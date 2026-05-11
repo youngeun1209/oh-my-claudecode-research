@@ -3,8 +3,12 @@
   "version": "0.1.0",
   "description": "Research-team agents for Claude Code: supervisor, analysis-implementer, paper-writer, figure-descriptor, reviewer.",
   "author": { "name": "Young-Eun Lee" },
+  "repository": "https://github.com/youngeun1209/oh-my-claudecode-research",
+  "homepage": "https://github.com/youngeun1209/oh-my-claudecode-research",
   "license": "MIT",
   "keywords": ["claude-code", "plugin", "research", "academic", "agents"],
   "agents": "./agents/",
+  "commands": "./commands/",
+  "skills": "./skills/",
   "hooks": "./hooks/hooks.json"
 }

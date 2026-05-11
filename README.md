@@ -1,46 +1,68 @@
 # oh-my-claudecode-research
 
-A small Claude Code plugin that ships a 5-agent **research team** — supervisor, analysis-implementer, paper-writer, figure-descriptor, reviewer — plus three lightweight hooks (PII scrub, MEMORY auto-load, citation warn) and a worked neuro-fMRI example preset.
+A Claude Code plugin that ships a **5-agent research team** + **2 parameterized commands** + **1 figure-cropping skill** + **3 lightweight hooks**, all tailored for producing research papers (or any structured-figure-and-outline document).
 
-This is the **research companion** to upstream [`oh-my-claudecode`](https://github.com/Yeachan-Heo/oh-my-claudecode), not a fork. It complements OMC (which provides a general orchestration system) with research-specific agent personas and conventions for projects that produce papers.
+This is the **research companion** to upstream [`oh-my-claudecode`](https://github.com/Yeachan-Heo/oh-my-claudecode), not a fork. OMCR works standalone or alongside OMC — see [`wiki/With-OMC.md`](wiki/With-OMC.md) for the companion setup.
 
 > **Status: v0.1.** Breaking changes are likely. Feedback and PRs welcome.
 
-## The 5 agents
+> **Full documentation:** [`wiki/Home.md`](wiki/Home.md)
+
+## What you get
+
+### 5 agents (`@`-mention)
 
 | Agent | Role |
 |---|---|
-| `@supervisor` | PI-level scientific vision keeper + project orchestrator. Owns the central hypothesis and the narrative spine; delegates to the four subagents. |
-| `@analysis-implementer` | Implements pipelines, statistical analyses, ML/sim models. Field-neutral by default; overlay `examples/neuro-fmri/` for a neuro-flavored body. |
-| `@paper-writer` | Drafts manuscript sections (abstract / intro / methods / results / discussion / cover / rebuttal) at high-impact-venue prose quality. |
-| `@figure-descriptor` | Designs figures as implementation-ready briefs (panel layouts, color palette, captions) for any vector tool — no image generation. |
-| `@reviewer` | Adversarial pre-submission peer review at the level of the project's target venue. |
+| `@supervisor` | PI-level scientific vision keeper + project orchestrator. Owns the central hypothesis; delegates to subagents. |
+| `@analysis-implementer` | Implements pipelines, statistical analyses, ML/sim models. Field-neutral by default. |
+| `@paper-writer` | Drafts manuscript sections at high-impact-venue prose quality. |
+| `@figure-descriptor` | Designs figures as implementation-ready briefs — no image generation. |
+| `@reviewer` | Adversarial pre-submission review at the target venue's level. |
+
+### 2 slash commands (parameterized via your project's CLAUDE.md)
+
+| Command | What it does |
+|---|---|
+| `/todofig [Fig N]` | Compare a captured figure deck against an outline → prioritized P0/P1/P2 TODO. |
+| `/sync` | Reconcile current state (deck) with goal (outline), refresh agent memories, optionally embed cropped figures into a target document. Status snapshot, not a TODO. |
+
+### 1 skill
+
+| Skill | What it does |
+|---|---|
+| `cropfig` | Tight-crop captioned figure PNGs to figure-only content. Used by `/sync` Phase 4 for `.docx` embedding without caption duplication. |
+
+### 3 hooks
+
+| Hook | Event | Behavior |
+|---|---|---|
+| `pii-scrub` | `PreToolUse:Write\|Edit` | Blocks writes containing PII (emails / SSNs / subject IDs by default; configurable). |
+| `memory-load` | `SessionStart` | Auto-injects `.claude/agent-memory/*/MEMORY.md` into session context. |
+| `citation-warn` | `PostToolUse:Write\|Edit` | Heuristic non-blocking warning when manuscript markdown has uncited paragraphs. |
 
 ## Install
 
-Three paths, depending on how much harness you want:
-
-**1. As a Claude Code plugin** (recommended — pulls in agents + hooks + manifest):
+**Recommended — Claude Code plugin:**
 
 ```bash
-git clone https://github.com/<YOUR_HANDLE>/oh-my-claudecode-research ~/.claude/plugins/oh-my-claudecode-research
+git clone https://github.com/youngeun1209/oh-my-claudecode-research \
+  ~/.claude/plugins/oh-my-claudecode-research
 ```
 
-Then in any project, open Claude Code and run `/plugin` to load it. Once loaded, the 5 agents appear in the `@`-mention picker, and the 3 hooks register on session start.
+Then in any project, open Claude Code and run `/plugin` to load it. After load:
+- 5 agents appear in the `@`-mention picker
+- `/todofig`, `/sync` appear in the slash-command picker
+- 3 hooks register on session start
 
-**2. As a standalone clone** (use individual files without the plugin loader):
-
-```bash
-git clone https://github.com/<YOUR_HANDLE>/oh-my-claudecode-research /path/to/checkout
-```
-
-Then in your research project's `.claude/`, copy the agent files you want:
+**Cherry-pick by file** (no plugin manager — copy agents into a specific project):
 
 ```bash
+git clone https://github.com/youngeun1209/oh-my-claudecode-research /path/to/checkout
 cp /path/to/checkout/agents/*.md /path/to/your-project/.claude/agents/
 ```
 
-**3. Cherry-pick by file** — the agents are plain markdown, no runtime dependencies. Open any `agents/*.md` in this repo and drop the contents into your project as a project-level subagent.
+This skips the commands, the skill, and the hooks. For full feature parity, use the plugin install.
 
 ## Quick start
 
@@ -50,65 +72,85 @@ After installing, open a research project and:
 @supervisor where are we?
 ```
 
-The supervisor will read the project's `CLAUDE.md` for the central hypothesis and project state, then orient you. If `CLAUDE.md` is empty or missing key fields (target venue, field, hypothesis), it will ask before assuming.
+Supervisor reads the project's `CLAUDE.md` (and any `agent-memory/supervisor/MEMORY.md`) and orients you on status + next action. If `CLAUDE.md` is missing key fields (hypothesis / target venue / field), supervisor asks before assuming.
 
-For a fully-fleshed worked example of how this looks in practice, see [`examples/neuro-fmri/`](examples/neuro-fmri/).
+For the slash commands, add a `## Research stack` block to your `CLAUDE.md`:
+
+```markdown
+## Research stack (used by /todofig, /sync, /cropfig)
+
+- **Deck export dir:** figures/captured/
+- **Outline file:** outline.md
+- **Figure count:** 8
+- **Result pattern:** `^### Result (\d+)`
+- **Report language:** English
+- **Report output dir:** ./todofig_reports/
+- **Sync report dir:** ./sync_reports/
+```
+
+Or just run `/todofig` once and it'll prompt for these fields, then offer to persist them automatically.
+
+Full walkthrough: [`wiki/Getting-Started.md`](wiki/Getting-Started.md)
+
+## Documentation
+
+- **[Wiki home](wiki/Home.md)** — navigation hub
+- **[Getting Started](wiki/Getting-Started.md)** — install + first session
+- **[Configuration](wiki/Configuration.md)** — Research stack block, env vars, PII patterns
+- **[Standalone Usage](wiki/Standalone-Usage.md)** — using OMCR alone, full walkthrough
+- **[With OMC](wiki/With-OMC.md)** — full stack: OMCR + OMC companion install
+- **[Agents](wiki/Agents.md)** | **[Commands](wiki/Commands.md)** | **[Hooks](wiki/Hooks.md)** — references
+- **[OMC Tool Reference](wiki/OMC-Tool-Reference.md)** — 47 OMC MCP tools mapped to research stages
+- **[Specializing](wiki/Specializing.md)** — author a field-specific preset
 
 ## Specializing for your field
 
-The 5 core agents are field-neutral. For domain-specific flavor, overlay a preset:
+Core agents and commands are field-neutral. For domain-specific flavor (e.g., neuroscience methodology, wet-lab conventions, ML evaluation idioms), overlay a preset from `examples/<field>/`. Currently shipped:
+
+- **[`examples/neuro-fmri/`](examples/neuro-fmri/)** — Mapper-on-fMRI specialization. Provides a neuro-flavored `analysis-implementer` body + redacted MEMORY.md skeletons for all 5 agents.
+
+Quick overlay:
 
 ```bash
-# Currently shipped: neuro-fMRI specialization (Mapper-on-fMRI / TDA / nilearn / Schaefer parcellations)
 cp examples/neuro-fmri/agents/analysis-implementer.md agents/analysis-implementer.md
-cp -r examples/neuro-fmri/skills/cropfig skills/
-cp examples/neuro-fmri/commands/*.md commands/
+
+# In your project:
+for agent in supervisor analysis-implementer paper-writer figure-descriptor reviewer; do
+  mkdir -p .claude/agent-memory/$agent
+  cp examples/neuro-fmri/memory-templates/$agent/MEMORY.md \
+     .claude/agent-memory/$agent/MEMORY.md
+done
 ```
 
-See [examples/neuro-fmri/README.md](examples/neuro-fmri/README.md) for the full overlay recipe and a 4-step guide to authoring your own preset (wet-lab biology, ML research, astronomy, HCI, etc.). PRs adding new presets welcome.
+To author your own preset: see [`wiki/Specializing.md`](wiki/Specializing.md). PRs adding new presets (`examples/wet-lab/`, `examples/ml-research/`, `examples/astronomy/`, …) welcome.
 
-## Memory pattern
+## OMC companion (recommended)
 
-Each agent maintains a persistent memory at `.claude/agent-memory/<agent-name>/MEMORY.md` in your project root. The `memory-load.sh` hook concatenates all of them and injects them at session start so every conversation begins with the agent's prior state.
+OMCR treats [`oh-my-claudecode`](https://github.com/Yeachan-Heo/oh-my-claudecode) as a *companion*, not a dependency. With OMC installed alongside, the following components fit naturally into research workflows. Pick the ones relevant to your project — you don't have to use all of them.
 
-Use [`templates/MEMORY.template.md`](templates/MEMORY.template.md) as a starting schema. The neuro preset ships redacted skeletons under [`examples/neuro-fmri/memory-templates/`](examples/neuro-fmri/memory-templates/) showing the structure each agent typically tracks.
+| Component | Why for research |
+|---|---|
+| `@scientist` agent | Statistical-rigor enforcer (CIs / p-values / effect sizes / `[LIMITATION]` markers). Companion to `@analysis-implementer`. |
+| `@document-specialist` agent | Literature research with citation verification (Context Hub). Fills our literature-anchoring gap. |
+| `@verifier` agent | Evidence-based completion checks — rejects "should work" claims without fresh test output. |
+| `@tracer` agent + `/oh-my-claudecode:trace` | Evidence-driven competing-hypotheses ranking with disconfirmation. Maps to methods/results validation. |
+| `@writer` agent | Technical-documentation writer for lab protocols, methods appendices, reproducibility guides. |
+| `@test-engineer` agent | TDD-discipline for analysis-script edge case coverage. |
+| `@git-master` agent | Atomic-commit discipline — independently revertable analysis steps. |
+| `/oh-my-claudecode:autoresearch` skill | Bounded evaluator-driven iteration loop with per-iteration JSON + decision logs. |
+| `/oh-my-claudecode:deep-interview` skill | Socratic clarification of vague research goals into testable hypotheses. |
+| `wiki_*` / `notepad_*` / `state_*` / `python_repl` MCP tools | Literature wiki / hypothesis register / experiment-run registry / stateful Python REPL. |
 
-## Harness — the 3 hooks
+Install OMC alongside via the Claude Code marketplace, or `npm i -g oh-my-claude-sisyphus`. Full mapping: [`wiki/With-OMC.md`](wiki/With-OMC.md) + [`wiki/OMC-Tool-Reference.md`](wiki/OMC-Tool-Reference.md).
 
-Shipped with the plugin (registered via `hooks/hooks.json`):
+## Conventions (contributors)
 
-| Hook | Event | Behavior |
-|---|---|---|
-| [`hooks/pii-scrub.sh`](hooks/pii-scrub.sh) | `PreToolUse:Write\|Edit` | Blocks writes whose content matches a configurable PII pattern list (defaults: emails, SSNs, 6-digit subject IDs). Override per-project at `.claude/scrub-patterns.txt`. |
-| [`hooks/memory-load.sh`](hooks/memory-load.sh) | `SessionStart` | Auto-loads all `.claude/agent-memory/*/MEMORY.md` files into session context. |
-| [`hooks/citation-warn.sh`](hooks/citation-warn.sh) | `PostToolUse:Write\|Edit` | Heuristic non-blocking warning when manuscript markdown (`paper/`, `manuscript/`, `*draft*.md`) has paragraphs missing any citation form. |
+- **kebab-case** filenames for agents, skills, commands
+- **YAML frontmatter** required on every agent / skill / command (`name`, `description`, optional `model` / `color` / `memory`)
+- **No PII** in `agents/`, `commands/`, `skills/`, `templates/`, `hooks/`, or top-level docs — institutions, advisors, real subject IDs, emails, target journal names, absolute paths. Domain-specific content lives only under `examples/<field>/`.
+- **English-first** language directive on all agents (override-in-CLAUDE.md pattern)
 
-Each hook honors a `CLAUDE_RESEARCH_DISABLE_<NAME>=1` env var for per-project disabling. See [`hooks/README.md`](hooks/README.md) for the full configuration guide.
-
-## OMC companion installs (recommended)
-
-This plugin treats upstream `oh-my-claudecode` as a *companion*, not a dependency. After installing OMC alongside, the following components fit naturally into a research workflow:
-
-| Component | Path in OMC | Why for research |
-|---|---|---|
-| `scientist` agent | `oh-my-claudecode/agents/scientist.md` | Statistical-rigor data analyst — confidence intervals, p-values, effect sizes, `[LIMITATION]` markers, structured reports. Companion to our `analysis-implementer`. |
-| `document-specialist` agent | `oh-my-claudecode/agents/document-specialist.md` | Literature/external-doc research with citation verification. Fills the literature-anchoring gap our agents don't cover. |
-| `verifier` agent | `oh-my-claudecode/agents/verifier.md` | Evidence-based completion checks. Useful before submitting results or paper drafts. |
-| `tracer` agent | `oh-my-claudecode/agents/tracer.md` | Evidence-driven causal tracing with competing hypotheses. Maps directly to research methods/results validation. |
-| `autoresearch` skill | `oh-my-claudecode/skills/autoresearch/SKILL.md` | Bounded evaluator-driven iterative improvement loop with durable per-iteration JSON + decision logs. Pairs with `@supervisor`. |
-| `deep-interview` skill | `oh-my-claudecode/skills/deep-interview/SKILL.md` | Socratic clarification of vague research goals into testable hypotheses. Project bootstrap. |
-| `trace` skill | `oh-my-claudecode/skills/trace/SKILL.md` | Team-mode hypothesis ranking + disconfirmation orchestration. |
-
-Install OMC alongside via the Claude Code marketplace, or `npm i -g oh-my-claude-sisyphus`. Then invoke as `/oh-my-claudecode:<skill>` or `@<agent>` from inside any project.
-
-## Conventions (when contributing)
-
-- **kebab-case** filenames for all agents, skills, commands.
-- **YAML frontmatter** required on every agent / skill / command (`name`, `description`, optional `model` / `color` / `memory`).
-- **No PII** in `agents/`, `templates/`, `hooks/`, or top-level docs — institutions, advisors, real subject IDs, emails, target journal names, absolute paths. Domain-specific content lives only under `examples/<field>/`.
-- **English-first** language directive on all agents (override-in-CLAUDE.md pattern for users who want a different user-dialog language).
-
-See [CONTRIBUTING.md](CONTRIBUTING.md) for full details.
+Full contract: [CONTRIBUTING.md](CONTRIBUTING.md)
 
 ## License
 

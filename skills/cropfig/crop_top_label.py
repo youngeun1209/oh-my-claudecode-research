@@ -1,9 +1,9 @@
 """Tight-crop captioned figure PNGs to figure-only content.
 
-Reads PNGs from the source directory (already trimmed of bottom captions by
-your figure-export pipeline), removes the top "Figure N. Title" label band
-using a band-classification heuristic, then tight-bbox crops and writes to
-the destination directory with uniform white padding.
+Reads PNGs from the source directory (typically already trimmed of bottom
+captions by your slide-export pipeline), removes the top "Figure N. Title"
+label band using a band-classification heuristic, then tight-bbox crops and
+writes to the destination directory with uniform white padding.
 
 Invariants:
 - The source directory is read-only here.
@@ -16,16 +16,16 @@ Configurable via env vars or positional args:
     python3 crop_top_label.py [SRC_DIR] [DST_DIR]
 
 Defaults:
-    SRC_DIR = $FIGURES_SRC or "Figures_snapshots"
-    DST_DIR = $FIGURES_DST or "Figures_tight"
+    SRC_DIR = $FIGURES_SRC or "figures/captured"
+    DST_DIR = $FIGURES_DST or "figures/tight"
 """
 import os
 import sys
 import numpy as np
 from PIL import Image
 
-DEFAULT_SRC = os.environ.get("FIGURES_SRC", "Figures_snapshots")
-DEFAULT_DST = os.environ.get("FIGURES_DST", "Figures_tight")
+DEFAULT_SRC = os.environ.get("FIGURES_SRC", "figures/captured")
+DEFAULT_DST = os.environ.get("FIGURES_DST", "figures/tight")
 
 MIN_LABEL_HEIGHT = 30        # cumulative top-label band height (rows) to trigger crop
 PADDING = 10                  # uniform white padding around the cropped figure

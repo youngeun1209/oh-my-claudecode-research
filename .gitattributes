@@ -1,0 +1,17 @@
+# Normalize line endings across contributors.
+* text=auto eol=lf
+
+# Force LF on shell scripts (they're executable; CRLF breaks `#!/usr/bin/env bash` shebang on POSIX).
+*.sh        text eol=lf
+*.bash      text eol=lf
+
+# Force LF on common source formats.
+*.md        text eol=lf
+*.json      text eol=lf
+*.py        text eol=lf
+*.txt       text eol=lf
+*.yml       text eol=lf
+*.yaml      text eol=lf
+
+# Treat lockfiles and snapshot files as generated (don't count toward language stats; collapse in diff views).
+*.lock      linguist-generated=true

@@ -1,5 +1,9 @@
 *.log
 .DS_Store
+
+# .claude/ ships per-user Claude Code state, including agent-memory/ and
+# scrub-patterns.txt — both of which can contain actual PII (advisor names,
+# subject IDs, internal URLs). Keep entirely local.
 .claude/
 .omc/
 
