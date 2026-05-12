@@ -1,11 +1,16 @@
 {
   "_metadata": {
-    "schema_version": "1.0",
-    "verified_on": "2026-05-11",
-    "disclaimer": "Best-effort mapping from common venue names to publicly-distributed LaTeX classes. OMCR ships POINTERS only (CTAN package names + documentclass options) — never bundles the .cls files themselves. The submission guidelines and class internals are owned by each publisher and can change without notice. ALWAYS confirm against the current author guidelines URL before submission.",
-    "license_note": "This registry is part of oh-my-claudecode-research (MIT). Each referenced LaTeX class is independently distributed by its respective maintainer on CTAN under that maintainer's license (typically LPPL). OMCR does not redistribute any class files.",
+    "schema_version": "1.1",
+    "verified_on": "2026-05-12",
+    "disclaimer": "Best-effort mapping from common venue names to publicly-distributed LaTeX classes AND publicly-stated editorial scope. OMCR ships POINTERS only (CTAN package names + documentclass options + summarized scope) — never bundles the .cls files themselves. The submission guidelines, class internals, and editorial priorities are owned by each publisher and can change without notice. ALWAYS confirm against the current author guidelines URL before submission. The aims_and_scope / editorial_priorities / typical_reviewer_concerns fields are short summaries derived from each venue's own publicly-stated mission, used only to seed the @reviewer agent's project memory — they do not replace reading the venue's actual reviewer guide.",
+    "license_note": "This registry is part of oh-my-claudecode-research (MIT). Each referenced LaTeX class is independently distributed by its respective maintainer on CTAN under that maintainer's license (typically LPPL). OMCR does not redistribute any class files. Editorial-scope summaries paraphrase publicly-stated venue missions and do not reproduce copyrighted editorial text.",
     "matching_policy": "Exact match against the venue name OR any of its aliases (case-insensitive). No fuzzy match. User confirmation required before /start-research (via the manuscript-scaffold skill) writes anything based on a lookup.",
-    "out_of_scope": "Venues whose classes are not on CTAN (NeurIPS / ICML / CVPR / PNAS / eLife / Frontiers / PLOS / etc.) are deliberately omitted from this MVP. Users targeting those should download the class file from the publisher and place it in the manuscript dir manually."
+    "out_of_scope": "Venues whose classes are not on CTAN (NeurIPS / ICML / CVPR / PNAS / eLife / Frontiers / PLOS / etc.) are deliberately omitted from this MVP. Users targeting those should download the class file from the publisher and place it in the manuscript dir manually.",
+    "schema_v1_1_fields": {
+      "aims_and_scope": "1-2 sentence paraphrase of the venue's publicly-stated mission. Null when the venue is a preprint server or when no clear public statement exists.",
+      "editorial_priorities": "Array of short phrases capturing what the venue is known to weight heavily (e.g. 'broad significance across physics', 'mechanistic depth'). Null when not applicable.",
+      "typical_reviewer_concerns": "Array of short phrases capturing recurring reviewer focus at this venue. Used to seed the @reviewer agent's MEMORY.md. Null for non-reviewed preprint servers."
+    }
   },
   "venues": {
     "Physical Review X": {
@@ -16,6 +21,18 @@
       "publisher": "APS",
       "submission_guidelines_url": "https://journals.aps.org/prx/authors",
       "notes": "Switch [reprint] to [preprint,onecolumn,nofootinbib] for a draft view.",
+      "aims_and_scope": "APS open-access flagship for original research of the highest quality and broadest interest across all of physics, including interdisciplinary work.",
+      "editorial_priorities": [
+        "broad significance across physics (not subfield-only impact)",
+        "conceptual novelty and openness of new directions",
+        "rigorous reproducibility — full methods and data availability"
+      ],
+      "typical_reviewer_concerns": [
+        "Is the result genuinely of broad cross-subfield interest, or does it speak only to specialists?",
+        "Is the claim falsifiable and are the controls convincing for a multidisciplinary readership?",
+        "Are the methods reproducible from text + supplement alone?",
+        "Does the framing oversell modest technical contributions?"
+      ],
       "verified_on": "2026-05-11"
     },
     "Physical Review Letters": {
@@ -26,6 +43,18 @@
       "publisher": "APS",
       "submission_guidelines_url": "https://journals.aps.org/prl/authors",
       "notes": "PRL has a strict 4-page length limit; check the current guidelines.",
+      "aims_and_scope": "APS short-format letters journal for important, timely, and novel results across all of physics, communicated concisely to the broad physics community.",
+      "editorial_priorities": [
+        "broad significance and importance — not incremental",
+        "concise, self-contained communication within the page limit",
+        "timeliness — results that the field needs to know now"
+      ],
+      "typical_reviewer_concerns": [
+        "Does the result meet PRL's 'important and broadly significant' bar, not just 'correct'?",
+        "Could the same claim be made in a regular Phys. Rev. journal instead?",
+        "Is the central message clear within the 4-page limit, or does it depend heavily on supplementary material?",
+        "Are the controls and statistics adequate despite the brevity?"
+      ],
       "verified_on": "2026-05-11"
     },
     "Physical Review Research": {
@@ -35,6 +64,17 @@
       "bibstyle": "apsrev4-2",
       "publisher": "APS",
       "submission_guidelines_url": "https://journals.aps.org/prresearch/authors",
+      "aims_and_scope": "APS open-access journal for rigorous, reproducible research across all of physics, including interdisciplinary work, without an a-priori significance threshold for impact ranking.",
+      "editorial_priorities": [
+        "technical correctness and reproducibility",
+        "scope breadth — interdisciplinary work welcomed",
+        "open data and open methods"
+      ],
+      "typical_reviewer_concerns": [
+        "Are the methods technically sound and adequately documented?",
+        "Are the claims appropriately scoped to the evidence (no overclaiming)?",
+        "Is the dataset / code release sufficient for reproduction?"
+      ],
       "verified_on": "2026-05-11"
     },
     "Physical Review A": {
@@ -44,6 +84,16 @@
       "bibstyle": "apsrev4-2",
       "publisher": "APS",
       "submission_guidelines_url": "https://journals.aps.org/pra/authors",
+      "aims_and_scope": "APS subfield journal for atomic, molecular, and optical physics, and quantum information.",
+      "editorial_priorities": [
+        "technical depth and precision in AMO / quantum information",
+        "clear advance over prior subfield work"
+      ],
+      "typical_reviewer_concerns": [
+        "Is the technical methodology (experimental or theoretical) at AMO-community standard?",
+        "Is the prior-art comparison within AMO complete?",
+        "Are uncertainty estimates and systematic-error budgets rigorous?"
+      ],
       "verified_on": "2026-05-11"
     },
     "Physical Review B": {
@@ -53,6 +103,16 @@
       "bibstyle": "apsrev4-2",
       "publisher": "APS",
       "submission_guidelines_url": "https://journals.aps.org/prb/authors",
+      "aims_and_scope": "APS subfield journal for condensed matter and materials physics.",
+      "editorial_priorities": [
+        "rigor in condensed-matter methodology (experimental or theoretical)",
+        "clear advance over prior subfield work"
+      ],
+      "typical_reviewer_concerns": [
+        "Is the sample / theoretical model adequately characterized?",
+        "Are the data sufficient to support the claimed materials-physics interpretation?",
+        "Is the prior literature in the subfield treated comprehensively?"
+      ],
       "verified_on": "2026-05-11"
     },
     "Physical Review D": {
@@ -62,6 +122,16 @@
       "bibstyle": "apsrev4-2",
       "publisher": "APS",
       "submission_guidelines_url": "https://journals.aps.org/prd/authors",
+      "aims_and_scope": "APS subfield journal for particles, fields, gravitation, and cosmology.",
+      "editorial_priorities": [
+        "rigor in HEP / gravity / cosmology methodology",
+        "appropriate statistical treatment for searches and constraints"
+      ],
+      "typical_reviewer_concerns": [
+        "Are statistical methods (likelihood, look-elsewhere, exclusion limits) consistent with subfield practice?",
+        "Are systematic uncertainties enumerated and propagated?",
+        "Is the prior literature in the relevant subfield engaged with comprehensively?"
+      ],
       "verified_on": "2026-05-11"
     },
     "Physical Review E": {
@@ -71,6 +141,16 @@
       "bibstyle": "apsrev4-2",
       "publisher": "APS",
       "submission_guidelines_url": "https://journals.aps.org/pre/authors",
+      "aims_and_scope": "APS subfield journal for statistical, nonlinear, biological, and soft-matter physics.",
+      "editorial_priorities": [
+        "rigor in statistical and nonlinear methodology",
+        "model-vs-data correspondence in biological / soft-matter applications"
+      ],
+      "typical_reviewer_concerns": [
+        "Are statistical / nonlinear models clearly motivated by the data, not the other way around?",
+        "Are finite-size effects, sampling, and ensemble choices defensible?",
+        "Is the relevant cross-subfield literature engaged with?"
+      ],
       "verified_on": "2026-05-11"
     },
     "Astrophysical Journal": {
@@ -81,6 +161,18 @@
       "publisher": "AAS / IOP",
       "submission_guidelines_url": "https://journals.aas.org/manuscript-preparation/",
       "notes": "AASTeX 6.3.1 is the current AAS submission class. Same class works for ApJL, ApJS, AJ, and PSJ.",
+      "aims_and_scope": "AAS journal for original research in astronomy and astrophysics — observation, theory, and instrumentation.",
+      "editorial_priorities": [
+        "substantive astrophysical content with clear advance over prior work",
+        "appropriate handling of observational systematics or theoretical assumptions",
+        "data and code availability per AAS data policy"
+      ],
+      "typical_reviewer_concerns": [
+        "Are observational selection effects and systematics handled appropriately?",
+        "Are uncertainties (statistical and systematic) reported correctly for derived quantities?",
+        "Is the cited prior astronomical literature comprehensive?",
+        "Are figures readable and color-blind-safe at print resolution?"
+      ],
       "verified_on": "2026-05-11"
     },
     "Astrophysical Journal Letters": {
@@ -90,6 +182,16 @@
       "bibstyle": "aasjournal",
       "publisher": "AAS / IOP",
       "submission_guidelines_url": "https://journals.aas.org/manuscript-preparation/",
+      "aims_and_scope": "AAS short-format journal for timely, high-impact astronomy and astrophysics results requiring rapid publication.",
+      "editorial_priorities": [
+        "timeliness and high-impact significance for the field",
+        "concise self-contained communication"
+      ],
+      "typical_reviewer_concerns": [
+        "Does the result meet ApJL's 'timely and impactful' bar versus regular ApJ?",
+        "Is the conclusion supported within the letter-length constraint without overreliance on supplements?",
+        "Are systematics treated rigorously despite the brevity?"
+      ],
       "verified_on": "2026-05-11"
     },
     "Astronomical Journal": {
@@ -99,6 +201,16 @@
       "bibstyle": "aasjournal",
       "publisher": "AAS / IOP",
       "submission_guidelines_url": "https://journals.aas.org/manuscript-preparation/",
+      "aims_and_scope": "AAS journal historically focused on observational astronomy, surveys, instrumentation, and solar-system science alongside extragalactic work.",
+      "editorial_priorities": [
+        "observational rigor and survey methodology",
+        "data products that benefit the community"
+      ],
+      "typical_reviewer_concerns": [
+        "Are survey / catalog methodology and completeness clearly documented?",
+        "Are derived quantities accompanied by realistic uncertainty estimates?",
+        "Is the data product release compliant with AAS policy?"
+      ],
       "verified_on": "2026-05-11"
     },
     "Monthly Notices of the Royal Astronomical Society": {
@@ -108,6 +220,16 @@
       "bibstyle": "mnras",
       "publisher": "Royal Astronomical Society / OUP",
       "submission_guidelines_url": "https://academic.oup.com/mnras/pages/General_Instructions",
+      "aims_and_scope": "RAS journal publishing original research in astronomy and astrophysics, with a broad scope and emphasis on technical soundness.",
+      "editorial_priorities": [
+        "technical soundness and methodological clarity",
+        "broad astronomical scope (observational, theoretical, computational)"
+      ],
+      "typical_reviewer_concerns": [
+        "Is the methodology described in sufficient detail to reproduce?",
+        "Are the assumptions of any theoretical / simulation model stated and tested?",
+        "Are the uncertainties on the main results realistic?"
+      ],
       "verified_on": "2026-05-11"
     },
     "Neuron": {
@@ -118,6 +240,18 @@
       "publisher": "Cell Press / Elsevier",
       "submission_guidelines_url": "https://www.cell.com/neuron/authors",
       "notes": "Cell Press uses elsarticle. Set [review] for double-spaced submission; switch to [preprint] for a near-final layout.",
+      "aims_and_scope": "Cell Press journal for novel high-impact neuroscience research spanning molecular, cellular, systems, and behavioral levels, with mechanistic insight prioritized.",
+      "editorial_priorities": [
+        "mechanistic insight (the 'how' and 'why', not just description)",
+        "multi-method convergence — converging evidence across techniques",
+        "broad neuroscience-community significance"
+      ],
+      "typical_reviewer_concerns": [
+        "Is the mechanism actually demonstrated, or only correlated?",
+        "Are the converging methods independent enough to count as convergence?",
+        "Is the sample size adequate for behavioral / physiological claims?",
+        "Is the work clearly novel relative to prior Cell-Press-tier neuroscience literature?"
+      ],
       "verified_on": "2026-05-11"
     },
     "Cell": {
@@ -127,6 +261,18 @@
       "bibstyle": "model5-names",
       "publisher": "Cell Press / Elsevier",
       "submission_guidelines_url": "https://www.cell.com/cell/authors",
+      "aims_and_scope": "Cell Press flagship for novel, conceptually-significant biology with strong mechanistic insight and broad relevance across life science.",
+      "editorial_priorities": [
+        "conceptual significance — a finding that changes how the field thinks",
+        "mechanistic depth and multi-technique convergence",
+        "broad biology-wide relevance, not subfield-only"
+      ],
+      "typical_reviewer_concerns": [
+        "Is the central finding conceptually transformative, not incremental?",
+        "Are all main claims supported by orthogonal techniques?",
+        "Is the in-vivo relevance demonstrated where applicable?",
+        "Is the prior-art positioning honest about what is and isn't new?"
+      ],
       "verified_on": "2026-05-11"
     },
     "NeuroImage": {
@@ -136,6 +282,19 @@
       "bibstyle": "model5-names",
       "publisher": "Elsevier",
       "submission_guidelines_url": "https://www.sciencedirect.com/journal/neuroimage/publish/guide-for-authors",
+      "aims_and_scope": "Elsevier journal for advances in neuroimaging methodology and its application to brain function and structure across species and modalities.",
+      "editorial_priorities": [
+        "methodological clarity and reproducibility in neuroimaging",
+        "appropriate statistics for high-dimensional brain data (multiple-comparisons, leakage, generalization)",
+        "transparency about preprocessing pipelines and parameter choices"
+      ],
+      "typical_reviewer_concerns": [
+        "Is multiple-comparisons correction handled correctly for the analysis (FWE / FDR / cluster)?",
+        "Is the preprocessing pipeline fully specified (software versions, parameters)?",
+        "Are cross-validation procedures free of data leakage?",
+        "Is the parcellation / atlas / ROI choice principled, and is sensitivity to that choice tested?",
+        "Are sample sizes adequate for the dimensionality of the analysis?"
+      ],
       "verified_on": "2026-05-11"
     },
     "Pattern Recognition": {
@@ -145,6 +304,18 @@
       "bibstyle": "model5-names",
       "publisher": "Elsevier",
       "submission_guidelines_url": "https://www.sciencedirect.com/journal/pattern-recognition/publish/guide-for-authors",
+      "aims_and_scope": "Elsevier journal for original research in pattern recognition, machine learning, and computer vision methodology and applications.",
+      "editorial_priorities": [
+        "methodological novelty over prior pattern-recognition baselines",
+        "rigorous benchmarking against state-of-the-art on standard datasets",
+        "ablation studies isolating which component drives gains"
+      ],
+      "typical_reviewer_concerns": [
+        "Is the comparison against current SOTA fair (same datasets, splits, training budget)?",
+        "Are ablation studies adequate to attribute the gain to the proposed component?",
+        "Are results statistically significant across seeds / folds, not single-run cherry-picks?",
+        "Is the method generalizable beyond the chosen benchmark?"
+      ],
       "verified_on": "2026-05-11"
     },
     "IEEE Transactions on Pattern Analysis and Machine Intelligence": {
@@ -155,6 +326,19 @@
       "publisher": "IEEE",
       "submission_guidelines_url": "https://www.computer.org/csdl/journal/tp/author-information",
       "notes": "[journal] for regular submissions; [conference] for conference papers using the same class.",
+      "aims_and_scope": "IEEE journal for high-quality original research in computer vision, pattern analysis, and machine intelligence with a strong methodological contribution.",
+      "editorial_priorities": [
+        "substantive methodological contribution beyond conference-paper extension",
+        "comprehensive experimental validation across datasets",
+        "thorough theoretical grounding where applicable"
+      ],
+      "typical_reviewer_concerns": [
+        "Is the journal version a substantive extension of any prior conference version (>30% new content)?",
+        "Are experiments comprehensive across multiple datasets / tasks?",
+        "Are theoretical claims (convergence, bounds, identifiability) rigorously proven?",
+        "Are baselines current and configured fairly?",
+        "Is the analysis of failure modes / limitations honest?"
+      ],
       "verified_on": "2026-05-11"
     },
     "IEEE Transactions on Neural Networks and Learning Systems": {
@@ -164,6 +348,18 @@
       "bibstyle": "IEEEtran",
       "publisher": "IEEE",
       "submission_guidelines_url": "https://cis.ieee.org/publications/transactions-on-neural-networks-and-learning-systems",
+      "aims_and_scope": "IEEE Computational Intelligence Society journal for theory, design, and applications of neural networks and related learning systems.",
+      "editorial_priorities": [
+        "methodological contribution to neural-network / learning-systems theory or design",
+        "rigorous experimental comparison against current baselines",
+        "theoretical analysis where applicable (convergence, generalization)"
+      ],
+      "typical_reviewer_concerns": [
+        "Is the contribution beyond a routine architectural variant?",
+        "Are baselines and benchmarks current?",
+        "Are theoretical claims supported by proofs / clear analysis?",
+        "Are training details (hyperparameters, seeds, hardware) fully reported?"
+      ],
       "verified_on": "2026-05-11"
     },
     "IEEE Transactions on Image Processing": {
@@ -173,6 +369,18 @@
       "bibstyle": "IEEEtran",
       "publisher": "IEEE",
       "submission_guidelines_url": "https://signalprocessingsociety.org/publications-resources/ieee-transactions-image-processing/transactions-image-processing-info-authors",
+      "aims_and_scope": "IEEE Signal Processing Society journal for original research in image, video, and multidimensional signal processing — algorithms, models, and applications.",
+      "editorial_priorities": [
+        "novelty in image / video signal-processing methodology",
+        "thorough quantitative evaluation against established benchmarks",
+        "signal-processing-flavored rigor (mathematical formulation, complexity analysis)"
+      ],
+      "typical_reviewer_concerns": [
+        "Is the method formulation mathematically precise?",
+        "Are quantitative metrics (PSNR / SSIM / task-specific) reported on standard datasets?",
+        "Is computational complexity analyzed (runtime, memory)?",
+        "Are visual results free of cherry-picking?"
+      ],
       "verified_on": "2026-05-11"
     },
     "ACM Transactions on Graphics": {
@@ -183,6 +391,18 @@
       "publisher": "ACM",
       "submission_guidelines_url": "https://www.acm.org/publications/proceedings-template",
       "notes": "Use [sigconf] for SIGGRAPH conference track; [acmtog] for the journal.",
+      "aims_and_scope": "ACM journal for original research in computer graphics — rendering, modeling, animation, geometry processing, simulation, and interactive techniques (also the SIGGRAPH journal track).",
+      "editorial_priorities": [
+        "visible quality of results (renderings, animations, simulations)",
+        "technical novelty over prior graphics literature",
+        "supplementary video / interactive demo as standard"
+      ],
+      "typical_reviewer_concerns": [
+        "Is the visual / quantitative result clearly better than prior art on the same task?",
+        "Is the supplementary video included and does it survive scrutiny at full quality?",
+        "Are limitations and failure cases shown honestly?",
+        "Are runtime / memory claims accurate?"
+      ],
       "verified_on": "2026-05-11"
     },
     "Communications of the ACM": {
@@ -192,6 +412,17 @@
       "bibstyle": "ACM-Reference-Format",
       "publisher": "ACM",
       "submission_guidelines_url": "https://cacm.acm.org/about-communications/author-guidelines/",
+      "aims_and_scope": "ACM flagship magazine reaching the broad computing community with research highlights, opinion, and practice — emphasizes accessible communication of significant computing advances.",
+      "editorial_priorities": [
+        "accessibility to a broad computing audience",
+        "significance and timeliness of the contribution",
+        "narrative clarity over technical exhaustiveness"
+      ],
+      "typical_reviewer_concerns": [
+        "Is the contribution explainable to non-specialists in the same field?",
+        "Is the significance for the broader computing community made clear?",
+        "Are jargon and notation kept minimal?"
+      ],
       "verified_on": "2026-05-11"
     },
     "Nature Communications": {
@@ -202,6 +433,18 @@
       "publisher": "Springer Nature",
       "submission_guidelines_url": "https://www.nature.com/ncomms/submit",
       "notes": "Springer Nature's unified sn-jnl class covers Nature Communications, Scientific Reports, and most Springer Nature journals. Pick bibstyle based on field — sn-mathphys-num / sn-vancouver / sn-apa / etc.",
+      "aims_and_scope": "Springer Nature open-access journal publishing high-quality research from across the natural sciences that represents an important advance within its specialist field.",
+      "editorial_priorities": [
+        "important advance within the specialist field (lower bar than Nature on cross-field breadth, but still substantive)",
+        "rigorous methodology and reproducibility",
+        "open data and code availability"
+      ],
+      "typical_reviewer_concerns": [
+        "Does the work represent a clear advance over the most recent specialist literature?",
+        "Are the conclusions supported by the data shown, without overclaiming broader implication?",
+        "Are data and code released per journal policy?",
+        "Are statistical methods appropriate and fully described?"
+      ],
       "verified_on": "2026-05-11"
     },
     "Scientific Reports": {
@@ -212,6 +455,18 @@
       "publisher": "Springer Nature",
       "submission_guidelines_url": "https://www.nature.com/srep/author-instructions/submission-guidelines",
       "notes": "Some older guides still reference wlscirep — sn-jnl is the current unified class.",
+      "aims_and_scope": "Springer Nature open-access journal publishing original research from across the natural and clinical sciences. Editorial criteria are based on technical soundness and rigor; novelty or impact is not used as an acceptance threshold.",
+      "editorial_priorities": [
+        "technical soundness of methodology and analysis",
+        "appropriate statistical treatment",
+        "no novelty / impact threshold — but no overclaiming either"
+      ],
+      "typical_reviewer_concerns": [
+        "Are the methods technically valid and reproducible?",
+        "Are the statistical analyses appropriate for the data structure?",
+        "Are the conclusions calibrated to what the data actually show (no overinterpretation)?",
+        "Is the data availability statement compliant?"
+      ],
       "verified_on": "2026-05-11"
     },
     "Nature Neuroscience": {
@@ -222,6 +477,19 @@
       "publisher": "Springer Nature",
       "submission_guidelines_url": "https://www.nature.com/neuro/authors-and-referees",
       "notes": "Nature journals (Nature, Nature Neuroscience, Nature Methods, etc.) commonly require Word at final submission; LaTeX is accepted at initial submission. Verify before submitting.",
+      "aims_and_scope": "Nature family journal for the most significant original research in neuroscience — molecular, cellular, systems, computational, behavioral, and cognitive — with broad relevance to the field.",
+      "editorial_priorities": [
+        "conceptual and methodological novelty at the top neuroscience tier",
+        "convergent multi-method evidence",
+        "broad neuroscience-community significance, not narrow subfield"
+      ],
+      "typical_reviewer_concerns": [
+        "Is the finding conceptually novel, not just a new dataset confirming known mechanisms?",
+        "Is the evidence convergent across orthogonal methods (e.g. perturbation + recording + behavior)?",
+        "Is the sample size adequate for population-level inference?",
+        "Are the statistical methods, including any reporting summary requirements, fully met?",
+        "Is the data and code availability adequate for reproduction?"
+      ],
       "verified_on": "2026-05-11"
     },
     "Nature Methods": {
@@ -231,6 +499,19 @@
       "bibstyle": "sn-nature",
       "publisher": "Springer Nature",
       "submission_guidelines_url": "https://www.nature.com/nmeth/submission-guidelines",
+      "aims_and_scope": "Nature family journal for novel methods in the life sciences — new techniques, tools, and protocols — with demonstrated broad utility across labs.",
+      "editorial_priorities": [
+        "genuine methodological novelty (not just an application of an existing method)",
+        "demonstration of broad utility across multiple problem instances",
+        "head-to-head benchmarking against current best methods",
+        "usability — reagents, code, or protocols accessible to other labs"
+      ],
+      "typical_reviewer_concerns": [
+        "Is the method genuinely new, or a reformulation of an existing technique?",
+        "Is utility demonstrated beyond a single proof-of-concept application?",
+        "Are head-to-head comparisons against existing methods comprehensive and fair?",
+        "Are protocols / code / reagents sufficient for other labs to adopt?"
+      ],
       "verified_on": "2026-05-11"
     },
     "AMS journal": {
@@ -241,6 +522,18 @@
       "publisher": "AMS",
       "submission_guidelines_url": "https://www.ams.org/arc/journals/jourtex.html",
       "notes": "Use this entry as a starting point for any AMS journal (J. Amer. Math. Soc., Trans. AMS, Proc. AMS, etc.); the specific class for a target journal is downloadable from the AMS author tools page.",
+      "aims_and_scope": "AMS family journals publishing original research in pure and applied mathematics. Acceptance bars and scope vary by specific journal — refer to the target journal's editorial statement.",
+      "editorial_priorities": [
+        "mathematical correctness — every claim proven completely",
+        "originality of the result",
+        "clarity and economy of exposition"
+      ],
+      "typical_reviewer_concerns": [
+        "Are all proofs complete (no 'easy to see' gaps over nontrivial steps)?",
+        "Is the result genuinely new, with a clear comparison to the closest prior theorem?",
+        "Is the exposition organized to be readable by a non-specialist mathematician?",
+        "Are definitions and notation introduced consistently?"
+      ],
       "verified_on": "2026-05-11"
     },
     "arXiv preprint": {
@@ -251,6 +544,9 @@
       "publisher": "arXiv (preprint server)",
       "submission_guidelines_url": "https://arxiv.org/help/submit_tex",
       "notes": "Generic article. arXiv accepts most LaTeX classes; the simple article + plainnat combo is the safest baseline.",
+      "aims_and_scope": "Open-access preprint server for physics, math, CS, quantitative biology, statistics, and related fields. Not peer-reviewed; moderated for scope and basic standards only.",
+      "editorial_priorities": null,
+      "typical_reviewer_concerns": null,
       "verified_on": "2026-05-11"
     },
     "bioRxiv preprint": {
@@ -261,6 +557,9 @@
       "publisher": "bioRxiv (preprint server)",
       "submission_guidelines_url": "https://www.biorxiv.org/content/preparing-and-submitting-your-manuscript",
       "notes": "bioRxiv accepts PDF only at upload — the LaTeX class is whatever you compile from. Generic article works.",
+      "aims_and_scope": "Open-access preprint server for the life sciences. Not peer-reviewed; screened for scope, ethics, and basic quality only.",
+      "editorial_priorities": null,
+      "typical_reviewer_concerns": null,
       "verified_on": "2026-05-11"
     }
   },

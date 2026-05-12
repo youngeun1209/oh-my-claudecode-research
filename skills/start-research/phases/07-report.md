@@ -1,6 +1,6 @@
-# Phase 6 — Report
+# Phase 7 — Report
 
-Produce a concise summary the user can read in 10 seconds. Use the template below; fill in per-phase outcomes recorded during phases 1–5.
+Produce a concise summary the user can read in 10 seconds. Use the template below; fill in per-phase outcomes recorded during phases 1–6.
 
 ````
 ## OMCR /start-research complete — YYYY-MM-DD
@@ -19,6 +19,11 @@ Produce a concise summary the user can read in 10 seconds. Use the template belo
 - reviewer MEMORY.md:             <...>
 - literature-curator MEMORY.md:   <...>
 - Body overlay note (neuro-fmri only): <reminder line if applicable>
+
+### Venue scope seed (reviewer specialization)
+- Target venue:       <venue name or "—">
+- Outcome:            <seeded-from-registry / seeded-from-webfetch / seeded-from-user-edit / partial-from-registry-plus-webfetch / skipped-no-venue / skipped-memory-modified / skipped-user-opted-out / skipped-fetch-failed / already-seeded>
+- Source:             <registry | webfetch:<host> | —>
 
 ### Manuscript scaffold
 - Manuscript dir:  <path> (<created / existed empty / existed with content — skipped>)

@@ -93,9 +93,9 @@ OMCR ships 6 agents under `agents/`. Each is a single markdown file with YAML fr
 - "Stress-test our methodology — what would a reviewer attack?"
 - "Do a full pre-submission review"
 
-**Reads:** project CLAUDE.md (target venue, central hypothesis), `reviewer/MEMORY.md` (open major concerns, resolved concerns, project-specific attack vectors).
+**Reads:** project CLAUDE.md (target venue, central hypothesis), `reviewer/MEMORY.md` (open major concerns, resolved concerns, project-specific attack vectors, **`## Venue-specific bar`** seeded by `/start-research` phase 5 from `templates/journal-registry.json` or a one-shot WebFetch of the venue's author guidelines).
 
-**Writes:** structured reviews (verdict, major/minor concerns, optional suggestions) in formal peer-review format; updates `reviewer/MEMORY.md` with concern status changes.
+**Writes:** structured reviews (verdict, major/minor concerns, optional suggestions) in formal peer-review format; updates `reviewer/MEMORY.md` with concern status changes. Does not modify the `## Venue-specific bar` section — that block is owned by `/start-research`; refresh by deleting it and re-running.
 
 **Does NOT:** resolve concerns. Resolution belongs to `@supervisor`, `@analysis-implementer`, or `@paper-writer`.
 

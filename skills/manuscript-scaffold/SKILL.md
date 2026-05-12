@@ -1,6 +1,6 @@
 ---
 name: manuscript-scaffold
-description: Scaffold a LaTeX manuscript directory for a research project — copy the bundled skeleton (main.tex + sections/* + figures/ + references.bib + .gitignore + README), optionally apply a journal-specific documentclass from templates/journal-registry.json, optionally clone an Overleaf project and cache the Git credential helper (token never persisted to tracked files), commit on the default branch, and ask before pushing. Invoked by /start-research phase 5, but also standalone-callable when adding a manuscript dir to an existing project later.
+description: Scaffold a LaTeX manuscript directory for a research project — copy the bundled skeleton (main.tex + sections/* + figures/ + references.bib + .gitignore + README), optionally apply a journal-specific documentclass from templates/journal-registry.json, optionally clone an Overleaf project and cache the Git credential helper (token never persisted to tracked files), commit on the default branch, and ask before pushing. Invoked by /start-research phase 6, but also standalone-callable when adding a manuscript dir to an existing project later.
 ---
 
 <Purpose>
@@ -8,7 +8,7 @@ Set up a LaTeX manuscript directory with optional journal-template customization
 </Purpose>
 
 <Use_When>
-- `/start-research` reaches phase 5 and the user did not opt out of manuscript scaffolding.
+- `/start-research` reaches phase 6 and the user did not opt out of manuscript scaffolding.
 - A project that was set up with `Manuscript dir` empty later wants to add a manuscript directory without re-running the full `/start-research` interview.
 - An existing manuscript directory needs to be wired up to a fresh Overleaf project (re-invoke with the new URL — the skill detects existing state and asks before clobbering).
 </Use_When>

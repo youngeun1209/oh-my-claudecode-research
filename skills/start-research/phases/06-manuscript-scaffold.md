@@ -1,6 +1,6 @@
-# Phase 5 — Manuscript scaffold (delegated)
+# Phase 6 — Manuscript scaffold (delegated)
 
-This phase is **always run** unless the user explicitly opted out during phase 2 by setting `Manuscript dir` to an empty value. In that case, skip this phase entirely and continue to phase 6.
+This phase is **always run** unless the user explicitly opted out during phase 2 by setting `Manuscript dir` to an empty value. In that case, skip this phase entirely and continue to phase 7.
 
 ## Delegate to the `manuscript-scaffold` skill
 
@@ -20,8 +20,8 @@ The skill runs four internal phases:
 3. Skeleton copy (with optional Overleaf clone + credential caching).
 4. Commit on the default branch, then ask before pushing.
 
-…and returns a structured summary. Fold that summary into phase 6's report under "Manuscript scaffold" / "Overleaf" / "Branch / commit" / "Deferred push command".
+…and returns a structured summary. Fold that summary into phase 7's report under "Manuscript scaffold" / "Overleaf" / "Branch / commit" / "Deferred push command".
 
 ## On early stop from the skill
 
-If the skill stops early (existing content in the manuscript dir, user declined Overleaf clone, etc.), continue to phase 6 and surface the stop reason in the report. **Do not retry the skill from `/start-research` without user direction** — re-running `/start-research` after the user manually resolves the blocker is the right path.
+If the skill stops early (existing content in the manuscript dir, user declined Overleaf clone, etc.), continue to phase 7 and surface the stop reason in the report. **Do not retry the skill from `/start-research` without user direction** — re-running `/start-research` after the user manually resolves the blocker is the right path.

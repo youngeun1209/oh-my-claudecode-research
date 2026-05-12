@@ -29,7 +29,7 @@ If user chooses **Yes**:
 
 If user chooses **No**:
 - Stop the flow. Print: "Cancelled. Run `/omcr-setup` first, then `/start-research`."
-- Phase 6 will still run to produce a one-line report noting the cancellation.
+- Phase 7 will still run to produce a one-line report noting the cancellation.
 
 ## Record state for phase 2
 
@@ -37,6 +37,6 @@ If `SETUP_DONE = true` (or just made true by running setup), record:
 
 - For each `CLAUDE.md` placeholder field: current value or `[TBD]`.
 - Existing `Preset overlay` value in `## Project context` (so phase 4 can skip re-applying).
-- Existence of `Manuscript dir` content (so phase 5 can decide whether to invoke `manuscript-scaffold`).
+- Existence of `Manuscript dir` content (so phase 6 can decide whether to invoke `manuscript-scaffold`).
 
 Phase 2 uses this to ask **only about fields that are missing or still `[TBD]`**.

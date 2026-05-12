@@ -1,6 +1,6 @@
 # Phase 4 — Preset overlay (agent memory)
 
-Apply the domain preset selected in phase 2's section C to agent memory templates. Manuscript-side preset hooks (e.g. journal documentclass) happen in phase 5 inside the `manuscript-scaffold` skill — not here.
+Apply the domain preset selected in phase 2's section C to agent memory templates. Manuscript-side preset hooks (e.g. journal documentclass) happen in phase 6 inside the `manuscript-scaffold` skill — not here. Venue-specific reviewer-MEMORY seeding happens in phase 5 — also not here.
 
 ## When to skip
 
@@ -21,12 +21,12 @@ For each of the 6 agents:
 
 For `neuro-fmri`, the plugin ships an agent body overlay at `examples/neuro-fmri/agents/analysis-implementer.md`. When the plugin is installed via `/plugin install`, Claude Code loads the **plugin core** `agents/analysis-implementer.md`, not the preset overlay. The overlay is included in `examples/` as a reference for users who want to copy it manually into `.claude/agents/analysis-implementer.md` in their project, which overrides the plugin core.
 
-Mention this in the phase 6 report:
+Mention this in the phase 7 report:
 
 > "Neuro-fMRI body overlay available at `examples/neuro-fmri/agents/analysis-implementer.md` if you want neuro-flavored agent behavior. Copy to `.claude/agents/analysis-implementer.md` to apply."
 
 Do not auto-copy it — that's an explicit user action.
 
-## Record for phase 6
+## Record for phase 7
 
 Track per-agent outcome (`replaced-from-canonical` / `skipped-modified` / `no-preset-template`) so the report can summarize.

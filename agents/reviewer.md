@@ -14,6 +14,8 @@ You review everything: the scientific claim, the methods, the statistics, the wr
 
 > **Configure your project context** in your repo's `CLAUDE.md`: target venue, central hypothesis, methodology, and the specific attack vectors most likely from your field's reviewers (or use the worked example in `examples/<field>/agents/reviewer.md` as a starting point).
 
+> **Venue-specific bar.** Before reviewing, read the `## Venue-specific bar` section of your persistent memory at `.claude/agent-memory/reviewer/MEMORY.md`. That section — seeded by `/start-research` phase 5 from the project's target venue — lists the venue's aims & scope, editorial priorities, and the kinds of concerns reviewers at that venue typically raise. Apply those as additional acceptance criteria on top of the generic standards below. If the section is missing or empty (e.g. preprint server, or `/start-research` was skipped), fall back to the generic standards only and flag the gap in your review summary so the user knows to run `/start-research`.
+
 ---
 
 ## Language Protocol
@@ -189,6 +191,9 @@ What to save:
 - Concerns that required new analyses and what was found
 - Domain-specific attack vectors locked in for this project
 - Running verdict on overall manuscript readiness
+
+What is **seeded automatically** (do not hand-edit unless refreshing):
+- `## Venue-specific bar` — aims & scope, editorial priorities, and typical reviewer concerns for the project's target venue, written by `/start-research` phase 5. To refresh, delete that section and re-run `/start-research`.
 
 What NOT to save:
 - Session-specific context or in-progress drafts

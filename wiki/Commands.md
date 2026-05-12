@@ -32,7 +32,7 @@ Safe. State-check + skip semantics mean existing user content (filled `CLAUDE.md
 - `neuro-fmri` — pre-select the neuro-fMRI preset (still confirms before applying)
 - (empty) — ask interactively
 
-**Phases (6):**
+**Phases (7):**
 
 1. **Precheck** — verifies `/omcr-setup` has run (`CLAUDE.md` marker blocks, `.claude/agent-memory/<agent>/`, bibliography files all present). If not, offers to invoke `/omcr-setup` automatically before continuing. User can decline and cancel.
 2. **Interview** — asks only for fields that are missing or still `[TBD]`. Three policy bands:
@@ -41,12 +41,13 @@ Safe. State-check + skip semantics mean existing user content (filled `CLAUDE.md
    - *Preset overlay* — apply `neuro-fmri` (or another shipped preset) or stay field-neutral. Skip allowed.
 3. **Fill CLAUDE.md** — write captured answers into the three marker blocks. Existing filled fields are preserved unless the user explicitly overrode them. If `BibTeX file` / `Summary file` paths differ from defaults, files are **moved** (not duplicated) with confirmation.
 4. **Preset overlay (agent memory)** — if a preset was chosen, replace per-agent `MEMORY.md` files **only when byte-identical to the canonical template** (i.e. untouched). Modified memory is never overwritten.
-5. **Manuscript scaffold** (delegated) — invokes the `manuscript-scaffold` skill with `Manuscript dir`, `Target venue`, `Overleaf git URL`, and `Working title`. The skill runs its own 4 phases: state check → journal template lookup (against `templates/journal-registry.json`) → skeleton copy (with optional Overleaf clone + credential caching) → commit and ask before push.
-6. **Report** — summary block, TBD follow-up list, next steps. Ends by recommending `@supervisor where are we?`.
+5. **Venue scope seed (reviewer specialization)** — reads `Target venue` from CLAUDE.md, looks it up in `templates/journal-registry.json` (aims & scope / editorial priorities / typical reviewer concerns). On miss, falls back to a one-shot WebFetch of the venue's author-guidelines page; on either path, the result is shown to the user for confirmation before being written into `.claude/agent-memory/reviewer/MEMORY.md` under `## Venue-specific bar`. The `memory-load` hook then auto-injects this section into every `@reviewer` invocation, so the reviewer reviews at the right venue bar without further setup. Pass `--no-venue-seed` to skip. Skipped when venue is `[TBD]` or the reviewer memory already has a `## Venue-specific bar` section.
+6. **Manuscript scaffold** (delegated) — invokes the `manuscript-scaffold` skill with `Manuscript dir`, `Target venue`, `Overleaf git URL`, and `Working title`. The skill runs its own 4 phases: state check → journal template lookup (against `templates/journal-registry.json`) → skeleton copy (with optional Overleaf clone + credential caching) → commit and ask before push.
+7. **Report** — summary block (now includes a Venue scope seed line), TBD follow-up list, next steps. Ends by recommending `@supervisor where are we?`.
 
 [Source: `commands/start-research.md`](../commands/start-research.md), [`skills/start-research/`](../skills/start-research/), [`skills/manuscript-scaffold/`](../skills/manuscript-scaffold/)
 
-### Journal template lookup (phase 5 details)
+### Journal template lookup (phase 6 details)
 
 The `manuscript-scaffold` skill matches `Target venue` against [`templates/journal-registry.json`](../templates/journal-registry.json) — a curated registry of ~27 high-impact venues mapped to their **CTAN-distributed LaTeX classes** (revtex / aastex / elsarticle / IEEEtran / acmart / sn-jnl / mnras / amscls). On exact case-insensitive match (or alias match), the skill shows the registry entry and asks confirmation before rewriting `main.tex`'s `\documentclass{...}` line.
 
@@ -57,7 +58,7 @@ Safety:
 
 For venues not in the registry, three options: keep generic `article`, specify a class name yourself, or paste a publisher URL for hash-display fetch before applying.
 
-### Overleaf integration (phase 5 details)
+### Overleaf integration (phase 6 details)
 
 If `Overleaf git URL` is set, the `manuscript-scaffold` skill clones the Overleaf project into `Manuscript dir` (requires paid Overleaf plan with Git Integration). Token cached **only** in git's credential helper or `~/.netrc`, scoped to `git.overleaf.com` — never written to any tracked file. Non-empty Overleaf projects stop and ask before clobbering. After scaffold, commits on the default branch **locally** and asks before pushing (default "no").
 

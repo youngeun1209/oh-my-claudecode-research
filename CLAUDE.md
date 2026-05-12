@@ -89,15 +89,15 @@ oh-my-claudecode-research/
 │   ├── cropfig/                      # generic figure-only crop (env-var + CLAUDE.md driven)
 │   │   ├── SKILL.md
 │   │   └── {crop_bounds,crop_figures,export_deck,upload_figures}.py
-│   ├── manuscript-scaffold/          # state check / journal lookup / skeleton / commit-push — called by /start-research phase 5, also standalone
+│   ├── manuscript-scaffold/          # state check / journal lookup / skeleton / commit-push — called by /start-research phase 6, also standalone
 │   │   ├── SKILL.md
 │   │   └── phases/{01-state-check,02-journal-template,03-skeleton,04-commit-push}.md
 │   ├── omcr-setup/                   # backs /omcr-setup — install-style OMCR infra. 6 phases: state / CLAUDE.md scaffold / agent-memory / bib / permissions / report. No interview. Also scaffolds .claude/omcr-state/ for engines.
 │   │   ├── SKILL.md
 │   │   └── phases/{01-state-check,02-claude-md-scaffold,03-agent-memory,04-bibliography,05-permissions,06-report}.md
-│   ├── start-research/               # backs /start-research — interview-driven init
+│   ├── start-research/               # backs /start-research — interview-driven init; phase 5 seeds @reviewer's venue-specific bar from journal-registry / WebFetch
 │   │   ├── SKILL.md
-│   │   └── phases/{01-precheck,02-interview,03-fill-claude-md,04-preset-overlay,05-manuscript-scaffold,06-report}.md
+│   │   └── phases/{01-precheck,02-interview,03-fill-claude-md,04-preset-overlay,05-venue-scope-seed,06-manuscript-scaffold,07-report}.md
 │   ├── sync/                         # backs /sync — state reconciler (status snapshot + agent-memory drift)
 │   │   └── SKILL.md
 │   ├── todofig/                      # backs /todofig — deck-vs-outline gap analyzer
@@ -120,7 +120,7 @@ oh-my-claudecode-research/
 │       └── README.md                 # how to overlay + author-your-own guide
 ├── templates/
 │   ├── MEMORY.template.md            # canonical empty MEMORY.md schema
-│   ├── journal-registry.json         # venue → CTAN class lookup (27 entries; CTAN packages only, no bundled .cls)
+│   ├── journal-registry.json         # venue → CTAN class lookup + aims/scope/editorial-priorities/reviewer-concerns per venue (27 entries; CTAN packages only, no bundled .cls). Schema v1.1.
 │   └── manuscript-skeleton/          # default LaTeX scaffold copied by /start-research (via manuscript-scaffold skill) into the user's Manuscript dir
 │       ├── main.tex                  # documentclass possibly rewritten by manuscript-scaffold per journal-registry
 │       ├── sections/{abstract,introduction,methods,results,discussion}.tex
