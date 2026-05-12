@@ -1,6 +1,6 @@
 # Manuscript skeleton
 
-This directory is the canonical LaTeX manuscript scaffold that `/setup` copies into a project's `Manuscript dir` (default `paper/`).
+This directory is the canonical LaTeX manuscript scaffold that `/omcr-setup` copies into a project's `Manuscript dir` (default `paper/`).
 
 ## What's here
 
@@ -40,7 +40,7 @@ The `.gitignore` already excludes LaTeX build artifacts (`*.aux`, `*.log`, `*.bb
 
 ## Overleaf workflow
 
-If `/setup` configured an Overleaf Git Bridge URL, this directory is a clone of your Overleaf project. `/setup` commits the scaffold on the default branch (`main` or `master` — whatever Overleaf set) but **does not push automatically**. You'll be asked explicitly whether to push when `/setup` runs.
+If `/omcr-setup` configured an Overleaf Git Bridge URL, this directory is a clone of your Overleaf project. `/omcr-setup` commits the scaffold on the default branch (`main` or `master` — whatever Overleaf set) but **does not push automatically**. You'll be asked explicitly whether to push when `/omcr-setup` runs.
 
 If you said "no" at the prompt (or want to push later edits):
 

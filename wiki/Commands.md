@@ -1,151 +1,91 @@
 # Commands — reference
 
-OMCR ships 3 slash commands and 2 invocable skills, all parameterized via the [Project context + Research stack blocks](Configuration.md) in your project's `CLAUDE.md`.
+OMCR ships 4 slash commands and 3 invocable skills, all parameterized via the [Project context + Research stack blocks](Configuration.md) in your project's `CLAUDE.md`.
 
-## `/setup`
+## `/omcr-setup`
 
-**Goal:** First-run project initialization. Interactively populate `CLAUDE.md`'s `## Project context` + `## Research stack` blocks, scaffold per-agent memory directories for all 6 agents, and (optionally) overlay a domain preset from `examples/<field>/`. Safe to re-run.
+**Goal:** Install OMCR's infrastructure in a project. **No questions about your research** — that lives in `/start-research`. Safe to re-run.
+
+**Argument:** none.
+
+**Phases (6):**
+
+1. **State check** — inventory existing `CLAUDE.md` marker blocks, `.claude/agent-memory/`, bibliography files, `.claude/settings.json` (looking for broad wildcards or invalid entries).
+2. **CLAUDE.md scaffold** — insert empty `## Project context` / `## Research stack` / `## Language preference` blocks with `[TBD]` placeholders. Existing blocks are left untouched.
+3. **Agent memory** — `.claude/agent-memory/<agent>/MEMORY.md` from `templates/MEMORY.template.md` for any of the 6 agents missing it. Existing `MEMORY.md` is never overwritten.
+4. **Bibliography** — create empty `paper/references.bib` (with header comment) and `./references.csv` (with canonical header row) if missing.
+5. **Permissions** — interactive curated allowlist menu for `.claude/settings.json`. Categories (default ON unless noted): read-only git inspection, file search & exploration, edit code/text files, LaTeX build, citation API lookups (CrossRef / OpenAlex / doi.org), Python analysis scripts (⬜ opt-in), figure crop tool. Dangerous categories (git write, file deletion, wildcard `Bash`, unrestricted `curl`) are **never offered** — they always prompt. If a previous `.claude/settings.json` has broad wildcards or invalid entries, offers to narrow with backup to `.claude/settings.json.backup.YYYY-MM-DD`.
+6. **Report** — concise summary; recommends `/start-research` next.
+
+[Source: `commands/omcr-setup.md`](../commands/omcr-setup.md), [`skills/omcr-setup/`](../skills/omcr-setup/)
+
+### Re-running `/omcr-setup`
+
+Safe. State-check + skip semantics mean existing user content (filled `CLAUDE.md` fields, written `MEMORY.md`, your `references.bib` / `references.csv`) is never overwritten. The permissions phase asks before replacing broad wildcards. Use re-runs to refresh infrastructure after a plugin update.
+
+## `/start-research`
+
+**Goal:** Interview-driven first-research-project initialization. Fill the `CLAUDE.md` placeholders that `/omcr-setup` scaffolded — working title, hypothesis, target venue, datasets, narrative spine — optionally apply a domain preset to agent memory, scaffold the LaTeX manuscript directory. Safe to re-run.
 
 **Argument:** `$ARGUMENTS` — optional preset hint:
 - `minimal` / `no-overlay` — skip the preset-overlay prompt entirely
 - `neuro-fmri` — pre-select the neuro-fMRI preset (still confirms before applying)
 - (empty) — ask interactively
 
-**What it asks (interview phases):**
+**Phases (6):**
 
-| Phase | Field type | Behavior on "skip" |
-|---|---|---|
-| Project context — scientific identity | hypothesis / venue / topic / datasets / spine | Push back **once** with the reason it matters; if user still skips, store as `[TBD: <one-line note>]`. **Never invent.** |
-| Research stack — infrastructure | paths / patterns / counts / language / BibTeX file / Summary file / CrossRef email | Propose a sensible default; accept silently if user types `[skip]`. |
-| Preset overlay | apply `neuro-fmri` or stay field-neutral | Skip allowed, no push-back |
+1. **Precheck** — verifies `/omcr-setup` has run (`CLAUDE.md` marker blocks, `.claude/agent-memory/<agent>/`, bibliography files all present). If not, offers to invoke `/omcr-setup` automatically before continuing. User can decline and cancel.
+2. **Interview** — asks only for fields that are missing or still `[TBD]`. Three policy bands:
+   - *Scientific identity* (hypothesis / venue / topic / datasets / narrative spine) — push back **once** with the reason it matters; if user still skips, store as `[TBD: <one-line note>]`. **Never invent.**
+   - *Infrastructure* (deck/outline paths, figure count, BibTeX/Summary paths, CrossRef email, Overleaf URL, language) — propose a sensible default; accept silently if user types `[skip]`.
+   - *Preset overlay* — apply `neuro-fmri` (or another shipped preset) or stay field-neutral. Skip allowed.
+3. **Fill CLAUDE.md** — write captured answers into the three marker blocks. Existing filled fields are preserved unless the user explicitly overrode them. If `BibTeX file` / `Summary file` paths differ from defaults, files are **moved** (not duplicated) with confirmation.
+4. **Preset overlay (agent memory)** — if a preset was chosen, replace per-agent `MEMORY.md` files **only when byte-identical to the canonical template** (i.e. untouched). Modified memory is never overwritten.
+5. **Manuscript scaffold** (delegated) — invokes the `manuscript-scaffold` skill with `Manuscript dir`, `Target venue`, `Overleaf git URL`, and `Working title`. The skill runs its own 4 phases: state check → journal template lookup (against `templates/journal-registry.json`) → skeleton copy (with optional Overleaf clone + credential caching) → commit and ask before push.
+6. **Report** — summary block, TBD follow-up list, next steps. Ends by recommending `@supervisor where are we?`.
 
-**What it writes:**
-1. The `## Project context`, `## Research stack`, and `## Language preference` blocks in `CLAUDE.md` — preserving any pre-existing content elsewhere in the file.
-2. `.claude/agent-memory/<agent>/MEMORY.md` for all 6 agents — from the preset if selected, otherwise from `templates/MEMORY.template.md`. Existing memory files are **never overwritten**.
-3. Empty `references.bib` and `references.csv` (with canonical header row) if the bibliography paths are configured. Existing files are **never overwritten**.
+[Source: `commands/start-research.md`](../commands/start-research.md), [`skills/start-research/`](../skills/start-research/), [`skills/manuscript-scaffold/`](../skills/manuscript-scaffold/)
 
-**Output:** A summary block listing what was created / updated / skipped, with explicit follow-up items for every `[TBD: ...]` placeholder.
+### Journal template lookup (phase 5 details)
 
-[Source: `commands/setup.md`](../commands/setup.md)
+The `manuscript-scaffold` skill matches `Target venue` against [`templates/journal-registry.json`](../templates/journal-registry.json) — a curated registry of ~27 high-impact venues mapped to their **CTAN-distributed LaTeX classes** (revtex / aastex / elsarticle / IEEEtran / acmart / sn-jnl / mnras / amscls). On exact case-insensitive match (or alias match), the skill shows the registry entry and asks confirmation before rewriting `main.tex`'s `\documentclass{...}` line.
 
-### Example session
+Safety:
+- **Pointers only** — CTAN package names + `documentclass` strings + publisher guideline URLs. No `.cls` files bundled.
+- **No fuzzy matching** — "PRX" matches "Physical Review X" only via registered alias.
+- Each entry carries a `verified_on` timestamp; the skill always reminds the user to check publisher guidelines before submission.
 
-```
-/setup
-```
+For venues not in the registry, three options: keep generic `article`, specify a class name yourself, or paste a publisher URL for hash-display fetch before applying.
 
-The command reads your current `CLAUDE.md` state, then asks only for missing fields:
+### Overleaf integration (phase 5 details)
 
-```
-Found CLAUDE.md with `## Project context` (5 fields) but no `## Research stack`.
-Skipping to Research stack interview...
+If `Overleaf git URL` is set, the `manuscript-scaffold` skill clones the Overleaf project into `Manuscript dir` (requires paid Overleaf plan with Git Integration). Token cached **only** in git's credential helper or `~/.netrc`, scoped to `git.overleaf.com` — never written to any tracked file. Non-empty Overleaf projects stop and ask before clobbering. After scaffold, commits on the default branch **locally** and asks before pushing (default "no").
 
-Deck export dir [default: figures/captured/]:
-> [enter — accept default]
+### Re-running `/start-research`
 
-Outline file [default: outline.md]:
-> manuscripts/outline.md
-
-Figure count [default: 8]:
-> 6
-
-BibTeX file [default: references.bib]:
-> [enter]
-
-Summary file [default: references.csv]:
-> [enter]
-
-CrossRef email (optional, for verify-citation polite pool):
-> me@example.edu
-
-Apply a domain preset? (neuro-fmri / none) [default: none]:
-> neuro-fmri
-
-About to write the following to CLAUDE.md:
-[shows diff]
-
-Confirm? (y/n) > y
-
-✓ Wrote ## Research stack to CLAUDE.md
-✓ Scaffolded 6 agent memory files from examples/neuro-fmri/
-✓ Created references.bib (empty, with comment header)
-✓ Created references.csv (header row only)
-✓ Setup complete — run `@supervisor where are we?` to start
-```
-
-If the user skips a scientific field:
-
-```
-Central hypothesis (one sentence):
-> skip
-
-→ "Without a hypothesis, @supervisor will ask every conversation. A rough one-sentence stake is far better than [TBD] — refine later. Want to give it a shot?"
-
-> still skip
-
-Saved as: [TBD: revisit after pilot]
-```
-
-### Manuscript scaffold
-
-`/setup` initializes the LaTeX manuscript at `<Manuscript dir>` (default `paper/`) from [`templates/manuscript-skeleton/`](../templates/manuscript-skeleton/):
-
-- `main.tex` with section includes
-- `sections/{abstract,introduction,methods,results,discussion}.tex` stubs
-- `figures/` placeholder directory
-- `references.bib` (empty — managed by `@literature-curator`)
-- `.gitignore` for LaTeX build artifacts
-
-Existing manuscript content is **never overwritten**: if `Manuscript dir` has files already, `/setup` stops and asks.
-
-### Journal template lookup
-
-If `Target venue` was filled during the interview, `/setup` looks it up against [`templates/journal-registry.json`](../templates/journal-registry.json) — a curated registry of ~27 high-impact venues mapped to their **CTAN-distributed LaTeX classes** (revtex / aastex / elsarticle / IEEEtran / acmart / sn-jnl / mnras / amscls). On match (case-insensitive exact, no fuzzy), the command shows the registry entry and asks confirmation before rewriting `main.tex`'s `\documentclass{...}` line.
-
-Safety guarantees on the registry:
-- OMCR ships **pointers only** — CTAN package names + `documentclass` strings + publisher guideline URLs. The `.cls` files themselves are NEVER bundled (legal: avoids redistributing publisher-licensed material; security: TeX Live verifies CTAN package signatures).
-- Each entry carries a `verified_on` timestamp; the command always reminds the user to check the current publisher guidelines URL before submission.
-- No fuzzy matching — "PRX" matches "Physical Review X" only because it's a registered alias.
-
-For venues not in the registry, `/setup` offers three options: keep the generic `article` class, specify a class name yourself (e.g. `cvpr_2024` — you supply the `.cls`), or paste a publisher URL for `/setup` to fetch with hash display before applying.
-
-### Overleaf integration (optional)
-
-If `Overleaf git URL` is set, `/setup` clones the user's Overleaf project into `Manuscript dir` (requires Overleaf paid plan with Git Integration). Auth flow:
-
-1. User pastes the Git URL (validated against `https://git.overleaf.com/<id>` format).
-2. User pastes their Overleaf Git authentication token (generated at Overleaf → Account Settings → Git Integration).
-3. Token cached **only** in git's credential helper or `~/.netrc`, scoped to `git.overleaf.com` — never written to CLAUDE.md / agent memory / any tracked file.
-4. `git ls-remote` verifies the URL + token work before touching anything.
-5. If the Overleaf project is non-empty, `/setup` stops and asks — does NOT clobber existing content.
-
-After scaffolding, the commit lands on the default branch (typically `master`) **locally**. `/setup` explicitly asks before pushing — default answer is "no" if the user just hits enter. The user can `git -C <manuscript_dir> push origin <default_branch>` later when ready.
-
-### Re-running `/setup`
-
-Safe. Existing values are surfaced as defaults; existing MEMORY.md / references.bib / references.csv are never overwritten. If you want to reset an agent's memory, delete the specific `.claude/agent-memory/<agent>/MEMORY.md` and re-run `/setup`.
+Safe. Existing values are surfaced as defaults; modified `MEMORY.md` is never overwritten; the `manuscript-scaffold` skill has its own existing-content guard. To reset an agent's memory, delete the specific `.claude/agent-memory/<agent>/MEMORY.md` and re-run.
 
 ## `/todofig`
 
 **Goal:** Compare a captured figure deck against an outline document; produce a prioritized TODO of gaps (P0/P1/P2).
 
 **Inputs (from `## Research stack` block):**
-- `deck_export_dir` — captured PNG source
-- `outline_file` — canonical outline (markdown)
-- `figure_count` — total figures expected
-- `result_pattern` — regex to find figure blocks in outline
-- `report_lang` — output language
-- `report_output_dir` — where to save the TODO report
-- `deck_export_script` (optional) — idempotent refresh script
+- `Deck file` — path to the `.key` / `.pptx` deck
+- `Figure PNG dir` (optional, default `<dirname(Deck file)>/png/`) — cropped per-slide PNGs produced by `cropfig`
+- `Outline file` — canonical outline (markdown)
+- `Figure count` — total figures expected
+- `Result pattern` — regex to find figure blocks in outline
+- `Report language` — output language
+- `Report output dir` — where to save the TODO report
 
 **Argument:** `$ARGUMENTS` — optional figure identifier to focus on (e.g., `Fig4`, `R1`, `Figure 5`). Empty = full sweep.
 
 **Output:**
 1. Per-figure ✅ / ⚠️ / ❌ block + "next action"
-2. Cross-cutting concerns (missing panels / orphan slides / stale figures / consistency issues)
+2. Cross-cutting concerns (missing panels / orphan figures / stale figures / consistency issues)
 3. Prioritized TODO (P0 / P1 / P2 / Later)
 
-**Saved to:** `${report_output_dir}/todofig_YYYY-MM-DD.md`
+**Saved to:** `${Report output dir}/todofig_YYYY-MM-DD.md`
 
 **Priorities:**
 - **P0** — blocks a main-text claim, or is an unresolved CRITICAL issue from supervisor memory
@@ -195,31 +135,28 @@ Skips the cross-cutting section, produces only Fig 5's diff + focused TODO.
 
 ## `/sync`
 
-**Goal:** Reconcile current state (captured deck) with final goal (outline), refresh agent memories with drifts, optionally embed cropped figures into a target document. Produces a status snapshot — **not a TODO**.
+**Goal:** Reconcile current state (cropped figures + agent memories) with final goal (outline), refresh agent memories with drifts. Produces a status snapshot — **not a TODO**.
 
 **Inputs (from `## Research stack` block):**
 - All `/todofig` fields, plus:
-- `sync_report_dir` — where to save status reports
-- `tight_crop_dir` (optional) — for Phase 4 figure embedding
-- `embed_target` (optional) — document (`.docx` / `.md`) to embed cropped figures into
+- `Sync report dir` — where to save status reports
 
 **Argument:** `$ARGUMENTS` — optional scope hint:
 - `memory-heavy` — deep memory reconciliation
 - `outline just changed` — aggressive memory updates
-- `figures only` — skip Phase 2 (memory)
-- `no-embed` — skip Phase 4 (embed)
-- `embed only` — run Phase 1.1 + Phase 4 only
+- `status only` — skip Phase 2 (memory)
 - (empty) — default full pass
 
-**Output (6 phases):**
-1. Phase 1 — Read everything (export, outline, deck, memories)
+**Output (5 phases):**
+1. Phase 1 — Read everything (outline, cropped PNGs, memories)
 2. Phase 2 — Reconcile memories (limited surgical edits only)
 3. Phase 3 — Status snapshot (✅ / 🟡 / ⬜ / 🚧 per figure)
-4. Phase 4 — Embed cropped figures into `embed_target` (optional)
-5. Phase 5 — Report
-6. Phase 6 — Persist report + update sync coordinator memory
+4. Phase 4 — Report
+5. Phase 5 — Persist report + update sync coordinator memory
 
-**Saved to:** `${sync_report_dir}/sync_YYYY-MM-DD.md`
+(Figure refresh and outline embed live in the `cropfig` skill, not in `/sync`.)
+
+**Saved to:** `${Sync report dir}/sync_YYYY-MM-DD.md`
 
 **Critical:** Phase 2 is **strictly limited** — no auto-rewriting of agent-authored interpretive content. Sync can only add/refresh sync markers and append drift entries.
 
@@ -229,8 +166,8 @@ Skips the cross-cutting section, produces only Fig 5's diff + focused TODO.
 
 | Question | Ground truth |
 |---|---|
-| What exists right now? | Captured PNGs in `deck_export_dir` |
-| Where are we heading? | `outline_file` |
+| What exists right now? | Cropped PNGs in `Figure PNG dir` (produced by `cropfig`) |
+| Where are we heading? | `Outline file` |
 | What has been done / decided? | `.claude/agent-memory/<agent>/MEMORY.md` |
 
 When sources disagree:
@@ -250,8 +187,8 @@ Output:
 ## Sync Report — 2026-05-10
 
 ### Current state
-- Deck source: figures/captured/
-- Latest export: 8 PNGs (refreshed)
+- Figure source: decks/main.pptx → /…/png/
+- Snapshot status: 8 cropped PNGs available
 - Per-figure summary: Fig 1 ✅, Fig 2 ✅, Fig 3 🟡, Fig 4 🚧, ...
 
 ### Goal alignment (vs. outline.md)
@@ -259,10 +196,6 @@ Output:
 - 🟡 In progress: Fig 3 (panel C placeholder), Fig 5 (stale)
 - ⬜ Not started: Fig 8
 - 🚧 Blocked: Fig 4 (waiting on R4 permutation test result)
-
-### Embed updates (since embed_target = outline.docx)
-- Refreshed: R1, R2, R3, R6
-- Skipped: R4 (no PNG yet), R7 (no PNG yet)
 
 ### Agent memory updates
 - supervisor: Last synced refreshed; 1 drift flagged
@@ -277,47 +210,46 @@ Output:
 
 ## `cropfig` (skill, not a slash command)
 
-**Goal:** Tight-crop captioned figure PNGs to figure-only content. Strips the top "Figure N. Title" label, removes trailing whitespace, adds uniform 10 px white padding.
+**Goal:** Three-step pipeline from a `.key` / `.pptx` deck to manuscript + outline. Produces vector PDFs (for `\includegraphics` in the .tex) and outline-grade PNGs (for `![Figure N](...)` in the outline.md) — both derived from the same cropped artifact so they cannot drift.
 
-**Invocation:** Not directly via `/`; agents and other commands invoke via the `Skill` tool with `skill="cropfig"`. Most commonly invoked by `/sync` Phase 4 to produce header-stripped PNGs for `.docx` embedding.
+**Invocation:** Not directly via `/`; agents and other commands invoke via the `Skill` tool with `skill="cropfig"`, or run the three scripts directly.
 
-**Inputs:** `FIGURES_SRC`, `FIGURES_DST`, `EXPORT_SCRIPT` (env vars) or the corresponding Research-stack fields.
+**Inputs:** `DECK_FILE` (required) + optional `MANUSCRIPT_DIR`, `OUTLINE_FILE`, `RESULT_PATTERN`, `CROPFIG_PROBE_DPI`, `CROPFIG_PNG_DPI` env vars (or the corresponding Research-stack fields). Defaults derive output paths from `dirname($DECK_FILE)`.
 
 **Output contract:**
 
-| Path | Owner | Top label | Bottom caption |
-|---|---|---|---|
-| `$FIGURES_SRC` | your export pipeline | KEPT | should be pre-stripped |
-| `$FIGURES_DST` | this skill | **removed** | (pre-stripped) |
+| Path | Owner | Content |
+|---|---|---|
+| `<dirname($DECK_FILE)>/pdf/figureNN.pdf` | func 2 | cropped vector PDF, manuscript-grade |
+| `<dirname($DECK_FILE)>/png/figureNN.png` | func 2 | rasterized view of the cropped PDF, outline-grade |
+| `$MANUSCRIPT_DIR/figures/figureNN.pdf` | func 3 (copy) | identical to the source PDF — used by the .tex |
+| `<dirname($OUTLINE_FILE)>/figures/figureNN.png` | func 3 (copy) | identical to the source PNG — referenced by the outline |
+| `$OUTLINE_FILE` | func 3 (modifies) | `![Figure N](figures/figureNN.png)` inserted after each result heading |
 
-**Implementation:** Python (PIL + numpy) — see `skills/cropfig/crop_top_label.py` for the band-classification heuristic (color saturation + long-dark-run detection).
+**Implementation:** PyMuPDF (vector PDF CropBox + per-slide split) + a band-classification heuristic in `crop_bounds.py` (color saturation + long-dark-run detection on a probe rasterization).
 
-[Source: `skills/cropfig/SKILL.md`](../skills/cropfig/SKILL.md) and [`crop_top_label.py`](../skills/cropfig/crop_top_label.py)
+[Source: `skills/cropfig/SKILL.md`](../skills/cropfig/SKILL.md)
 
 ### Direct CLI use
 
-If you want to invoke `cropfig` outside of `/sync`:
-
 ```bash
-# Defaults
-python3 ~/.claude/plugins/oh-my-claudecode-research/skills/cropfig/crop_top_label.py
+# Required: point at the deck
+export DECK_FILE=decks/main.pptx
 
-# Explicit paths
-python3 ~/.claude/plugins/oh-my-claudecode-research/skills/cropfig/crop_top_label.py \
-  path/to/captured/ \
-  path/to/tight/
+# Func 1 — deck → per-slide vector PDFs (staging dir is ephemeral)
+STAGE=$(mktemp -d)
+python3 ~/.claude/plugins/oh-my-claudecode-research/skills/cropfig/export_deck.py "$DECK_FILE" "$STAGE"
 
-# Env vars
-FIGURES_SRC=path/to/captured FIGURES_DST=path/to/tight \
-  python3 ~/.claude/plugins/oh-my-claudecode-research/skills/cropfig/crop_top_label.py
+# Func 2 — crop each PDF, emit cropped PDF + outline PNG next to the deck
+python3 ~/.claude/plugins/oh-my-claudecode-research/skills/cropfig/crop_figures.py "$STAGE"
+rm -rf "$STAGE"
+
+# Func 3 — copy artifacts into the manuscript + outline trees
+MANUSCRIPT_DIR=paper OUTLINE_FILE=outline.md \
+  python3 ~/.claude/plugins/oh-my-claudecode-research/skills/cropfig/upload_figures.py
 ```
 
-Or as a Python import:
-
-```python
-from skills.cropfig.crop_top_label import main
-main(src="path/to/captured", dst="path/to/tight")
-```
+`crop_figures.py` accepts optional positional output dirs (`<staging> <pdf_out> <png_out>`); `upload_figures.py` reads from `<dirname($DECK_FILE)>/pdf` and `<dirname($DECK_FILE)>/png` and copies into the manuscript + outline trees. Func 3 is idempotent — re-running replaces the outline embed links rather than duplicating them.
 
 ## `verify-citation` (skill, not a slash command)
 

@@ -1,6 +1,6 @@
 # Specializing for Your Field
 
-OMCR's 5 core agents are field-neutral. To make them concrete for your domain, author a **preset** under `examples/<field>/`. The shipped example is `examples/neuro-fmri/` (generic neuroimaging — preprocessing, parcellation, connectivity, ISC, statistical conventions). This page walks through authoring your own.
+OMCR's 6 core agents are field-neutral. To make them concrete for your domain, author a **preset** under `examples/<field>/`. The shipped example is `examples/neuro-fmri/` (generic neuroimaging — preprocessing, parcellation, connectivity, ISC, statistical conventions). This page walks through authoring your own.
 
 ## When you need a preset
 

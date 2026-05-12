@@ -1,39 +1,22 @@
 # With OMC (companion install)
 
-Installing OMC alongside OMCR unlocks: a stateful Python REPL, a literature wiki, an experiment-state machine, an evidence-driven causal tracer, an evidence-based verifier, and a Socratic interviewer for hypothesis crystallization — all via [oh-my-claudecode](https://github.com/Yeachan-Heo/oh-my-claudecode)'s MCP server.
-
-OMCR + OMC = the "fully-loaded" research stack.
+Installing OMC alongside OMCR unlocks an orchestration layer — workflow skills (`ralph`, `team`, `autopilot`, `deep-interview`, `autoresearch`, …), an MCP server (`python_repl`, `wiki_*`, `state_*`, `notepad_*`, `trace_*`), and 19 specialized agents. For what OMC is and how it works internally, see [oh-my-claudecode](https://github.com/Yeachan-Heo/oh-my-claudecode). **This page is for how to combine OMC with OMCR's own agents and commands.**
 
 ## Install OMC alongside
 
 ```bash
-# Option 1 — Claude Code marketplace (recommended once it's listed):
-# In Claude Code: /plugin install oh-my-claudecode
+# In Claude Code (recommended once listed):
+/plugin install oh-my-claudecode
 
-# Option 2 — npm (the runtime that backs OMC's MCP):
+# Or npm fallback:
 npm install -g oh-my-claude-sisyphus
-
-# Option 3 — clone the repo into ~/.claude/plugins/:
-git clone https://github.com/Yeachan-Heo/oh-my-claudecode ~/.claude/plugins/oh-my-claudecode
 ```
 
-After installation, verify in Claude Code:
-
-```
-/oh-my-claudecode:
-```
-
-The autocomplete should list `/oh-my-claudecode:autopilot`, `/oh-my-claudecode:deep-interview`, `/oh-my-claudecode:trace`, `/oh-my-claudecode:autoresearch`, etc.
-
-And:
-
-```
-@
-```
-
-Should now include OMC's 19 agents alongside OMCR's 5.
+Verify by typing `/oh-my-claudecode:` in Claude Code — autocomplete should list `autopilot`, `deep-interview`, `ralph`, `team`, `autoresearch`, `trace`, etc. For git-clone / advanced install paths, see upstream OMC docs.
 
 ## Workflow stages — OMCR + OMC mapping
+
+The detailed recipes below pair specific OMCR assets with specific OMC orchestrators. This table is the per-stage crosswalk reference.
 
 | Stage | OMCR | + OMC adds |
 |---|---|---|
@@ -50,105 +33,135 @@ Should now include OMC's 19 agents alongside OMCR's 5.
 | **Memory across sessions** | OMCR's `memory-load` hook | OMC's `project_memory_*` MCP family for in-session memory operations |
 | **State across runs** | (manual logs in MEMORY.md) | OMC's `state_*` MCP family + `notepad_*` MCP family |
 
-## A "full stack" session — example
+## Recipes — pairing OMCR with OMC
 
-You sit down to a project that has both installed. A typical session:
+Each recipe pairs one OMCR-side asset (agent or command) with one OMC orchestrator. Field-neutral; substitute your domain specifics. Skip any recipe whose OMC piece you haven't installed.
 
-### 1. Bootstrap / re-orient
+### How these recipes work — type the commands in order
 
-```
-@supervisor where are we?
-```
+There is **no automatic pipeline** between OMCR agents and OMC orchestrators in v0.1.x. OMCR's 6 agents are prompt-only and do not invoke OMC slash commands directly (a "detect-and-enhance" auto-invocation is on the v0.2 backlog — see [OMC-Tool-Reference.md](OMC-Tool-Reference.md#how-omcr-side-agents-can-call-omc-tools)). "Pairing" in this section means **workflow-stage co-residence**, not magical chaining: you, the user, type each command in turn in the same Claude Code session. The handoff between an OMCR agent and an OMC skill is typically a file path (e.g. `.omc/specs/...`, `.claude/agent-memory/...`) or a natural-language quote of the previous step's output. Each recipe below lists the exact commands in execution order — treat them as a typing sequence, not as one fused command.
 
-Standalone OMCR behavior. Supervisor reads its memory and reports status.
+### Recipe R1 — Start research on a new topic
 
-### 2. Refine a vague new direction (OMC)
+**When**: you're sitting down to *start research* on a new topic with `@supervisor` — the project already exists (CLAUDE.md is set up), but this specific research direction is fresh and the question is still vague. Not the `/omcr-setup` + `/start-research` moment (that's project bootstrapping); this is the **intellectual start** of a research thread.
 
-If your supervisor surfaces a new direction that's still vague:
+**Pair**: `@supervisor` + `/oh-my-claudecode:deep-interview`
 
-```
-/oh-my-claudecode:deep-interview the question of whether [your new direction] is testable
-```
+**Why**: deep-interview's Socratic loop forces falsifiability + evaluator specification before you commit a single analysis hour. Catches the "we're researching X" → "but what's the actual testable claim?" gap.
 
-Deep-interview asks Socratic questions until you have a falsifiable hypothesis + an evaluator (a function that says PASS / FAIL given results). Output saved to `.omc/specs/deep-interview-{slug}.md`.
-
-### 3. Literature work (OMC)
+**Flow**:
 
 ```
-@document-specialist find recent papers on [topic] in [target_venue]
+1. @supervisor I want to start research on [topic]
+   → supervisor lays out what it knows, surfaces the gap (vague Q, no evaluator)
+
+2. /oh-my-claudecode:deep-interview "starting research on [topic] — is it
+   testable, and what's the PASS/FAIL evaluator?"
+   → deep-interview iterates Socratically until you have a falsifiable
+     hypothesis + a concrete evaluator (the function that says PASS or FAIL
+     given results). Output saved to .omc/specs/deep-interview-{slug}.md.
+
+3. @supervisor read .omc/specs/deep-interview-{slug}.md and record the
+   result in hypothesis-log.md, update the project goals
+   → durable in OMCR's per-agent memory (.claude/agent-memory/supervisor/)
 ```
 
-Document-specialist uses Context Hub (`chub`) for curated docs, falls back to WebSearch / WebFetch, returns synthesized findings with URL citations.
+**Result**: a research thread starts with a written, testable Q + evaluator, not "we'll figure out the eval as we go".
 
-Persist to your literature wiki:
+### Recipe R2 — Must-finish parameter sweep
 
-```
-Use wiki_add to register the Smith 2024 paper under tag "rest-state-scaffold" with the finding "individual rest topology predicts ..."
-```
+**When**: parameter sweep or seed-stability check that **must** complete and pass a reviewer gate before you trust the result.
 
-(`wiki_add` is OMC's MCP tool — accessible from the session.)
+**Pair**: `@analysis-implementer` + `/oh-my-claudecode:ralph` (with `@reviewer` as the reviewer gate)
 
-### 4. Stateful analysis (OMC)
+**Why**: ralph won't terminate on iteration count alone — it requires the configured reviewer to verify completion. Prevents the "ran for 50 epochs, looks fine, ship it" failure mode.
 
-Standalone OMCR's `@analysis-implementer` writes Python scripts you run externally. With OMC's `python_repl`:
+**Flow**:
 
 ```
-@analysis-implementer compute the spin-test p-value for the R3 contrast using the saved permutation distribution
+1. @analysis-implementer write the sweep script for the R3 contrast
+   → produces analysis/sweep_R3.py with permutation logic + saved
+     distribution
+
+2. /oh-my-claudecode:ralph --critic=@reviewer "run the sweep until the
+   spin-test p-value stabilizes (delta < 0.001 across last 3 iterations)"
+   → ralph loops analysis-implementer; on each iteration @reviewer checks
+     stability + spot-checks the perm distribution.
+
+3. ralph blocks completion until @reviewer returns PASS, then writes the
+   final state to .omc/state/
 ```
 
-The agent invokes `python_repl` to execute the computation in a persistent Python kernel — variables stay alive across calls, so subsequent analyses can reuse loaded data.
+**Result**: sweep terminates only on a verified stable result, with audit trail in `.omc/state/` for the Methods appendix.
 
-### 5. Methodology validation (OMC)
+### Recipe R3 — Parallel literature scan
 
-When you have a contested result:
+**When**: 20–50 candidate papers to triage, where serial `@document-specialist` calls would take hours.
 
-```
-/oh-my-claudecode:trace the observation that the R4 contrast is non-significant
-```
+**Pair**: `@literature-curator` (+ OMCR's `verify-citation` skill) + `/oh-my-claudecode:team`
 
-Trace orchestrates `@tracer` in team mode: enumerates competing hypotheses (truly null vs. underpowered vs. wrong operationalization vs. confound), ranks evidence for/against each, names the discriminating probe.
+**Why**: team partitions across N clones; each returns a structured summary; literature-curator merges + runs OMCR's `verify-citation` skill on each entry before adding to `references.bib`.
 
-### 6. Figure design (OMCR)
+**Flow**:
 
 ```
-@figure-descriptor design Fig 5
+1. @literature-curator give me the candidate paper list for "rest-state
+   scaffold"
+   → produces a 30-item DOI list with placeholder summaries
+
+2. /team 5:document-specialist "summarize papers 1-6 / 7-12 / 13-18 /
+   19-24 / 25-30 with fields: claim, method, dataset, effect size"
+   → team spawns 5 clones; each returns structured summaries
+
+3. @literature-curator merge the 5 summary batches, deduplicate, then run
+   verify-citation on each DOI before adding to references.bib
+   → verify-citation gates each entry against CrossRef/OpenAlex; merged
+     BibTeX lands in your manuscript directory
 ```
 
-Unchanged from standalone — no OMC analog.
+**Result**: ~6× throughput on the survey, with `verify-citation` gating preserving citation rigor.
 
-### 7. Iterative refinement (OMC)
+### Recipe R4 — Build analysis *tooling* (not the analysis itself)
 
-If a result is borderline and you want to systematically improve a parameter:
+**When**: you need a reusable helper — a custom statistical function, a plotting wrapper, a data-loader for a specific schema.
 
-```
-/oh-my-claudecode:autoresearch on the mission "maximize R3 cross-validated accuracy" with evaluator "perm-test p-value < 0.05"
-```
+**Pair**: `@analysis-implementer` + `/oh-my-claudecode:autopilot`
 
-Autoresearch runs a bounded loop: iterate the parameter, run the evaluator, persist the JSON + decision log, continue until max-runtime or terminal condition.
+**Why**: autopilot ships a spec → code → tests pipeline. Good for tool code (deterministic spec, automated tests possible). **Wrong for hypothesis-driven analysis runs** — those need ralph or autoresearch, where the contract is the evaluator, not test pass.
 
-### 8. Pre-submission gate (OMCR + OMC)
+**Flow**:
 
 ```
-@reviewer review the full draft
+1. @analysis-implementer specify the contract for a spin-test wrapper:
+   inputs, outputs, edge cases
+   → produces .omc/specs/spin-test-wrapper.md with signature + invariants
+
+2. /oh-my-claudecode:autopilot "build the spin-test wrapper per the spec
+   in .omc/specs/spin-test-wrapper.md"
+   → autopilot generates the module + unit tests + verifies on the test
+     suite before claiming completion
+
+3. @analysis-implementer use the wrapper in the R3 analysis script
+   → analysis script imports the verified helper
 ```
 
-OMCR's reviewer applies target-venue criteria.
+**Caveat**: do not use autopilot for the analysis script itself — it doesn't know how to iterate on a hypothesis. For analysis runs, see R2 (ralph) or the autoresearch row below.
 
-Then:
+### More pairings (one-line each)
 
-```
-/oh-my-claudecode:critic the analysis plan for R4
-```
+For these, treat the same pattern as R1–R4: type each command in turn, hand off via file paths or natural language. Flesh out into a full recipe if it starts to recur in your workflow.
 
-OMC's critic adds pre-mortem + assumption extraction + alternative-interpretation stress-test on the *plan*, complementing reviewer's *manuscript* focus.
-
-### 9. Save state (OMCR + OMC)
-
-```
-/sync
-```
-
-OMCR reconciles MEMORY.md files. OMC's `project_memory_write` MCP (if used by any agent during the session) persists in-session updates automatically.
+| Stage | Pairing | Why |
+|---|---|---|
+| Plan a costly run | `@supervisor` + `/oh-my-claudecode:ralplan` | Planner/Architect/Critic consensus before commit |
+| Parallel datasets | `@analysis-implementer` + `/oh-my-claudecode:ultrawork` | Same analysis on N datasets concurrently |
+| Hyperparam loop | `@analysis-implementer` + `/oh-my-claudecode:autoresearch` | Bounded evaluator-driven improvement with persistent JSON log |
+| Reproducibility | `@analysis-implementer` + `/oh-my-claudecode:ultraqa` | Fresh-seed re-runs until variance < threshold |
+| Cross-model review | `@reviewer` + `/oh-my-claudecode:ccg` | Claude+Codex+Gemini critique synthesis (needs external CLIs) |
+| Contested result | `@reviewer` + `/oh-my-claudecode:trace` | Competing-hypotheses ranking with disconfirmation evidence |
+| Parallel drafting | `@paper-writer` + `/oh-my-claudecode:team` | Intro/methods/results/discussion in parallel |
+| Must-finish revision | `@paper-writer` + `/oh-my-claudecode:ralph` | Loop until `@reviewer` signs off on the manuscript |
+| Figure dispatch | `/todofig` + `/oh-my-claudecode:team` | Generate N missing figures in parallel |
 
 ## Configuration overlap
 
@@ -189,3 +202,4 @@ If you have OMC installed globally but want a specific project to use only OMCR 
 - [Configuration](Configuration.md) — research-stack block (shared between OMCR commands and OMC's autoresearch)
 - [OMC Tool Reference](OMC-Tool-Reference.md) — all 47 OMC MCP tools mapped to research workflow stages
 - [Agents](Agents.md) — OMCR's 6 agents reference
+- [OMC's skill catalog (upstream)](https://github.com/Yeachan-Heo/oh-my-claudecode/tree/main/skills) — for the full list of OMC orchestration skills and their CLI flags, defer to upstream

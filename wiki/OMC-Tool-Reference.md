@@ -1,6 +1,6 @@
 # OMC Tool Reference (research workflow mapping)
 
-This page maps OMC's 47 MCP tools to research workflow stages, so you can find the right OMC primitive for the job. **Assumes OMC is installed alongside OMCR** — see [With OMC](With-OMC.md) for install.
+This page maps OMC's 47 MCP tools to research workflow stages, so you can find the right OMC primitive for the job. **Assumes OMC is installed alongside OMCR** — see [With OMC](With-OMC.md) for install. For OMC orchestration skills (`ralph`, `team`, `autopilot`, `ralplan`, …) and how to combine them with OMCR's agents, see [With-OMC § Recipes](With-OMC.md#recipes--pairing-omcr-with-omc) — this page covers MCP tools only.
 
 If you only have OMCR installed, none of these tools are available. OMCR's standalone behavior is documented in [Standalone Usage](Standalone-Usage.md).
 

@@ -37,11 +37,11 @@ When `## Research stack` in the project's `CLAUDE.md` defines a `Manuscript dir`
 
 **Figure references.** Use `\ref{fig:<label>}` for in-text references. Place the figure files in `<manuscript_dir>/figures/` (the `\graphicspath{{figures/}}` directive in `main.tex` resolves the path). Figure design is `@figure-descriptor`'s job — you reference what they describe.
 
-**Documentclass.** Do not change the `\documentclass{...}` line unless coordinating with the user. `/setup` (or the user manually) sets it based on the target venue, possibly via the registry at [`templates/journal-registry.json`](../templates/journal-registry.json). If the manuscript needs to retarget a different venue, run `/setup` again rather than hand-editing.
+**Documentclass.** Do not change the `\documentclass{...}` line unless coordinating with the user. `/start-research` (via the `manuscript-scaffold` skill, or the user manually) sets it based on the target venue, possibly via the registry at [`templates/journal-registry.json`](../templates/journal-registry.json). If the manuscript needs to retarget a different venue, re-invoke the `manuscript-scaffold` skill (or rerun `/start-research`) rather than hand-editing.
 
 **Local preview.** The user can compile via `cd <manuscript_dir> && latexmk -pdf main.tex`. Build artifacts (`.aux`, `.bbl`, etc.) are gitignored by the skeleton's `.gitignore`.
 
-**Overleaf sync.** If `Overleaf git URL` is configured, the manuscript dir is a clone of the user's Overleaf project. Edits land in local commits; the user explicitly pushes with `git -C <manuscript_dir> push origin <default_branch>` when ready (this is documented in the `/setup` final report and the skeleton's `README.md`). Never push on the user's behalf.
+**Overleaf sync.** If `Overleaf git URL` is configured, the manuscript dir is a clone of the user's Overleaf project. Edits land in local commits; the user explicitly pushes with `git -C <manuscript_dir> push origin <default_branch>` when ready (this is documented in the `/start-research` final report and the skeleton's `README.md`). Never push on the user's behalf.
 
 ---
 

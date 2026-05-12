@@ -1,6 +1,6 @@
 # oh-my-claudecode-research — Wiki
 
-A small Claude Code plugin that ships a **6-agent research team** + **4 lightweight hooks** + **3 parameterized commands** + **2 skills**, all tailored for producing research papers (or any structured-figure-and-outline document).
+A small Claude Code plugin that ships a **6-agent research team** + **4 lightweight hooks** + **4 parameterized commands** + **3 skills**, all tailored for producing research papers (or any structured-figure-and-outline document).
 
 This wiki is the documentation deep dive. The [README](../README.md) is the quick overview.
 
@@ -14,7 +14,7 @@ This wiki is the documentation deep dive. The [README](../README.md) is the quic
 
 ### Reference
 - **[Agents](Agents.md)** — The 6 core agents (supervisor / analysis-implementer / paper-writer / figure-descriptor / reviewer / literature-curator)
-- **[Commands](Commands.md)** — `/todofig`, `/sync`, and the `cropfig` + `verify-citation` skills
+- **[Commands](Commands.md)** — `/omcr-setup`, `/start-research`, `/todofig`, `/sync`, plus the `cropfig`, `verify-citation`, and `manuscript-scaffold` skills
 - **[Hooks](Hooks.md)** — `pii-scrub`, `memory-load`, `citation-warn`
 - **[OMC Tool Reference](OMC-Tool-Reference.md)** — 47 OMC MCP tools mapped to research workflow stages
 
@@ -46,8 +46,8 @@ OMCR is a **research-team persona pack**. It does not orchestrate analyses, run 
 
 Plus the harness:
 - 4 hooks (PII guard, MEMORY auto-load, citation warning, setup nudge)
-- 3 slash commands (`/setup` for first-run init; `/todofig` and `/sync` for figure-deck-vs-outline workflows)
-- 2 skills (`cropfig` for stripping caption bands from exported figure PNGs; `verify-citation` for gating every citation added to the bibliography)
+- 4 slash commands (`/omcr-setup` installs OMCR infrastructure; `/start-research` runs the interview-driven first-project init; `/todofig` and `/sync` cover figure-deck-vs-outline workflows)
+- 3 skills (`cropfig` strips caption bands from exported figure PNGs; `verify-citation` gates every citation added to the bibliography; `manuscript-scaffold` lays down the LaTeX skeleton + optional journal template + optional Overleaf clone)
 
 ## What OMCR is NOT
 

@@ -4,7 +4,7 @@
 # If the current project looks uninitialized (no CLAUDE.md, OR CLAUDE.md is
 # missing the `## Project context` / `## Research stack` blocks that OMCR's
 # agents and commands rely on), print a single non-blocking nudge suggesting
-# `/setup`. Does NOT run setup itself — the actual interview lives in the
+# `/omcr-setup`. Does NOT run setup itself — the actual interview lives in the
 # slash command.
 #
 # No-op (exit 0, prints nothing) if:
@@ -59,7 +59,7 @@ else
   echo "Your \`CLAUDE.md\` is missing the \`## Research stack\` block — \`/todofig\`, \`/sync\`, and the \`verify-citation\` / \`cropfig\` skills need this for paths and parameters."
 fi
 echo ""
-echo "Run \`/setup\` to walk through an interactive interview that populates the missing blocks, scaffolds the per-agent memory directories, and (optionally) initializes \`references.bib\` + \`references.csv\` for \`@literature-curator\`."
+echo "Run \`/omcr-setup\` to walk through an interactive interview that populates the missing blocks, scaffolds the per-agent memory directories, and (optionally) initializes \`references.bib\` + \`references.csv\` for \`@literature-curator\`."
 echo ""
 echo "To suppress this nudge: \`export CLAUDE_RESEARCH_DISABLE_SETUP_NUDGE=1\`."
 

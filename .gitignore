@@ -1,5 +1,7 @@
 *.log
 .DS_Store
+__pycache__/
+*.pyc
 
 # .claude/ ships per-user Claude Code state, including agent-memory/ and
 # scrub-patterns.txt — both of which can contain actual PII (advisor names,

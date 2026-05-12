@@ -6,8 +6,8 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 v0.1.x of a Claude Code plugin that ships:
 - 6 research-team agents (`agents/`)
-- 3 parameterized slash commands (`commands/`)
-- 2 skills (`skills/cropfig/`, `skills/verify-citation/`)
+- 4 parameterized slash commands (`commands/`)
+- 5 skills (`skills/omcr-setup/`, `skills/start-research/`, `skills/cropfig/`, `skills/verify-citation/`, `skills/manuscript-scaffold/`)
 - 4 lightweight hooks (`hooks/`)
 - a canonical memory schema (`templates/MEMORY.template.md`)
 - the plugin manifest (`.claude-plugin/plugin.json`)
@@ -52,14 +52,40 @@ oh-my-claudecode-research/
 │   ├── figure-descriptor.md
 │   ├── reviewer.md
 │   └── literature-curator.md         # bibliography curator + BibTeX/summary-table owner
-├── commands/                         # 3 parameterized slash commands
-│   ├── setup.md                      # /setup — first-run interview + agent-memory scaffolding
+├── commands/                         # 4 parameterized slash commands (thin dispatchers)
+│   ├── omcr-setup.md                 # /omcr-setup — install OMCR infra (CLAUDE.md markers, agent-memory, bib, permissions). No interview.
+│   ├── start-research.md             # /start-research — interview-driven first-project init (fills CLAUDE.md, manuscript scaffold)
 │   ├── todofig.md                    # /todofig — deck-vs-outline gap analyzer
 │   └── sync.md                       # /sync — state reconciler + optional figure embed
 ├── skills/
 │   ├── cropfig/                      # generic figure-only crop (env-var + CLAUDE.md driven)
 │   │   ├── SKILL.md
 │   │   └── crop_top_label.py
+│   ├── manuscript-scaffold/          # state check / journal lookup / skeleton / commit-push — phase-split; called by /start-research phase 5, also standalone
+│   │   ├── SKILL.md
+│   │   └── phases/
+│   │       ├── 01-state-check.md
+│   │       ├── 02-journal-template.md
+│   │       ├── 03-skeleton.md
+│   │       └── 04-commit-push.md
+│   ├── omcr-setup/                   # /omcr-setup — install-style OMCR infra. 6 phases: state / CLAUDE.md scaffold / agent-memory / bib / permissions / report. No interview.
+│   │   ├── SKILL.md
+│   │   └── phases/
+│   │       ├── 01-state-check.md
+│   │       ├── 02-claude-md-scaffold.md
+│   │       ├── 03-agent-memory.md
+│   │       ├── 04-bibliography.md
+│   │       ├── 05-permissions.md
+│   │       └── 06-report.md
+│   ├── start-research/               # /start-research — interview-driven init. 6 phases: precheck / interview / fill CLAUDE.md / preset overlay / manuscript / report
+│   │   ├── SKILL.md
+│   │   └── phases/
+│   │       ├── 01-precheck.md
+│   │       ├── 02-interview.md
+│   │       ├── 03-fill-claude-md.md
+│   │       ├── 04-preset-overlay.md
+│   │       ├── 05-manuscript-scaffold.md
+│   │       └── 06-report.md
 │   └── verify-citation/              # CrossRef/OpenAlex existence + metadata check; updates summary CSV
 │       ├── SKILL.md
 │       └── verify_citation.py
@@ -79,8 +105,8 @@ oh-my-claudecode-research/
 ├── templates/
 │   ├── MEMORY.template.md            # canonical empty MEMORY.md schema
 │   ├── journal-registry.json         # venue → CTAN class lookup (27 entries; CTAN packages only, no bundled .cls)
-│   └── manuscript-skeleton/          # default LaTeX scaffold copied by /setup into the user's Manuscript dir
-│       ├── main.tex                  # documentclass possibly rewritten by /setup per journal-registry
+│   └── manuscript-skeleton/          # default LaTeX scaffold copied by /start-research (via manuscript-scaffold skill) into the user's Manuscript dir
+│       ├── main.tex                  # documentclass possibly rewritten by manuscript-scaffold per journal-registry
 │       ├── sections/{abstract,introduction,methods,results,discussion}.tex
 │       ├── figures/.gitkeep
 │       ├── references.bib            # empty; managed by @literature-curator post-setup
@@ -128,14 +154,14 @@ When editing agents, link to the template file via a relative path so users disc
 
 The plugin manifest (`.claude-plugin/plugin.json`) declares four registries:
 - `agents: ./agents/` — 6 `@`-mentionable agents
-- `commands: ./commands/` — 3 slash commands (`/setup` for first-run init; `/todofig` and `/sync` resolved against the user's `## Research stack` block)
-- `skills: ./skills/` — 2 invocable skills (`cropfig`, `verify-citation`)
+- `commands: ./commands/` — 4 slash commands (`/omcr-setup` installs OMCR infrastructure; `/start-research` runs the interview-driven first-project init; `/todofig` and `/sync` resolved against the user's `## Research stack` block)
+- `skills: ./skills/` — 5 invocable skills (`omcr-setup`, `start-research`, `cropfig`, `verify-citation`, `manuscript-scaffold`)
 - `hooks: ./hooks/hooks.json` — 4 lifecycle hooks
 
 The 4 hooks wire to Claude Code events:
 - `PreToolUse:Write|Edit` → `pii-scrub.sh` — blocks writes containing matched PII patterns.
 - `SessionStart` → `memory-load.sh` — concatenates `.claude/agent-memory/*/MEMORY.md` into session context.
-- `SessionStart` → `setup-nudge.sh` — non-blocking one-line nudge if `CLAUDE.md` lacks the `## Project context` or `## Research stack` blocks.
+- `SessionStart` → `setup-nudge.sh` — non-blocking one-line nudge if `CLAUDE.md` lacks the `## Project context` or `## Research stack` blocks (suggests `/omcr-setup`, then `/start-research`).
 - `PostToolUse:Write|Edit` → `citation-warn.sh` — heuristic warning for manuscript markdown with uncited paragraphs.
 
 All four honor `CLAUDE_RESEARCH_DISABLE_<NAME>=1` env vars for per-project disabling. See [`hooks/README.md`](hooks/README.md) for the full configuration guide and how to extend.

@@ -4,7 +4,7 @@
     "verified_on": "2026-05-11",
     "disclaimer": "Best-effort mapping from common venue names to publicly-distributed LaTeX classes. OMCR ships POINTERS only (CTAN package names + documentclass options) — never bundles the .cls files themselves. The submission guidelines and class internals are owned by each publisher and can change without notice. ALWAYS confirm against the current author guidelines URL before submission.",
     "license_note": "This registry is part of oh-my-claudecode-research (MIT). Each referenced LaTeX class is independently distributed by its respective maintainer on CTAN under that maintainer's license (typically LPPL). OMCR does not redistribute any class files.",
-    "matching_policy": "Exact match against the venue name OR any of its aliases (case-insensitive). No fuzzy match. User confirmation required before /setup writes anything based on a lookup.",
+    "matching_policy": "Exact match against the venue name OR any of its aliases (case-insensitive). No fuzzy match. User confirmation required before /start-research (via the manuscript-scaffold skill) writes anything based on a lookup.",
     "out_of_scope": "Venues whose classes are not on CTAN (NeurIPS / ICML / CVPR / PNAS / eLife / Frontiers / PLOS / etc.) are deliberately omitted from this MVP. Users targeting those should download the class file from the publisher and place it in the manuscript dir manually."
   },
   "venues": {

@@ -17,22 +17,21 @@ Read the project's `CLAUDE.md` for a `## Research stack` section. Required field
 
 | Field | Purpose |
 |---|---|
-| `deck_export_dir` | Directory of captured figure PNGs (current state) |
-| `outline_file` | Canonical outline file (final goal) |
-| `figure_count` | Total figures expected |
-| `report_lang` | Output language |
-| `sync_report_dir` | Directory to save sync reports |
+| `Deck file` | Path to the `.key` / `.pptx` deck (current state derives from this) |
+| `Outline file` | Canonical outline file (final goal) |
+| `Figure count` | Total figures expected |
+| `Report language` | Output language |
+| `Sync report dir` | Directory to save sync reports |
 
-Optional fields (enable specific phases):
+Optional fields:
 
-| Field | Enables | Default |
+| Field | Default | Purpose |
 |---|---|---|
-| `deck_export_script` | Phase 1.1 (idempotent re-export) | not set → skip |
-| `tight_crop_dir` | Phase 4 (figure-only embeds) | `figures/tight/` |
-| `embed_target` | Phase 4 (embed cropped figures into a docx / md) | not set → skip Phase 4 |
-| `slide_to_figure_offset` | Slide-index → figure-number mapping | `0` (slide 1 = figure 1) |
+| `Figure PNG dir` | `<dirname(Deck file)>/png/` | Cropped per-slide raster PNGs. `/sync` reads these to assess current figure state. Populated by the `cropfig` skill. |
 
-If a required field is missing, ask the user once and offer to persist to the `## Research stack` section of `CLAUDE.md`. See `/todofig`'s Step 0 for the canonical block format.
+If a required field is missing, ask the user once and offer to persist to the `## Research stack` section of `CLAUDE.md`. See [`wiki/Configuration.md`](../wiki/Configuration.md) for the canonical block format.
+
+Figure refresh and outline embedding are owned by the `cropfig` skill (`export_deck.py` + `crop_figures.py` + `upload_figures.py`), not by `/sync`. Run `cropfig` separately when you need to refresh the deck.
 
 ---
 
@@ -40,39 +39,31 @@ If a required field is missing, ask the user once and offer to persist to the `#
 
 | Question | Ground truth |
 |---|---|
-| What exists right now? | Captured PNGs in `deck_export_dir` (via `deck_export_script` if set) |
-| Where are we heading? | `outline_file` |
+| What exists right now? | Cropped PNGs in `Figure PNG dir` (produced by `cropfig`) |
+| Where are we heading? | `Outline file` |
 | What has been done and decided? | Agent memories under `.claude/agent-memory/<agent>/MEMORY.md` |
 
 When sources disagree:
-- Agent memory vs. captured PNG → trust the PNG (current state); update the memory.
+- Agent memory vs. cropped PNG → trust the PNG (current state); update the memory.
 - Agent memory vs. outline → update the memory; flag the drift.
-- Outline vs. captured PNG → note the gap; defer to `/todofig`.
+- Outline vs. cropped PNG → note the gap; defer to `/todofig`.
 - Agent memory references stale paths or filenames → normalize.
 
 ---
 
 ## Phase 1 — Read everything
 
-### 1.1 Export the latest deck (if `deck_export_script` set)
+### 1.1 Read the outline
 
-```bash
-${deck_export_script}
-```
+Read `Outline file` in full. For each result/figure block, extract: figure number, panel list, key message, control conditions, method constraints. Use the project's `Result pattern` from `/todofig`'s config if defined; otherwise default to `^### Result (\d+)`.
 
-Idempotent. Note how many slides were exported (or "skipped — up to date").
+### 1.2 Read the current state
 
-**Guard:** if the script is missing or returns non-zero (headless environment, permission denied, missing tool), continue with outline-only analysis. State clearly in the report that figure snapshots are unavailable. Do not fail the whole sync.
+Read PNGs in `Figure PNG dir` (filename order: `figure01.png`, `figure02.png`, …). Each `figureNN.png` corresponds 1-to-1 with the figure block numbered `N` in the outline. Determine which panels actually exist, which are placeholders, and which conditions are shown.
 
-### 1.2 Read the outline
+**Guard:** if `Figure PNG dir` is missing or empty (`cropfig` hasn't run yet, or the deck hasn't been re-exported since the last memory sync), continue with outline-only analysis and state clearly in the report that figure snapshots are unavailable.
 
-Read `outline_file` in full. For each result/figure block, extract: figure number, panel list, key message, control conditions, method constraints. Use the project's `result_pattern` from `/todofig`'s config if defined; otherwise default to `^### Result (\d+)` or `^### Fig(?:ure)? (\d+)`.
-
-### 1.3 Read the current state
-
-Read PNGs in `deck_export_dir` (filename order). Determine which panels actually exist, which are placeholders, and which conditions are shown.
-
-### 1.4 Read agent memories
+### 1.3 Read agent memories
 
 For each agent under `.claude/agent-memory/`:
 - `supervisor/MEMORY.md`
@@ -123,80 +114,37 @@ If `supervisor/MEMORY.md` flags specific contrasts as non-significant (overclaim
 
 ---
 
-## Phase 4 — Embed cropped figures into `embed_target` (if configured)
+## Phase 4 — (figure embedding moved to `cropfig`)
 
-Goal: at each result/figure heading in `embed_target`, embed the **figure-only** PNG (no top label, no caption) for the corresponding figure, replacing any previously sync-embedded image block. Keeps the user's editable working copy visually in sync with the captured deck. The prose inside `embed_target` is **never** touched.
+Figure refreshing (deck → per-slide PDF → cropped PDF + low-DPI PNG) and outline embedding (`![Figure N](figures/figureNN.png)` after each result heading) are now owned by the `cropfig` skill, not `/sync`. To refresh figures alongside `/sync`:
 
-This phase is **only** active when `embed_target` is configured. Otherwise, skip silently.
-
-### Step 4.0 — Produce figure-only PNGs via the `cropfig` skill
-
-Invoke the `cropfig` skill (`Skill` tool with `skill="cropfig"`). It refreshes the source PNGs (idempotent), strips the top "Figure N. Title" label, tight-bbox crops each slide, and writes to `tight_crop_dir`.
-
-If cropfig fails (export unavailable, headless, PIL missing), skip Phase 4 entirely and flag in the report — do **not** fall back to embedding the captioned source PNGs (that would duplicate caption text inside the document).
-
-### Step 4.1 — Prerequisites check
-
-- `tight_crop_dir` must contain PNGs after Step 4.0. If empty, skip + flag.
-- `embed_target` must not be locked by another process. For `.docx`, check `~$<filename>` lock file (`ls "$(dirname embed_target)/~\$(basename embed_target)" 2>/dev/null`). If locked, skip + surface "Close `embed_target` and rerun /sync".
-- For `.docx` targets: `python-docx` must be importable (`python3 -c "import docx"`). If missing, skip + flag; do not auto-install.
-- For `.md` targets: standard markdown image insertion — no extra dependency.
-
-### Step 4.2 — Result → figure → slide mapping
-
-For each result block in `outline_file`, parse the captured figure identifier. Map figure → slide using:
-
-```
-slide_index = figure_number + slide_to_figure_offset
-source_png  = ${tight_crop_dir}/<sorted_filename_at_slide_index>
+```bash
+DECK_FILE=<path> python3 "$CLAUDE_PLUGIN_ROOT"/skills/cropfig/export_deck.py   "$DECK_FILE" "$STAGE"
+DECK_FILE=<path> python3 "$CLAUDE_PLUGIN_ROOT"/skills/cropfig/crop_figures.py  "$STAGE"
+DECK_FILE=<path> python3 "$CLAUDE_PLUGIN_ROOT"/skills/cropfig/upload_figures.py
 ```
 
-If a slide PNG is missing for a figure, skip that one embed and note it in the report.
-
-### Step 4.3 — Embed (idempotent via sentinel)
-
-Author a single-use script (do not commit it; run inline). For `.docx` use `python-docx`; for `.md` use plain text manipulation. Pattern:
-
-1. Load `embed_target`.
-2. Iterate sections / paragraphs. For each result/figure heading, record its position and the captured figure number.
-3. For each matched heading, in order:
-   a. Scan forward (until next heading) and **delete** any block bracketed by `<<sync-embedded-figure:N>>` sentinels. This removes stale embeds.
-   b. Insert a new sentinel block: `<<sync-embedded-figure:N>>` paragraph, then the picture from `source_png`, then `<</sync-embedded-figure:N>>` paragraph.
-4. Save back to `embed_target`.
-
-Idempotency is enforced by the sentinels: re-running `/sync` always rewrites sync-owned blocks and never touches anything else.
-
-### Failure modes (all → skip + surface in "Manual review needed")
-
-- No PNGs in `deck_export_dir` (Phase 1.1 failed and dir was empty).
-- `cropfig` skill failed → skip Phase 4 entirely; do not fall back to captioned PNGs.
-- `embed_target` locked by another process.
-- Required library missing (e.g., `python-docx` for `.docx`).
-- Script exception: report the exception verbatim; do not attempt heuristic retries.
+Or invoke the `cropfig` skill directly. `/sync` should not duplicate this work — if the outline appears out of date and `cropfig` has not been run, surface that as a "Manual review needed" item rather than running embed logic inside `/sync`.
 
 ---
 
 ## Phase 5 — Report
 
-Deliver in `report_lang` with this structure. Keep figure / panel / condition identifiers in English regardless of `report_lang`.
+Deliver in `Report language` with this structure. Keep figure / panel / condition identifiers in English regardless of `Report language`.
 
 ```
 ## Sync Report — YYYY-MM-DD
 
 ### Current state
-- Deck source: ${deck_export_dir}
-- Latest export: [N slides / skipped — up to date / unavailable: <reason>]
+- Figure source: ${Figure PNG dir}
+- Snapshot status: [N figures / unavailable: <reason — cropfig not run yet, etc.>]
 - Per-figure summary: [one-line status across all figures]
 
-### Goal alignment (vs. ${outline_file})
+### Goal alignment (vs. ${Outline file})
 - ✅ Completed: [figure list]
 - 🟡 In progress: [figure + one-sentence gap]
 - ⬜ Not started: [figure list]
 - 🚧 Blocked: [figure + what blocks it]
-
-### Embed updates (if embed_target configured)
-- Refreshed: [figures whose embeds were updated]
-- Skipped: [reasons — locked / missing PNG / lib missing]
 
 ### Agent memory updates
 - supervisor: [one-line summary or "no change"]
@@ -219,7 +167,7 @@ Deliver in `report_lang` with this structure. Keep figure / panel / condition id
 
 ## Phase 6 — Persist
 
-Save the full report to `${sync_report_dir}/sync_YYYY-MM-DD.md`. Create the directory if missing (`mkdir -p`). Do **not** overwrite any human-maintained TODO file.
+Save the full report to `${Sync report dir}/sync_YYYY-MM-DD.md`. Create the directory if missing (`mkdir -p`). Do **not** overwrite any human-maintained TODO file.
 
 Optionally update `.claude/agent-memory/sync-coordinator/MEMORY.md` (if the project tracks a sync coordinator memory) with:
 - Sync date
@@ -232,8 +180,6 @@ Optionally update `.claude/agent-memory/sync-coordinator/MEMORY.md` (if the proj
 ## Argument handling
 
 - `/sync memory-heavy` → spend extra effort on Phase 2 (deep memory reconciliation).
-- `/sync outline just changed` → re-parse `outline_file` carefully; aggressively update memories that reference old terminology.
-- `/sync figures only` → skip Phase 2; still run Phase 4 (embeds) and Phase 5 (status).
-- `/sync no-embed` → skip Phase 4 even if `embed_target` is configured.
-- `/sync embed only` → run Phase 1.1 + Phase 4 only (refresh embeds, no memory work, no full report).
-- (empty) → default full pass (Phase 1 → 6).
+- `/sync outline just changed` → re-parse `Outline file` carefully; aggressively update memories that reference old terminology.
+- `/sync status only` → skip Phase 2; produce status snapshot only.
+- (empty) → default full pass (Phase 1 → 6, excluding Phase 4 which now lives in `cropfig`).

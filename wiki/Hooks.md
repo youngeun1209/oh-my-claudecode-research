@@ -95,11 +95,11 @@ echo '{"tool_input":{"file_path":"src/foo.md","content":"long paragraph in src/,
 
 [Source: `hooks/citation-warn.sh`](../hooks/citation-warn.sh)
 
-## `setup-nudge.sh` — prompt `/setup` if the project is uninitialized
+## `setup-nudge.sh` — prompt `/omcr-setup` if the project is uninitialized
 
 **Event:** `SessionStart` (runs once when Claude Code opens a new session, alongside `memory-load.sh`)
 
-**Behavior:** Checks the project root for `CLAUDE.md` and whether it contains the `## Project context` and `## Research stack` blocks. If either is missing, prints a one-line non-blocking nudge suggesting `/setup`. Always exits 0 — never blocks.
+**Behavior:** Checks the project root for `CLAUDE.md` and whether it contains the `## Project context` and `## Research stack` blocks. If either is missing, prints a one-line non-blocking nudge suggesting `/omcr-setup`. Always exits 0 — never blocks.
 
 **No-op when:**
 - The project is fully initialized (both blocks present).
@@ -117,7 +117,7 @@ cd /tmp/empty && bash $PLUGIN_ROOT/hooks/setup-nudge.sh
 cd /your/project && bash $PLUGIN_ROOT/hooks/setup-nudge.sh
 ```
 
-**Why this exists:** The agents and commands all depend on the `## Project context` + `## Research stack` blocks for hypothesis / venue / paths / BibTeX / etc. Without an explicit prompt, a new user could load the plugin, type `@supervisor`, and watch every agent ask the same setup questions session after session. The nudge surfaces `/setup` once per session until the project is initialized — then goes silent.
+**Why this exists:** The agents and commands all depend on the `## Project context` + `## Research stack` blocks for hypothesis / venue / paths / BibTeX / etc. Without an explicit prompt, a new user could load the plugin, type `@supervisor`, and watch every agent ask the same setup questions session after session. The nudge surfaces `/omcr-setup` once per session until the project is initialized — then goes silent.
 
 [Source: `hooks/setup-nudge.sh`](../hooks/setup-nudge.sh)
 

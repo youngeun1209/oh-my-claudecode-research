@@ -108,10 +108,10 @@ Major concerns flow back to supervisor → analysis-implementer or paper-writer 
 ```
 
 Sync:
-- Re-exports figures (if `deck_export_script` configured)
-- Reconciles each agent's MEMORY.md against current deck and outline
+- Reconciles each agent's MEMORY.md against current deck and outline (PNGs in `Figure PNG dir`)
 - Reports drifts (no auto-resolution of judgment calls)
-- Optionally embeds cropped figures into your `embed_target` (.docx or .md)
+
+(Figure refresh and outline embedding now live in the `cropfig` skill — run `cropfig` separately before `/sync` if you need fresh figures.)
 
 Sync is the "save state" command — run before closing the session so the next day picks up where you left off.
 
@@ -174,4 +174,4 @@ If any of these gaps matter to you, install OMC alongside — [With OMC](With-OM
 | Adversarial review | `@reviewer review the [section / Fig N / full draft]` |
 | Compare deck to outline | `/todofig` (full) or `/todofig FigN` (single) |
 | Save state + reconcile memories | `/sync` |
-| Crop captioned figure PNGs to figure-only | `cropfig` skill (invoked by `/sync` Phase 4) |
+| Deck → cropped figures (vector PDF + outline PNG) | `cropfig` skill (invoked manually or by other commands) |

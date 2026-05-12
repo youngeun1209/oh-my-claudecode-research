@@ -21,34 +21,29 @@ Add a `## Research stack` section to your project's `CLAUDE.md`. The slash comma
 - **Outline file:** outline.md
 - **Figure count:** 8
 - **Result pattern:** `^### Result (\d+)`
-- **Slide → figure offset:** 0
 - **Report language:** English
 - **Report output dir:** ./todofig_reports/
 - **Sync report dir:** ./sync_reports/
-- **Embed target:** outline.docx  (optional — for /sync Phase 4)
 ```
 
 ### Field reference
 
 | Field | Used by | Type | Default | Purpose |
 |---|---|---|---|---|
-| `Deck file` | `cropfig` Step 1 | path | (optional) | Path to a `.key` or `.pptx` deck. When set, `cropfig` runs `export_deck.py` to populate `Deck export dir` before cropping. Wins over `Deck export script` if both are set. |
-| `Deck export dir` | `/todofig`, `/sync`, `cropfig` | path | `figures/captured/` | Captured figure PNGs (input). Either produced by Step 1 (from `Deck file` / `Deck export script`) or written by your own slide-export pipeline. Read-only during the crop step. |
-| `Tight-crop output dir` | `cropfig`, `/sync` Phase 4 | path | `figures/tight/` | Header-stripped figure-only PNGs. Owned by `cropfig`; rewritten each invocation. |
-| `Outline file` | `/todofig`, `/sync` | path | (required) | Markdown outline describing intended figure contents. |
+| `Deck file` | `cropfig`, `/sync`, `/todofig` | path | (required by `cropfig`) | Path to a `.key` or `.pptx` deck. `cropfig` exports it to per-slide vector PDFs and crops them; `/sync` and `/todofig` derive the PNG dir from it. |
+| `Figure PDF dir` | `cropfig` func 3 | path | `<dirname(Deck file)>/pdf/` | Cropped per-slide vector PDFs (manuscript artifact). Default derived from `Deck file` — outputs land next to the deck. |
+| `Figure PNG dir` | `cropfig` func 3, `/sync`, `/todofig` | path | `<dirname(Deck file)>/png/` | Cropped per-slide raster PNGs (outline artifact). Default derived from `Deck file`. `/sync` and `/todofig` inspect these to assess current figure state. |
+| `Outline file` | `/todofig`, `/sync`, `cropfig` func 3 | path | `outline.md` | Markdown outline describing intended figure contents. `cropfig` func 3 inserts `![Figure N](figures/figureNN.png)` after each result heading. |
 | `Figure count` | `/todofig`, `/sync` | integer | (required) | Total figures expected in the project. Used for the status table loop. |
-| `Result pattern` | `/todofig`, `/sync` | regex | `^### Result (\d+)` | Pattern used to find result/figure blocks in the outline. Capture group → figure identifier. |
-| `Slide → figure offset` | `/todofig`, `/sync` Phase 4 | integer | `0` | Slide-index minus figure-number. Set to `1` if slide 1 is a conceptual schematic and slide 2 = Fig 1. |
+| `Result pattern` | `/todofig`, `/sync`, `cropfig` func 3 | regex | `^### Result (\d+)` | Pattern used to find result/figure blocks in the outline. Capture group → figure number (1-indexed). |
 | `Report language` | `/todofig`, `/sync` | string | `English` | Output language for the human-readable report. Manuscript content always stays English. |
 | `Report output dir` | `/todofig` | path | `./todofig_reports/` | Where `/todofig` saves its dated TODO report. |
 | `Sync report dir` | `/sync` | path | `./sync_reports/` | Where `/sync` saves its dated status snapshot. |
-| `Deck export script` | `/todofig`, `/sync`, `cropfig` | shell command | (optional) | Idempotent command to refresh `Deck export dir`. Used only when `Deck file` is unset; skipped if neither is set. |
-| `Embed target` | `/sync` Phase 4 | path | (optional) | Document (`.docx` / `.md`) into which cropped figures are embedded at each result heading. Phase 4 skipped if not set. |
-| `Manuscript dir` | `/setup`, `@paper-writer` | path | `paper/` | Directory holding the LaTeX manuscript (`main.tex`, `sections/`, `references.bib`, `figures/`). Initialized by `/setup` from [`templates/manuscript-skeleton/`](../templates/manuscript-skeleton/). |
+| `Manuscript dir` | `/start-research`, `@paper-writer` | path | `paper/` | Directory holding the LaTeX manuscript (`main.tex`, `sections/`, `references.bib`, `figures/`). Initialized by `/start-research` (via the `manuscript-scaffold` skill) from [`templates/manuscript-skeleton/`](../templates/manuscript-skeleton/). |
 | `BibTeX file` | `@literature-curator`, `verify-citation` | path | `<Manuscript dir>/references.bib` | Canonical BibTeX file. Defaults inside the manuscript dir so it gets pushed to Overleaf when configured. |
 | `Summary file` | `@literature-curator`, `verify-citation` | path | `references.csv` (project root) | Human-readable literature summary table. Lives **outside** the manuscript dir on purpose — it's project metadata, not part of the paper. |
 | `CrossRef email` | `verify-citation` | email | (optional) | Polite-pool identifier for CrossRef. Recommended — higher rate limit and priority on the public API. Not used to send any mail. |
-| `Overleaf git URL` | `/setup` | URL | (optional) | If set, `/setup` clones the Overleaf project into `Manuscript dir` and scaffolds the skeleton there. Requires Overleaf paid plan with Git Integration. Authentication token is cached only in git's credential helper or `~/.netrc` — never written to CLAUDE.md or any tracked file. |
+| `Overleaf git URL` | `/start-research` | URL | (optional) | If set, `/start-research` (via the `manuscript-scaffold` skill) clones the Overleaf project into `Manuscript dir` and scaffolds the skeleton there. Requires Overleaf paid plan with Git Integration. Authentication token is cached only in git's credential helper or `~/.netrc` — never written to CLAUDE.md or any tracked file. |
 
 ### First-run wizard
 
@@ -67,10 +62,12 @@ Use environment variables to override layer 2 for a single invocation or to pass
 
 | Variable | Used by | Maps to layer 2 field |
 |---|---|---|
-| `DECK_FILE` | `cropfig` | `Deck file` |
-| `FIGURES_SRC` | `cropfig` | `Deck export dir` |
-| `FIGURES_DST` | `cropfig` | `Tight-crop output dir` |
-| `EXPORT_SCRIPT` | `cropfig` | `Deck export script` |
+| `DECK_FILE` | `cropfig` (all 3 funcs) | `Deck file` |
+| `MANUSCRIPT_DIR` | `cropfig` func 3 | `Manuscript dir` |
+| `OUTLINE_FILE` | `cropfig` func 3 | `Outline file` |
+| `RESULT_PATTERN` | `cropfig` func 3 | `Result pattern` |
+| `CROPFIG_PROBE_DPI` | `cropfig` func 2 | (no layer-2 field; tunable knob) |
+| `CROPFIG_PNG_DPI` | `cropfig` func 2 | (no layer-2 field; tunable knob) |
 | `CLAUDE_RESEARCH_DISABLE_PII_SCRUB` | `pii-scrub` hook | (n/a — disables) |
 | `CLAUDE_RESEARCH_DISABLE_MEMORY_LOAD` | `memory-load` hook | (n/a — disables) |
 | `CLAUDE_RESEARCH_DISABLE_CITATION_WARN` | `citation-warn` hook | (n/a — disables) |
@@ -83,13 +80,13 @@ Example `.claude/settings.json` snippet:
 {
   "env": {
     "DECK_FILE": "decks/main.key",
-    "FIGURES_SRC": "results/figures_v3/captured/",
-    "FIGURES_DST": "results/figures_v3/tight/"
+    "MANUSCRIPT_DIR": "paper",
+    "OUTLINE_FILE": "outline.md"
   }
 }
 ```
 
-Set `DECK_FILE` to a `.key` or `.pptx` path and `cropfig` will run `export_deck.py` automatically; omit it and set `EXPORT_SCRIPT` instead if you already have your own export pipeline.
+`DECK_FILE` is the only field `cropfig` strictly needs — the pdf/png output dirs default to `<dirname(DECK_FILE)>/pdf/` and `<dirname(DECK_FILE)>/png/`. `MANUSCRIPT_DIR` and `OUTLINE_FILE` are only consulted by `cropfig` func 3 (upload step).
 
 ## PII scrub patterns
 
@@ -147,7 +144,7 @@ Beyond the `## Research stack` block, your project's `CLAUDE.md` should also hav
 - **Preset overlay:** [neuro-fmri / none]
 ```
 
-Most of these fields are filled by running `/setup` interactively. The command **never invents** scientific identity — if you skip a scientific field, it stores `[TBD: <one-line note>]` so `@supervisor` knows to surface the gap later.
+`/omcr-setup` scaffolds these fields as `[TBD]` placeholders. `/start-research` then interviews you to fill them in. The interview **never invents** scientific identity — if you skip a scientific field, it stores `[TBD: <one-line note>]` so `@supervisor` knows to surface the gap later.
 
 ### Field semantics
 
@@ -169,5 +166,5 @@ The 6 agents are coded to default to English. If you want user-facing reports in
 ## See also
 
 - [Standalone Usage](Standalone-Usage.md) — using OMCR's commands with this config
-- [Commands](Commands.md) — full reference for `/setup`, `/todofig`, `/sync`, plus the `cropfig` + `verify-citation` skills
+- [Commands](Commands.md) — full reference for `/omcr-setup`, `/start-research`, `/todofig`, `/sync`, plus the `cropfig`, `verify-citation`, and `manuscript-scaffold` skills
 - [Hooks](Hooks.md) — full reference for the 4 hooks
