@@ -22,6 +22,7 @@ For each field below, present the default and ask "use this, or override?". If t
 | `Summary file` | `references.csv` (project root — kept OUT of the manuscript dir so it doesn't get pushed to Overleaf) | `## Research stack` |
 | `CrossRef email` | (none) | `## Research stack` (optional — recommend the user provide it for verify-citation polite-pool access) |
 | `Overleaf git URL` | (none) | `## Research stack` (optional — only if user has Overleaf with Git Integration enabled, which requires a paid plan) |
+| `Data root` | `./data/` | `## Research stack` (used by `/figure-bake` to resolve figure data paths) |
 | `User-dialog language` | `English` | `## Language preference` (optional) |
 | `Manuscript language` | `English` (do not let the user change this — keep manuscripts in English for venue compatibility) | `## Language preference` |
 

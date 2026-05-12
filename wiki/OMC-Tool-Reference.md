@@ -150,3 +150,102 @@ In OMCR v0.2 (per the project's v0.2 backlog), agents may be retrofitted to use 
 | Recall a decision from a prior session | `session_search` |
 | Inspect a causal-tracing run's evidence chain | `trace_timeline` |
 | Rename a function across the analysis pipeline | `lsp_rename` or `ast_grep_replace` |
+
+## OMC tools that compose with each OMCR engine
+
+The mapping above is **OMC tool → research stage**. This section is the **inverse map**: per OMCR engine, which OMC skills, agents, and MCP tools compose well with it? Use this when you have already picked an OMCR engine and want to know "what OMC piece can I wrap around it / call before it / call after it?"
+
+This is a curated, opinionated list — not every OMC piece is mentioned. For the full catalog of OMC skills (`ralph`, `team`, `autopilot`, `ultrawork`, `ultraqa`, `ralplan`, `deep-interview`, `autoresearch`, `verifier`, `tracer`, `document-specialist`, …), see [upstream OMC docs](https://github.com/Yeachan-Heo/oh-my-claudecode). For worked recipes that turn these compositions into copy-pasteable commands, see [With-OMC § Recipes](With-OMC.md#recipes--pairing-omcr-engines-with-omc-orchestrators-v04).
+
+### `/iterate-revision` (OMCR engine)
+
+Single-section revise-to-ready engine. Loops `@paper-writer` ↔ `@reviewer` until DONE / BLOCKED / HALT. Composes well with:
+
+| OMC piece | Composition role | Why |
+|---|---|---|
+| `/oh-my-claudecode:ralph` | outer retry loop | Wrap `/iterate-revision` to retry until an independent verifier (not OMCR's `@reviewer`) confirms DONE. See [With-OMC Recipe 1](With-OMC.md#recipe-1--iterate-revision-wrapped-in-ralph-for-verifier-gated-revision). |
+| `/oh-my-claudecode:ultraqa` | strategy explorer | Try N revision styles (concise / detailed / narrative) in parallel; pick best by reviewer rating. See [With-OMC Recipe 3](With-OMC.md#recipe-3--multi-style-revision-via-ultraqa). |
+| `@oh-my-claudecode:verifier` | post-loop audit | One-shot cross-check after DONE: does the central claim hold against methods + results? See [With-OMC Recipe 5](With-OMC.md#recipe-5--cross-checking-a-critical-claim-with-verifier). |
+| `@oh-my-claudecode:tracer` | debug instrumentation | When the loop keeps returning HALT, instrument the next run for per-phase timing + dispatched task-brief diffs. |
+| `wiki_query` / `wiki_add` | context lookup | If `@literature-curator`'s MEMORY.md is sparse, the writer / reviewer can pull anchor citations from OMC's wiki during a revision iter. |
+| `python_repl` | inline numerical check | When the reviewer flags a results table, an in-loop `python_repl` call can confirm / refute the number before the next iter. |
+
+### `/literature-sweep` (OMCR engine)
+
+Topic-to-bibliography engine. Dispatches `@literature-curator` over CrossRef/OpenAlex candidates, hard-gates every survivor through `verify-citation`, writes to `references.bib` + summary CSV. Composes with:
+
+| OMC piece | Composition role | Why |
+|---|---|---|
+| `omc team N:literature-curator` | cross-session parallelism | When you need 50+ papers / week-long sweeps, OMC's tmux-backed team survives session restarts. OMCR's `--parallel 4` cap is in-session only. See [With-OMC Recipe 2](With-OMC.md#recipe-2--distributed-literature-sweep-via-omc-team-tmux-survives-session-restart). |
+| `wiki_ingest` | external import | Bulk-import an existing BibTeX / RIS export into OMC's queryable wiki before sweeping; lets `@literature-curator` deduplicate against prior project work. |
+| `wiki_add` | post-sweep registration | After `/literature-sweep` writes to `references.bib`, mirror the same entries into OMC's wiki via `wiki_add` for cross-project reuse. |
+| `wiki_lint` | pre-submission QC | After all sweeps complete, `wiki_lint` validates the final entry shape (DOI present, year sane, no fabricated fields). |
+| `@oh-my-claudecode:document-specialist` | deep-read pass | OMCR's curator extracts abstract-level metadata. For 5–10 anchor papers you actually want a deep read on, hand them to OMC's heavier-weight specialist. |
+
+### `/respond-reviewer` (OMCR engine)
+
+Reviewer-letter rebuttal engine. Classifies each comment, dispatches per-comment to the right specialist, assembles `rebuttal-letter.tex`. Composes with:
+
+| OMC piece | Composition role | Why |
+|---|---|---|
+| `/oh-my-claudecode:ralph` | retry-until-no-overclaim | Wrap to retry until `@verifier` confirms the rebuttal claims actually match the manuscript changes. |
+| `@oh-my-claudecode:verifier` | per-claim audit | OMCR's supervisor flags weak / disputed responses in phase 05, but doesn't independently audit the claim chain. `@verifier` can read the rebuttal letter + the cited manuscript sections and flag mismatches. |
+| `/oh-my-claudecode:ralplan` | structural-comment replan | When the engine surfaces `structural` comments to user attention (the ethical gate), use `ralplan` for consensus-replanning the scope decision before manually answering. |
+| `state_write` / `state_read` | per-letter audit trail | Log each rebuttal run as a structured experiment record alongside OMCR's own `rebuttals.json`. |
+| `wiki_query` | citation-comment lookup | When a comment requests a missing reference, `wiki_query` checks if OMC's wiki already has it before dispatching `@literature-curator`. |
+
+### `/figure-bake` (OMCR engine)
+
+Single-figure design-to-PDF engine. 3-agent loop: `@figure-descriptor` → `@analysis-implementer` → `@reviewer`, with `cropfig` invoked per iter. Composes with:
+
+| OMC piece | Composition role | Why |
+|---|---|---|
+| `/oh-my-claudecode:ultrawork` | parallel figure backlog | When `/todofig` reports 5+ figures missing or stale, fan out across them with `/ultrawork` calling `/figure-bake` per id. |
+| `/oh-my-claudecode:ralph` | iterate until reviewer DONE | Wrap a single figure-bake to retry until the figure passes both OMCR's reviewer and an independent verifier on the rendered PNG. |
+| `python_repl` | inline render debug | When the implementer's matplotlib code errors, `python_repl` keeps the session state alive so the next iter can resume without re-loading the dataset. |
+| `@oh-my-claudecode:tracer` | render-pipeline debug | When `/figure-bake` returns BLOCKED on a Python traceback, `@tracer` instruments the next implementer dispatch for evidence-driven debugging. |
+| `@oh-my-claudecode:scientist` | stats correctness | If the figure is a statistical plot (effect-size forest plot, CI ribbon, etc.), `@scientist` audits the math before the renderer hits the data. |
+
+### `/outline-expand` (OMCR engine)
+
+Map-reduce first-draft engine. One `@paper-writer` per section, fanned out in a single Agent-tool message, with shared `nomenclature.md` payload. Composes with:
+
+| OMC piece | Composition role | Why |
+|---|---|---|
+| `/oh-my-claudecode:team` | cross-process parallelism | When the manuscript has 8+ sections and a single in-session parallel dispatch is too heavy, `omc team N:paper-writer` shards across tmux panes. |
+| `/oh-my-claudecode:ultraqa` | per-section strategy explore | After `/outline-expand` produces first drafts, run `/ultraqa` per section to try N styles before settling. |
+| `wiki_query` | per-section anchor pull | When a section's outline references "the Smith 2023 finding", `@paper-writer` can `wiki_query` it before drafting. |
+| `notepad_write_priority` | hypothesis register | Pre-draft, log the section's argumentative claim to OMC's notepad so all parallel writers reference the same hypothesis. |
+
+### `/supervisor-drive` (OMCR engine)
+
+Autonomous orchestrator. The only OMCR engine allowed to chain other engines; re-evaluates state between every step. 6 safety gates, 8-rule priority ranker. Composes with:
+
+| OMC piece | Composition role | Why |
+|---|---|---|
+| `/oh-my-claudecode:autopilot` | outer budget + decision log | Wrap `/supervisor-drive --auto` in `/autopilot` for budget tracking, structured decision log, and outer-loop recovery from engine exceptions. **The recommended composition for any week-long drive.** See [With-OMC Recipe 4](With-OMC.md#recipe-4--autonomous-paper-drive-with-autopilot-wrapping-supervisor-drive). |
+| `omc team 1:supervisor` | cross-session persistence | When the drive will exceed a single Claude Code session (multi-day autonomous run), wrap `/supervisor-drive --auto` in an `omc team` pane so it survives session restarts. |
+| `/oh-my-claudecode:ralplan` | between-drives consensus replan | After a halt on safety gate 4 (StructuralRewrite), use `ralplan` to consensus-replan the scope decision before resuming. |
+| `@oh-my-claudecode:verifier` | post-drive audit | After `/supervisor-drive` returns `submission_ready = true`, run `@verifier` on the discussion-vs-methods-vs-results chain as a final cross-check before submission. |
+| `@oh-my-claudecode:tracer` | halted-drive diagnosis | When `_run-log.jsonl` shows a halt on a specific engine, `@tracer` reads the run record + the engine's last brief and emits a causal diagnosis. |
+| `state_*` MCP family | drive-event registry | Each safety-gate trip writes a state entry; `state_list_active` shows currently-stuck drives across all projects. |
+
+### Cross-cutting MCP tools (compose with every engine)
+
+Some OMC MCP tools are useful regardless of which OMCR engine you reach for:
+
+| Tool | What it's good for |
+|---|---|
+| `wiki_query` | Pre-flight check: "have we already cited this paper?" — answer before any engine adds a new entry. |
+| `python_repl` | Stateful Python kernel for any engine's analysis check; survives across the engine's iterations within one session. |
+| `lsp_diagnostics_directory` | Run after any engine that touches code (e.g., `/figure-bake`'s implementer phase) to confirm no broken imports landed. |
+| `session_search` | "What did we decide about parameter k two weeks ago?" — recall context any engine's persona might need. |
+| `state_list_active` | Cross-engine audit: which OMCR / OMC modes are currently active across all your projects? |
+| `notepad_write_priority` | Hypothesis register that survives across engines — `/iterate-revision` and `/respond-reviewer` should both reference the same priority hypothesis. |
+
+## See also
+
+- [With OMC](With-OMC.md) — install + 5 worked recipes pairing OMCR engines with OMC orchestrators.
+- [Orchestration Comparison](Orchestration-Comparison.md) — the full task → tool matrix backing these inverse-map entries.
+- [Commands](Commands.md) — OMCR engine command reference.
+- [Autonomous Drive](Autonomous-Drive.md) — `/supervisor-drive` deep dive.

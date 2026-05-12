@@ -4,9 +4,9 @@
 
 _Don't learn paper-writing tooling. Just use OMCR._
 
-OMCR is the research-tailored sibling of [oh-my-claudecode](https://github.com/Yeachan-Heo/oh-my-claudecode). Where OMC orchestrates general code work (`ralph`, `team`, `autopilot`, …), OMCR orchestrates the *paper-writing lifecycle* — hypothesis interview → analysis → figure deck → manuscript → review. Works standalone or with OMC; see [`wiki/With-OMC.md`](wiki/With-OMC.md).
+OMCR is the research-tailored sibling of [oh-my-claudecode](https://github.com/Yeachan-Heo/oh-my-claudecode). Where OMC orchestrates general code work with execution engines (`ralph`, `team`, `autopilot`, `ultraqa`, `ultrawork`), OMCR orchestrates the *paper-writing lifecycle* with **6 domain-specific engines** — `/iterate-revision`, `/literature-sweep`, `/respond-reviewer`, `/figure-bake`, `/outline-expand`, and the autonomous `/supervisor-drive`. Use either alone, or compose them: OMCR engines run inside OMC's generic loops for retries (`/ralph`), parallelism (`/team`, `/ultrawork`), multi-strategy exploration (`/ultraqa`), or budget-tracked drives (`/autopilot`). See [`wiki/Orchestration-Comparison.md`](wiki/Orchestration-Comparison.md) for the full task → tool matrix and [`wiki/With-OMC.md`](wiki/With-OMC.md) for worked recipes.
 
-A 6-agent research team + 4 parameterized commands + 7 skills + 4 lightweight hooks.
+A 6-agent research team + 6 orchestration engines + 4 setup/workflow commands + 14 skills (1 primitive + 13 backing surfaces) + 4 lightweight hooks. Full engine walkthrough: [`wiki/Using-Orchestration.md`](wiki/Using-Orchestration.md).
 
 > **Status: v0.1.** Breaking changes are likely. Feedback and PRs welcome.
 
@@ -34,9 +34,9 @@ A 6-agent research team + 4 parameterized commands + 7 skills + 4 lightweight ho
 | `/todofig [Fig N]` | Compare a captured figure deck against an outline → prioritized P0/P1/P2 TODO. |
 | `/sync` | Reconcile current state (deck) with goal (outline), refresh agent memories, optionally embed cropped figures into a target document. Status snapshot, not a TODO. |
 
-### 7 skills
+### 14 skills
 
-The 4 slash commands are thin dispatchers — each forwards `$ARGUMENTS` to a matching skill. The remaining 3 skills are standalone-invocable.
+The 4 setup/workflow slash commands are thin dispatchers — each forwards `$ARGUMENTS` to a matching skill. `cropfig`, `verify-citation`, `manuscript-scaffold` are standalone-invocable. **Plus** 1 primitive (`orchestrate` — internal, composes via 4 phases) + 6 engine skills backing the 6 orchestration commands; full walkthrough at [`wiki/Using-Orchestration.md`](wiki/Using-Orchestration.md). The table below covers the 7 setup/workflow skills.
 
 | Skill | What it does |
 |---|---|
@@ -78,8 +78,8 @@ git clone https://github.com/youngeun1209/oh-my-claudecode-research \
 
 Then open Claude Code and run `/plugin` to load it. After load (either path):
 - 6 agents appear in the `@`-mention picker
-- `/omcr-setup`, `/start-research`, `/todofig`, `/sync` appear in the slash-command picker
-- 7 skills (`omcr-setup`, `start-research`, `sync`, `todofig`, `cropfig`, `verify-citation`, `manuscript-scaffold`) become invocable
+- 10 slash commands appear in the picker: `/omcr-setup`, `/start-research`, `/todofig`, `/sync` (setup/workflow) + `/iterate-revision`, `/literature-sweep`, `/respond-reviewer`, `/figure-bake`, `/outline-expand`, `/supervisor-drive` (orchestration engines)
+- 14 skills become invocable (7 setup/workflow + 1 primitive `orchestrate` + 6 engine skills)
 - 4 hooks register on session start (PII guard, MEMORY auto-load, citation warning, setup nudge)
 
 **Cherry-pick by file** (no plugin manager — copy agents into a specific project):

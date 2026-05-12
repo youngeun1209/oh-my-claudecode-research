@@ -14,9 +14,10 @@ If you also have OMC installed (or want to install it), see [With OMC](With-OMC.
 
 | Surface | Behavior |
 |---|---|
-| 5 `@`-mentionable agents | Full personas, English-by-default, configurable language |
-| `/todofig` and `/sync` commands | Parameterized via `## Research stack` block in your CLAUDE.md |
-| `cropfig` skill | Tight-crops captioned PNGs (Python + PIL + numpy) |
+| 6 `@`-mentionable agents | Full personas, English-by-default, configurable language |
+| 4 setup/workflow commands (`/omcr-setup`, `/start-research`, `/todofig`, `/sync`) | Parameterized via `## Research stack` block in your CLAUDE.md |
+| **6 orchestration engines** (`/iterate-revision`, `/literature-sweep`, `/respond-reviewer`, `/figure-bake`, `/outline-expand`, `/supervisor-drive`) | Multi-step workflow drivers with `.claude/omcr-state/` persistence — see [Using-Orchestration](Using-Orchestration.md) |
+| `cropfig` + `verify-citation` + `manuscript-scaffold` skills | Figure crop pipeline + citation verification + LaTeX scaffold |
 | 4 hooks | PII guard + MEMORY auto-load + citation warning + setup nudge |
 | `templates/MEMORY.template.md` | Canonical schema for per-agent memory |
 | `examples/neuro-fmri/` | Overlay preset if you do neuroimaging (fMRI / EEG / MEG) work |
@@ -114,6 +115,12 @@ Sync:
 (Figure refresh and outline embedding now live in the `cropfig` skill — run `cropfig` separately before `/sync` if you need fresh figures.)
 
 Sync is the "save state" command — run before closing the session so the next day picks up where you left off.
+
+### Want more automation than @-mention?
+
+The session above stays at **Level 1** (manual `@`-mention dispatching). OMCR also ships 6 **orchestration engines** that automate multi-step workflows (a whole section refinement, a literature scan, a rebuttal letter, etc.) and an **autonomous driver** that picks the right engine based on project state.
+
+See [Using-Orchestration](Using-Orchestration.md) for the Level 2 (engine commands like `/iterate-revision`, `/literature-sweep`) and Level 3 (`/supervisor-drive --auto`) walkthroughs.
 
 ## Memory pattern in practice
 

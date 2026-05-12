@@ -15,3 +15,10 @@ __pycache__/
 /oh-my-claudecode
 /DoD-Agent
 
+# Local design / working docs (orchestration roadmap drafts, RFCs, scratch).
+# Specs migrate to wiki/ + skills/<name>/SKILL.md when implemented.
+# Exception: example-state/ ships canonical state-schema JSON examples as
+# tracked reference material (Phase 0 decision §7 + user ACK).
+/develop/*
+!/develop/example-state/
+

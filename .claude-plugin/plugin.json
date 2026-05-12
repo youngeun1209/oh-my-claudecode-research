@@ -9,6 +9,21 @@
   "keywords": ["claude-code", "plugin", "research", "academic", "agents"],
   "agents": "./agents/",
   "commands": "./commands/",
-  "skills": "./skills/",
+  "skills": [
+    "./skills/orchestrate",
+    "./skills/omcr-setup",
+    "./skills/start-research",
+    "./skills/manuscript-scaffold",
+    "./skills/iterate-revision",
+    "./skills/literature-sweep",
+    "./skills/respond-reviewer",
+    "./skills/figure-bake",
+    "./skills/outline-expand",
+    "./skills/supervisor-drive",
+    "./skills/cropfig",
+    "./skills/verify-citation",
+    "./skills/sync",
+    "./skills/todofig"
+  ],
   "hooks": "./hooks/hooks.json"
 }

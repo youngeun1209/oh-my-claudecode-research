@@ -124,8 +124,29 @@ It also ships redacted memory skeletons for all 6 agents because each agent in a
 
 The pattern transfers to other fields with substitutions: swap "fMRI" for your data modality, swap the attack vectors for the ones reviewers in your field use.
 
+## Engine skill frontmatter (advanced — for engine authors)
+
+If you're authoring a new **orchestration engine** (not a field preset), the SKILL.md frontmatter has two extra conventions beyond `name` / `description`:
+
+- **`writes: [paper, reviews, citations, figures, rebuttals]`** — list which `.claude/omcr-state/` files this engine mutates. Documentation-only; not runtime-enforced. Greppable for audit: `grep "writes:" skills/*/SKILL.md`. (Phase 0 decision §3 of the orchestration design.)
+- **`cost_estimate_tokens: <int>`** — coarse upper-bound token cost for one typical run of this engine. Used by `/supervisor-drive` as the day-one budget estimate before enough `_run-log.jsonl` history exists for a rolling-median estimate. (Phase 3 decision §6 — combined with × 1.25 padding.)
+
+Example from `skills/iterate-revision/SKILL.md`:
+
+```yaml
+---
+name: iterate-revision
+description: Writer ↔ reviewer loop on one manuscript section
+writes: [paper, reviews]
+cost_estimate_tokens: 24000
+---
+```
+
+Engine specifications live in [develop/](../develop/) during design; ship into `skills/<name>/` once locked. See [Orchestration-Model](Orchestration-Model.md) for the 4-primitive composition pattern and [Using-Orchestration](Using-Orchestration.md) for end-user invocation.
+
 ## See also
 
 - [`examples/neuro-fmri/README.md`](../examples/neuro-fmri/README.md) — the canonical worked example
 - [Agents](Agents.md) — the 6 core agents being overlaid
+- [Orchestration-Model](Orchestration-Model.md) — engine composition pattern + state conventions
 - [CONTRIBUTING](../CONTRIBUTING.md) — full contribution contract (frontmatter / MEMORY schema / PII / commits)

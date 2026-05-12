@@ -37,7 +37,7 @@ For full feature parity, use Option A.
 In a Claude Code session, type `@` and check the autocomplete picker for 6 agents:
 `@supervisor`, `@analysis-implementer`, `@paper-writer`, `@figure-descriptor`, `@reviewer`, `@literature-curator`.
 
-The slash-command picker should show `/omcr-setup`, `/start-research`, `/todofig`, `/sync`.
+The slash-command picker should show 10 commands: `/omcr-setup`, `/start-research`, `/todofig`, `/sync` (setup/workflow) plus 6 orchestration engines (`/iterate-revision`, `/literature-sweep`, `/respond-reviewer`, `/figure-bake`, `/outline-expand`, `/supervisor-drive`).
 
 If they appear, install succeeded.
 
@@ -125,6 +125,8 @@ Then drill into a specific task:
 ```
 
 The five "doer" subagents report back to `@supervisor`, who decides when to advance and when to loop back.
+
+Once you're comfortable with `@`-mention dispatching, the next step is **engine-based orchestration** — letting `/iterate-revision`, `/literature-sweep`, `/figure-bake`, etc. drive multi-step workflows for you, and `/supervisor-drive --auto` find the next bottleneck automatically. See [Using-Orchestration](Using-Orchestration.md).
 
 ## 5. Hooks behavior
 

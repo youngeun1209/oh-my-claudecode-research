@@ -4,15 +4,16 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Repository status
 
-v0.1.x of a Claude Code plugin that ships:
+Active development on v0.2–v0.4 orchestration engines (no release tag yet; plugin manifest still declares 0.1.0). Current state ships:
 - 6 research-team agents (`agents/`)
-- 4 parameterized slash commands (`commands/`)
-- 7 skills (`skills/omcr-setup/`, `skills/start-research/`, `skills/sync/`, `skills/todofig/`, `skills/cropfig/`, `skills/verify-citation/`, `skills/manuscript-scaffold/`)
+- 10 slash commands (`commands/`) — 4 setup/workflow (`/omcr-setup`, `/start-research`, `/todofig`, `/sync`) + 6 orchestration engines (`/iterate-revision`, `/literature-sweep`, `/respond-reviewer`, `/figure-bake`, `/outline-expand`, `/supervisor-drive`)
+- 14 skills (`skills/`) — 7 setup/workflow skills + 1 primitive (`orchestrate`) + 6 engine skills backing the new commands
 - 4 lightweight hooks (`hooks/`)
 - a canonical memory schema (`templates/MEMORY.template.md`)
+- canonical orchestration-state schemas (`develop/example-state/` — tracked reference for `.claude/omcr-state/{paper,reviews,citations,figures,rebuttals}.json` + `_run-log.jsonl`)
 - the plugin manifest (`.claude-plugin/plugin.json`)
 - one worked example preset (`examples/neuro-fmri/` — neuro-flavored analysis-implementer body + redacted MEMORY.md skeletons)
-- wiki documentation (`wiki/`) — 11 markdown pages, mirrors to GitHub Wiki via `wiki/README.md` instructions
+- wiki documentation (`wiki/`) — 15 markdown pages, mirrors to GitHub Wiki via `wiki/README.md` instructions
 
 MIT licensed (`LICENSE`, 2026 Young-Eun Lee). No build chain, no npm — plain markdown plus shell scripts loaded directly by Claude Code.
 
@@ -52,45 +53,56 @@ oh-my-claudecode-research/
 │   ├── figure-descriptor.md
 │   ├── reviewer.md
 │   └── literature-curator.md         # bibliography curator + BibTeX/summary-table owner
-├── commands/                         # 4 thin dispatcher slash commands — all delegate to a matching skill
+├── commands/                         # 10 thin dispatcher slash commands — all delegate to a matching skill
 │   ├── omcr-setup.md                 # /omcr-setup → skills/omcr-setup/
 │   ├── start-research.md             # /start-research → skills/start-research/
 │   ├── todofig.md                    # /todofig → skills/todofig/
-│   └── sync.md                       # /sync → skills/sync/
-├── skills/                           # 7 skills (5 back the slash commands, 2 are standalone)
+│   ├── sync.md                       # /sync → skills/sync/
+│   ├── iterate-revision.md           # /iterate-revision → skills/iterate-revision/ (Phase 1 engine)
+│   ├── literature-sweep.md           # /literature-sweep → skills/literature-sweep/ (Phase 2 engine)
+│   ├── respond-reviewer.md           # /respond-reviewer → skills/respond-reviewer/ (Phase 2 engine)
+│   ├── figure-bake.md                # /figure-bake → skills/figure-bake/ (Phase 2 engine)
+│   ├── outline-expand.md             # /outline-expand → skills/outline-expand/ (Phase 2 engine)
+│   └── supervisor-drive.md           # /supervisor-drive → skills/supervisor-drive/ (Phase 3 autonomous orchestrator)
+├── skills/                           # 14 skills: 1 primitive + 6 engines + 7 setup/workflow
+│   ├── orchestrate/                  # PRIMITIVE: state-read + dispatch + evaluate + loop (Phase 0). Internal — composed by engines, never invoked directly.
+│   │   ├── SKILL.md
+│   │   └── phases/{01-state-read,02-dispatch,03-evaluate,04-loop}.md
+│   ├── iterate-revision/             # ENGINE: writer ↔ reviewer loop on one section (Phase 1)
+│   │   ├── SKILL.md
+│   │   └── phases/{01-precheck,02-draft-or-revise,03-review,04-evaluate,05-finalize}.md
+│   ├── literature-sweep/             # ENGINE: parallel curator dispatch + verify-citation hard gate (Phase 2)
+│   │   ├── SKILL.md
+│   │   └── phases/{01-precheck,02-search,03-parallel-read,04-deduplicate,05-verify,06-finalize}.md
+│   ├── respond-reviewer/             # ENGINE: classify-and-dispatch rebuttal letter (Phase 2)
+│   │   ├── SKILL.md
+│   │   └── phases/{01-parse-letter,02-classify,03-dispatch-per-comment,04-aggregate,05-evaluate,06-finalize}.md
+│   ├── figure-bake/                  # ENGINE: 3-agent figure loop with cropfig integration (Phase 2)
+│   │   ├── SKILL.md
+│   │   └── phases/{01-precheck,02-brief,03-implement,04-critique,05-evaluate,06-finalize}.md
+│   ├── outline-expand/               # ENGINE: map-reduce parallel section drafting (Phase 2)
+│   │   ├── SKILL.md
+│   │   └── phases/{01-precheck,02-map,03-reduce,04-finalize}.md
+│   ├── supervisor-drive/             # ENGINE: autonomous orchestrator with 6 safety gates (Phase 3)
+│   │   ├── SKILL.md
+│   │   └── phases/{00-resume-check,01-state-survey,02-action-plan,03-confirm-or-auto,04-engine-invoke,05-checkpoint,06-iterate-or-finalize,07-report}.md
 │   ├── cropfig/                      # generic figure-only crop (env-var + CLAUDE.md driven)
 │   │   ├── SKILL.md
-│   │   └── crop_top_label.py
-│   ├── manuscript-scaffold/          # state check / journal lookup / skeleton / commit-push — phase-split; called by /start-research phase 5, also standalone
+│   │   └── {crop_bounds,crop_figures,export_deck,upload_figures}.py
+│   ├── manuscript-scaffold/          # state check / journal lookup / skeleton / commit-push — called by /start-research phase 5, also standalone
 │   │   ├── SKILL.md
-│   │   └── phases/
-│   │       ├── 01-state-check.md
-│   │       ├── 02-journal-template.md
-│   │       ├── 03-skeleton.md
-│   │       └── 04-commit-push.md
-│   ├── omcr-setup/                   # backs /omcr-setup — install-style OMCR infra. 6 phases: state / CLAUDE.md scaffold / agent-memory / bib / permissions / report. No interview.
+│   │   └── phases/{01-state-check,02-journal-template,03-skeleton,04-commit-push}.md
+│   ├── omcr-setup/                   # backs /omcr-setup — install-style OMCR infra. 6 phases: state / CLAUDE.md scaffold / agent-memory / bib / permissions / report. No interview. Also scaffolds .claude/omcr-state/ for engines.
 │   │   ├── SKILL.md
-│   │   └── phases/
-│   │       ├── 01-state-check.md
-│   │       ├── 02-claude-md-scaffold.md
-│   │       ├── 03-agent-memory.md
-│   │       ├── 04-bibliography.md
-│   │       ├── 05-permissions.md
-│   │       └── 06-report.md
-│   ├── start-research/               # backs /start-research — interview-driven init. 6 phases: precheck / interview / fill CLAUDE.md / preset overlay / manuscript / report
+│   │   └── phases/{01-state-check,02-claude-md-scaffold,03-agent-memory,04-bibliography,05-permissions,06-report}.md
+│   ├── start-research/               # backs /start-research — interview-driven init
 │   │   ├── SKILL.md
-│   │   └── phases/
-│   │       ├── 01-precheck.md
-│   │       ├── 02-interview.md
-│   │       ├── 03-fill-claude-md.md
-│   │       ├── 04-preset-overlay.md
-│   │       ├── 05-manuscript-scaffold.md
-│   │       └── 06-report.md
-│   ├── sync/                         # backs /sync — state reconciler. Single-file SKILL.md (status snapshot + agent-memory drift reconciliation).
+│   │   └── phases/{01-precheck,02-interview,03-fill-claude-md,04-preset-overlay,05-manuscript-scaffold,06-report}.md
+│   ├── sync/                         # backs /sync — state reconciler (status snapshot + agent-memory drift)
 │   │   └── SKILL.md
-│   ├── todofig/                      # backs /todofig — deck-vs-outline gap analyzer. Single-file SKILL.md (P0/P1/P2 prioritized TODO).
+│   ├── todofig/                      # backs /todofig — deck-vs-outline gap analyzer
 │   │   └── SKILL.md
-│   └── verify-citation/              # CrossRef/OpenAlex existence + metadata check; updates summary CSV
+│   └── verify-citation/              # CrossRef/OpenAlex existence + metadata check; hard gate for /literature-sweep
 │       ├── SKILL.md
 │       └── verify_citation.py
 ├── hooks/                            # 4 shell-script hooks + their config
@@ -116,17 +128,31 @@ oh-my-claudecode-research/
 │       ├── references.bib            # empty; managed by @literature-curator post-setup
 │       ├── .gitignore                # strips LaTeX build artifacts
 │       └── README.md                 # conventions reference
-├── wiki/                             # 11-page documentation deep dive (browse here or push to GitHub Wiki)
+├── develop/                          # local working drafts (gitignored — EXCEPT example-state/)
+│   ├── example-state/                # TRACKED: canonical .claude/omcr-state/ JSON schemas (copied by /omcr-setup)
+│   │   ├── README.md                 # populated examples + schema enums
+│   │   ├── paper.json                # manuscript progress (status / iter / outline / hypothesis)
+│   │   ├── reviews.json              # append-only reviewer verdict history
+│   │   ├── citations.json            # BibTeX queue + verified + last_sweep
+│   │   ├── figures.json              # per-figure brief / impl / critique status
+│   │   ├── rebuttals.json            # per-run rebuttal entries from /respond-reviewer
+│   │   └── _run-log.jsonl            # append-only run log (one JSON per line)
+│   └── (other develop/ files are gitignored — Phase 0-4 design notes, decisions, test fixtures, smoketest)
+├── wiki/                             # 15-page documentation deep dive (browse here or push to GitHub Wiki)
 │   ├── Home.md                       # navigation hub
 │   ├── Getting-Started.md            # install + first session
-│   ├── Standalone-Usage.md           # OMCR alone walkthrough
-│   ├── With-OMC.md                   # OMCR + OMC companion install
-│   ├── Configuration.md              # ## Research stack block reference + env vars
-│   ├── OMC-Tool-Reference.md         # 47 OMC MCP tools mapped to research stages
+│   ├── Standalone-Usage.md           # OMCR alone walkthrough (@-mention style)
+│   ├── Using-Orchestration.md        # how to use the 6 engines (Level 1/2/3 walkthrough)
+│   ├── With-OMC.md                   # OMCR + OMC companion install + 5 worked recipes
+│   ├── Configuration.md              # ## Research stack block reference + env vars (incl. data_root)
+│   ├── OMC-Tool-Reference.md         # OMC MCP tools mapped to research stages + inverse map per OMCR engine
+│   ├── Orchestration-Model.md        # state store + 4 primitives + frontmatter conventions (writes:, cost_estimate_tokens:)
+│   ├── Orchestration-Comparison.md   # OMCR-alone vs OMCR+OMC matrix + decision tree
+│   ├── Autonomous-Drive.md           # /supervisor-drive deep dive (6 safety gates)
 │   ├── Agents.md                     # 6 agents reference
-│   ├── Commands.md                   # /todofig + /sync + cropfig reference
+│   ├── Commands.md                   # all 10 slash commands reference
 │   ├── Hooks.md                      # 4 hooks reference
-│   ├── Specializing.md               # author a field-specific preset
+│   ├── Specializing.md               # author a field-specific preset + engine-skill frontmatter
 │   └── README.md                     # how to sync this dir to GitHub Wiki
 ├── README.md                         # public landing page (front door, links to wiki)
 ├── CLAUDE.md                         # this file
@@ -158,8 +184,8 @@ When editing agents, link to the template file via a relative path so users disc
 
 The plugin manifest (`.claude-plugin/plugin.json`) declares four registries:
 - `agents: ./agents/` — 6 `@`-mentionable agents
-- `commands: ./commands/` — 4 thin dispatcher slash commands (`/omcr-setup`, `/start-research`, `/sync`, `/todofig`) — each forwards `$ARGUMENTS` to its matching skill
-- `skills: ./skills/` — 7 invocable skills (`omcr-setup`, `start-research`, `sync`, `todofig`, `cropfig`, `verify-citation`, `manuscript-scaffold`). The first 4 back the 4 slash commands; `cropfig`, `verify-citation`, `manuscript-scaffold` are standalone-invocable (called by other agents / skills).
+- `commands: ./commands/` — 10 thin dispatcher slash commands: 4 setup/workflow (`/omcr-setup`, `/start-research`, `/sync`, `/todofig`) + 6 orchestration engines (`/iterate-revision`, `/literature-sweep`, `/respond-reviewer`, `/figure-bake`, `/outline-expand`, `/supervisor-drive`) — each forwards `$ARGUMENTS` to its matching skill
+- `skills: ./skills/` — 14 invocable skills: 7 setup/workflow (`omcr-setup`, `start-research`, `sync`, `todofig`, `cropfig`, `verify-citation`, `manuscript-scaffold`) + 1 primitive (`orchestrate` — internal building block, composed by engines, not invoked directly) + 6 engine skills backing the orchestration commands. `cropfig`, `verify-citation`, `manuscript-scaffold` are also standalone-invocable.
 - `hooks: ./hooks/hooks.json` — 4 lifecycle hooks
 
 The 4 hooks wire to Claude Code events:

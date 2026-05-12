@@ -1,0 +1,17 @@
+{
+  "schema_version": "1",
+  "title": null,
+  "venue": null,
+  "hypothesis": null,
+  "manuscript_root": "manuscript/",
+  "sections": {
+    "abstract":     { "path": "manuscript/sections/abstract.tex",     "status": "empty", "iter": 0, "last_review_id": null, "outline": null },
+    "introduction": { "path": "manuscript/sections/introduction.tex", "status": "empty", "iter": 0, "last_review_id": null, "outline": null },
+    "methods":      { "path": "manuscript/sections/methods.tex",      "status": "empty", "iter": 0, "last_review_id": null, "outline": null },
+    "results":      { "path": "manuscript/sections/results.tex",      "status": "empty", "iter": 0, "last_review_id": null, "outline": null },
+    "discussion":   { "path": "manuscript/sections/discussion.tex",   "status": "empty", "iter": 0, "last_review_id": null, "outline": null }
+  },
+  "figures": [],
+  "submission_ready": false,
+  "last_updated": "2026-05-11T00:00:00Z"
+}

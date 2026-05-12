@@ -1,6 +1,6 @@
 # Commands — reference
 
-OMCR ships 4 slash commands (all thin dispatchers) and 7 invocable skills (4 of which back the slash commands), all parameterized via the [Project context + Research stack blocks](Configuration.md) in your project's `CLAUDE.md`.
+OMCR ships **10 slash commands** (all thin dispatchers) and **14 invocable skills**, all parameterized via the [Project context + Research stack blocks](Configuration.md) in your project's `CLAUDE.md`. The 4 setup/workflow commands (`/omcr-setup`, `/start-research`, `/todofig`, `/sync`) are documented in detail below, followed by the 2 standalone skills (`cropfig`, `verify-citation`). The 6 orchestration engines (`/iterate-revision`, `/literature-sweep`, `/respond-reviewer`, `/figure-bake`, `/outline-expand`, `/supervisor-drive`) are summarized at the bottom with links to deeper walkthroughs.
 
 ## `/omcr-setup`
 
@@ -207,6 +207,26 @@ Output:
 ### ⚠️ Manual review needed
 - Fig 5 figure-descriptor memory says "Raw / Own / Other" but slide shows "Baseline / Treatment / Sham" — please reconcile.
 ```
+
+## Orchestration engines (v0.2–v0.4)
+
+Six engine commands automate multi-step research workflows. Each engine reads/writes state in `.claude/omcr-state/`, dispatches one or more agent personas via the [`orchestrate`](../skills/orchestrate/SKILL.md) primitive skill, and reports a DONE / CONTINUE / BLOCKED / HALT verdict. Engines are **leaves** — they never call other slash-command engines; cross-engine coordination is the autonomous `/supervisor-drive`'s job.
+
+| Engine | Pattern | What it drives |
+|---|---|---|
+| `/iterate-revision <path>` | writer ↔ reviewer loop | Polish one manuscript section until reviewer is satisfied |
+| `/literature-sweep <topic>` | N parallel curators (1–4) | Find + verify N papers; drop into BibTeX + summary CSV (hard verify-gate) |
+| `/respond-reviewer <letter>` | classify & dispatch | Per-comment rebuttal letter; structural comments are human-gated |
+| `/figure-bake <fig-id>` | 3-agent loop | Design → implement → critique loop with `cropfig` integration |
+| `/outline-expand <outline>` | map-reduce | Outline → N parallel section drafts + terminology-drift lint |
+| `/supervisor-drive [--auto]` | autonomous driver | Bottleneck-ranker dispatches the right engine; 6 safety gates |
+
+**Full daily-workflow walkthrough:** [Using-Orchestration](Using-Orchestration.md)
+**Autonomous mode deep dive:** [Autonomous-Drive](Autonomous-Drive.md) (6 safety gates, priority rules, modes)
+**Internal mechanics (state store + 4 primitives):** [Orchestration-Model](Orchestration-Model.md)
+**Composition with OMC (5 worked recipes):** [Orchestration-Comparison](Orchestration-Comparison.md) and [With-OMC](With-OMC.md)
+
+Source files: [`commands/iterate-revision.md`](../commands/iterate-revision.md), [`commands/literature-sweep.md`](../commands/literature-sweep.md), [`commands/respond-reviewer.md`](../commands/respond-reviewer.md), [`commands/figure-bake.md`](../commands/figure-bake.md), [`commands/outline-expand.md`](../commands/outline-expand.md), [`commands/supervisor-drive.md`](../commands/supervisor-drive.md). Each engine's skill lives at `skills/<name>/` with phase files documenting per-step behavior.
 
 ## `cropfig` (skill, not a slash command)
 

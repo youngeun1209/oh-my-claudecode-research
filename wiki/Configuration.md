@@ -44,6 +44,7 @@ Add a `## Research stack` section to your project's `CLAUDE.md`. The slash comma
 | `Summary file` | `@literature-curator`, `verify-citation` | path | `references.csv` (project root) | Human-readable literature summary table. Lives **outside** the manuscript dir on purpose — it's project metadata, not part of the paper. |
 | `CrossRef email` | `verify-citation` | email | (optional) | Polite-pool identifier for CrossRef. Recommended — higher rate limit and priority on the public API. Not used to send any mail. |
 | `Overleaf git URL` | `/start-research` | URL | (optional) | If set, `/start-research` (via the `manuscript-scaffold` skill) clones the Overleaf project into `Manuscript dir` and scaffolds the skeleton there. Requires Overleaf paid plan with Git Integration. Authentication token is cached only in git's credential helper or `~/.netrc` — never written to CLAUDE.md or any tracked file. |
+| `Data root` | `/figure-bake` | path | `./data/` | Root directory for experimental data. `/figure-bake` resolves figure data references relative to this. Per-figure paths inside a figure brief reference paths under this root. |
 
 ### First-run wizard
 
@@ -68,6 +69,7 @@ Use environment variables to override layer 2 for a single invocation or to pass
 | `RESULT_PATTERN` | `cropfig` func 3 | `Result pattern` |
 | `CROPFIG_PROBE_DPI` | `cropfig` func 2 | (no layer-2 field; tunable knob) |
 | `CROPFIG_PNG_DPI` | `cropfig` func 2 | (no layer-2 field; tunable knob) |
+| `CLAUDE_RESEARCH_DATA_ROOT` | `/figure-bake` | `Data root` |
 | `CLAUDE_RESEARCH_DISABLE_PII_SCRUB` | `pii-scrub` hook | (n/a — disables) |
 | `CLAUDE_RESEARCH_DISABLE_MEMORY_LOAD` | `memory-load` hook | (n/a — disables) |
 | `CLAUDE_RESEARCH_DISABLE_CITATION_WARN` | `citation-warn` hook | (n/a — disables) |

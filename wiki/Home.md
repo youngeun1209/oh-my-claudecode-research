@@ -1,6 +1,6 @@
 # oh-my-claudecode-research — Wiki
 
-A small Claude Code plugin that ships a **6-agent research team** + **4 lightweight hooks** + **4 parameterized commands** + **7 skills**, all tailored for producing research papers (or any structured-figure-and-outline document).
+A Claude Code plugin that ships a **6-agent research team** + **10 slash commands** (4 setup/workflow + 6 orchestration engines) + **14 skills** (1 primitive + 13 backing surfaces) + **4 lightweight hooks**, all tailored for producing research papers (or any structured-figure-and-outline document).
 
 This wiki is the documentation deep dive. The [README](../README.md) is the quick overview.
 
@@ -10,13 +10,16 @@ This wiki is the documentation deep dive. The [README](../README.md) is the quic
 - **[Getting Started](Getting-Started.md)** — Install, first session, common pitfalls
 - **[Configuration](Configuration.md)** — The `## Research stack` block in your project's CLAUDE.md
 - **[Standalone Usage](Standalone-Usage.md)** — Using OMCR alone (no OMC required)
+- **[Using Orchestration](Using-Orchestration.md)** — how to use the 6 engines (Level 1/2/3 walkthrough)
 - **[With OMC](With-OMC.md)** — Installing OMC alongside for richer features
 
 ### Reference
 - **[Agents](Agents.md)** — The 6 core agents (supervisor / analysis-implementer / paper-writer / figure-descriptor / reviewer / literature-curator)
-- **[Commands](Commands.md)** — `/omcr-setup`, `/start-research`, `/todofig`, `/sync`, plus the `cropfig`, `verify-citation`, and `manuscript-scaffold` skills
+- **[Commands](Commands.md)** — all 10 slash commands (4 setup/workflow + 6 orchestration engines) and the standalone skills
 - **[Hooks](Hooks.md)** — `pii-scrub`, `memory-load`, `citation-warn`, `setup-nudge`
 - **[OMC Tool Reference](OMC-Tool-Reference.md)** — 47 OMC MCP tools mapped to research workflow stages
+- **[Orchestration Comparison](Orchestration-Comparison.md)** — composition matrix: OMCR alone vs OMCR + OMC, decision tree, cost & complexity table
+- **[Autonomous Drive](Autonomous-Drive.md)** — `/supervisor-drive` deep dive (modes, safety gates, priority ranker, cost model)
 
 ### Extending
 - **[Specializing for Your Field](Specializing.md)** — How to author a field-specific preset (neuro-fmri, wet-lab, ML research, …)
@@ -46,8 +49,8 @@ OMCR is a **research-workflow orchestration plugin**. It coordinates a 6-special
 
 Plus the wiring:
 - 4 hooks (PII guard, MEMORY auto-load, citation warning, setup nudge)
-- 4 slash commands (`/omcr-setup` installs OMCR infrastructure; `/start-research` runs the interview-driven first-project init; `/todofig` and `/sync` cover figure-deck-vs-outline workflows)
-- 7 skills: `omcr-setup`, `start-research`, `sync`, `todofig` back the four matching slash commands; `cropfig` strips caption bands from exported figure PNGs; `verify-citation` gates every citation added to the bibliography; `manuscript-scaffold` lays down the LaTeX skeleton + optional journal template + optional Overleaf clone
+- 10 slash commands: 4 setup/workflow (`/omcr-setup` installs infra; `/start-research` is the interview; `/todofig` and `/sync` cover figure-deck-vs-outline) + 6 orchestration engines (`/iterate-revision`, `/literature-sweep`, `/respond-reviewer`, `/figure-bake`, `/outline-expand`, `/supervisor-drive` — see [Using-Orchestration](Using-Orchestration.md))
+- 14 skills: the 4 setup/workflow commands are backed by matching skills; `cropfig` strips caption bands; `verify-citation` gates every citation; `manuscript-scaffold` lays down the LaTeX skeleton. Plus 1 primitive (`orchestrate`) + 6 engine skills (`iterate-revision`, `literature-sweep`, `respond-reviewer`, `figure-bake`, `outline-expand`, `supervisor-drive`)
 
 ## What OMCR is NOT
 
