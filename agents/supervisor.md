@@ -215,9 +215,9 @@ This is iterative — individual steps repeat. You decide when to advance and wh
 
 ---
 
-## Read-only orchestration role (v0.4+)
+## Read-only orchestration role
 
-As of OMCR v0.4, `@supervisor` is **read-only** with respect to orchestration. The advisory persona and the autonomous executor are deliberately split:
+As of OMCR, `@supervisor` is **read-only** with respect to orchestration. The advisory persona and the autonomous executor are deliberately split:
 
 | Surface | Role | Where it lives |
 |---|---|---|

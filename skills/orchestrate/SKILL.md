@@ -41,9 +41,9 @@ flat — no `logs/` subdirectory — per Phase 0 decision §1.
 | `figures.json` | engines that dispatch `@figure-descriptor` + `cropfig` | no |
 | `_run-log.jsonl` | every engine (every run start + completion) | yes |
 
-`schema_version` is a JSON string (`"1"` for v0.2). On mismatch the
+`schema_version` is a JSON string (`"1"` for now). On mismatch the
 primitive warns and proceeds — there is no migration runner yet. See
-Phase 0 decision §2 for the rationale and the deferred-to-v0.5 plan.
+Phase 0 decision §2 for the rationale and the deferred plan.
 
 Full per-field documentation and populated examples live in:
 
@@ -104,7 +104,7 @@ cumulative usage exceeds the cap.
 
 ## Safety invariants
 
-- **Serial execution only** (Phase 0 decision §4). v0.2 does not ship
+- **Serial execution only** (Phase 0 decision §4). OMCR does not currently ship
   a lock file. One engine at a time per project.
 - **`max_iter` is hard.** The loop never silently exceeds it — when
   reached without DONE/BLOCKED, the loop emits HALT and exits cleanly.
@@ -119,7 +119,7 @@ cumulative usage exceeds the cap.
 Add a phase to `orchestrate/phases/` only when **every** engine would
 benefit. Engine-specific logic (e.g. "scan for `[TBD:` markers" from
 `/iterate-revision` Phase 0 decision §1.2) goes in that engine's own
-phase files. The four primitives here should stay at four for v0.2.
+phase files. The four primitives here should stay at four for now.
 
 If a fifth primitive looks tempting (e.g. "parallel dispatch fanout"),
 that is a Phase 3 concern — the autonomous supervisor is the only

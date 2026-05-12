@@ -173,7 +173,7 @@ The autonomous mode applies these hardcoded priority rules in order (no config k
 7. **Figures with mismatched briefs** → `/figure-bake`
 8. **Everything approved + verified** → `submission_ready = true`, exit DONE
 
-Only one engine + one target per iteration (no parallel dispatch at v0.4).
+Only one engine + one target per iteration (no parallel dispatch currently).
 
 ## Where state lives
 
@@ -190,7 +190,7 @@ All orchestration state lives under `.claude/omcr-state/` in your project (gitig
 
 Canonical schemas: [`develop/example-state/`](../develop/example-state/) (tracked as reference; copied into your project by `/omcr-setup`). Engines never overwrite human-curated fields; they only add/append.
 
-`schema_version` is a JSON string (`"1"`). Additive bumps (`"1.1"`) require no migration; breaking bumps (`"2"`) will (deferred to v0.5+).
+`schema_version` is a JSON string (`"1"`). Additive bumps (`"1.1"`) require no migration; breaking bumps (`"2"`) will (deferred+).
 
 ## Safety in autonomous mode
 
@@ -216,7 +216,7 @@ If you just want to KNOW state without changing anything:
 /supervisor-drive --plan-only
 ```
 
-Both are non-destructive. Neither dispatches an engine. `@supervisor` is **advisory** under the v0.4 split — it reads state and recommends. The actual driving happens via `/supervisor-drive`.
+Both are non-destructive. Neither dispatches an engine. `@supervisor` is **advisory** under the current split — it reads state and recommends. The actual driving happens via `/supervisor-drive`.
 
 ## When to compose with OMC
 

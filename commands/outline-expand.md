@@ -19,7 +19,7 @@ Arguments: `$ARGUMENTS`
 | Flag | Default | Purpose |
 |---|---|---|
 | `--sections` | all sections discovered in the outline that match a `paper.json.sections[*]` key and are not already `approved` | Comma-separated subset of section names to draft this run. When set, **only** these are drafted; existing-status guards still apply unless an explicit name is listed (an explicit name in `--sections` skips the "already drafted" early-skip). |
-| `--max-iter-per-section` | `1` | Unused for v0.2. Accepted on the CLI for forward compatibility with the v0.3 `--auto-iterate` flag (Phase 2 §5, Phase 5 deferred). This engine produces first drafts only — it does **not** invoke `/iterate-revision` internally. |
+| `--max-iter-per-section` | `1` | Unused for now. Accepted on the CLI for forward compatibility with the a future `--auto-iterate` flag (Phase 2 §5, Phase 5 deferred). This engine produces first drafts only — it does **not** invoke `/iterate-revision` internally. |
 
 ## Examples
 

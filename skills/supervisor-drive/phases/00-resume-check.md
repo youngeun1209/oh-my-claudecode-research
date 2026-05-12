@@ -138,7 +138,7 @@ supervisor-drive: prior drive run_id=<R> completed cleanly (verdict=DONE). Start
 
 ### 5. (reserved for future deferral logic)
 
-No-op at v0.4. The decision tree above covers every Phase 3 §1 case.
+No-op currently. The decision tree above covers every Phase 3 §1 case.
 
 ### 6. Initialize the new drive
 

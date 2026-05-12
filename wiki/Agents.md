@@ -18,7 +18,7 @@ OMCR ships 6 agents under `agents/`. Each is a single markdown file with YAML fr
 
 **Delegates to:** `@analysis-implementer`, `@paper-writer`, `@figure-descriptor`, `@reviewer`.
 
-**Read-only orchestration role (v0.4+):** `@supervisor` is **advisory** with respect to autonomous orchestration — `@`-mention it to read state, summarize progress, and suggest the next move. It does NOT itself drive engines automatically. To actually drive engines without per-step prompting, use [`/supervisor-drive`](Autonomous-Drive.md) (the skill). The split keeps the agent's job simple (advise) and the skill's job explicit (act). When asked "what happened recently?", `@supervisor` interprets `.claude/omcr-state/_run-log.jsonl` plus the state files.
+**Read-only orchestration role:** `@supervisor` is **advisory** with respect to autonomous orchestration — `@`-mention it to read state, summarize progress, and suggest the next move. It does NOT itself drive engines automatically. To actually drive engines without per-step prompting, use [`/supervisor-drive`](Autonomous-Drive.md) (the skill). The split keeps the agent's job simple (advise) and the skill's job explicit (act). When asked "what happened recently?", `@supervisor` interprets `.claude/omcr-state/_run-log.jsonl` plus the state files.
 
 **Model:** `opus` (color: red, memory: project).
 

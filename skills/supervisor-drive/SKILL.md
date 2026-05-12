@@ -1,6 +1,6 @@
 ---
 name: supervisor-drive
-description: Autonomous OMCR orchestrator. Surveys state across the 5 OMCR state files (paper, reviews, citations, figures, rebuttals), picks the highest-priority engine from a hardcoded bottleneck-ranker, runs it through one of the 5 OMCR engines, then re-evaluates state from scratch and loops. Three modes — interactive (default), auto, plan-only. Six safety gates (HypothesisChange, NewCitation, NewExperiment, StructuralRewrite, BudgetExceeded, CriticalIssue) fire even in --auto. Single-target only at v0.4. Halt-on-exception, no retry. Resume after halt is strict — requires explicit --resume <run-id> or --fresh.
+description: Autonomous OMCR orchestrator. Surveys state across the 5 OMCR state files (paper, reviews, citations, figures, rebuttals), picks the highest-priority engine from a hardcoded bottleneck-ranker, runs it through one of the 5 OMCR engines, then re-evaluates state from scratch and loops. Three modes — interactive (default), auto, plan-only. Six safety gates (HypothesisChange, NewCitation, NewExperiment, StructuralRewrite, BudgetExceeded, CriticalIssue) fire even in --auto. Single-target only currently. Halt-on-exception, no retry. Resume after halt is strict — requires explicit --resume <run-id> or --fresh.
 writes: [paper, reviews, citations, figures, rebuttals]
 cost_estimate_tokens: 80000
 ---
@@ -116,7 +116,7 @@ The supervisor never bypasses an engine's own precheck phase. If `/iterate-revis
 
 ## The bottleneck-ranker — hardcoded priority rules
 
-Phase 02 applies these rules in order. The **first match wins** — no weighted scoring at v0.4. See [`phases/02-action-plan.md`](phases/02-action-plan.md) for the full implementation; the summary table:
+Phase 02 applies these rules in order. The **first match wins** — no weighted scoring currently. See [`phases/02-action-plan.md`](phases/02-action-plan.md) for the full implementation; the summary table:
 
 | # | Trigger | Engine / response |
 |---|---|---|
@@ -129,7 +129,7 @@ Phase 02 applies these rules in order. The **first match wins** — no weighted 
 | 7 | Figures with brief-vs-impl divergence (`figures.json` entry where `brief_status == approved` but `impl_status != approved`, or `critique_status == done` and the latest verdict was BLOCKED/HALT) | `/figure-bake <fig-id>`. |
 | 8 | All approved + all figures done + all citations verified | `submission_ready = true`. **EXIT DONE.** |
 
-Priority rules are **hardcoded** at v0.4 per Phase 3 §5. No `CLAUDE.md`-driven override, no JSON knob, no flag. Users who disagree on a specific run use `--interactive` (pick an alternative) or `--plan-only` (inspect and stop).
+Priority rules are **hardcoded** currently per Phase 3 §5. No `CLAUDE.md`-driven override, no JSON knob, no flag. Users who disagree on a specific run use `--interactive` (pick an alternative) or `--plan-only` (inspect and stop).
 
 ## The 6 safety gates
 
@@ -160,7 +160,7 @@ This makes the loop fully described by `loop { survey → plan → confirm → d
 
 ### Single-target invariant
 
-`next_action` is always exactly one engine + one target (Phase 3 §4). No "iterate-revision on methods AND discussion simultaneously." No parallel dispatch. `alternatives` in the action plan is for the interactive-mode picker only, never for parallel execution. Batch / parallel modes are deferred to v0.5.
+`next_action` is always exactly one engine + one target (Phase 3 §4). No "iterate-revision on methods AND discussion simultaneously." No parallel dispatch. `alternatives` in the action plan is for the interactive-mode picker only, never for parallel execution. Batch / parallel modes are deferred.
 
 ### Explicit-resume invariant
 
@@ -214,11 +214,11 @@ The supervisor **declares `writes: [paper, reviews, citations, figures, rebuttal
 ## What this engine does NOT do
 
 - Does **not** call personas directly. Only engines. (Personas are inside engines.)
-- Does **not** dispatch engines in parallel. Single-target only at v0.4 (Phase 3 §4).
+- Does **not** dispatch engines in parallel. Single-target only currently (Phase 3 §4).
 - Does **not** retry on engine exception. Halt-on-exception, no retry (Phase 3 §2).
 - Does **not** auto-resume after a halt. Explicit `--resume <run-id>` or `--fresh` required (Phase 3 §1).
 - Does **not** override safety gates in `--auto` mode. Every gate is confirm-required; autonomous mode pauses at the gate.
-- Does **not** read a `CLAUDE.md` priority-override block. Hardcoded ranker at v0.4 (Phase 3 §5).
+- Does **not** read a `CLAUDE.md` priority-override block. Hardcoded ranker currently (Phase 3 §5).
 - Does **not** push to a remote. Per-engine commits are local. Run `/sync` afterward to push.
 - Does **not** rewrite `main.tex`, `references.bib`, or any non-state file directly. All file edits are mediated through the engine the supervisor invoked.
 - Does **not** modify other engines' SKILL.md or phase files at runtime. Engine logic is static markdown; the supervisor reads it.

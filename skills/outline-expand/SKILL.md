@@ -22,7 +22,7 @@ If you are reading this because Claude Code's skill auto-discovery surfaced it: 
 | Flag | Default | Purpose |
 |---|---|---|
 | `--sections` | all sections discovered in the outline whose `paper.json.sections[name].status` is not `approved` | Comma-separated subset to draft. Explicit names override the "already drafted" early-skip but never the `approved` guard (use `--sections` + manual status reset to redo an approved section). |
-| `--max-iter-per-section` | `1` (unused in v0.2) | Reserved for v0.3 `--auto-iterate`. This engine produces first drafts only. |
+| `--max-iter-per-section` | `1` (unused currently) | Reserved for now `--auto-iterate`. This engine produces first drafts only. |
 
 Examples:
 - `/outline-expand outline.md` — draft every not-yet-approved section listed in the outline.
@@ -104,7 +104,7 @@ This engine **does not** call `/iterate-revision`, ever. Phase 2 decision §5 (e
 
 - `/iterate-revision <section-path>` per section, ordered by importance.
 - Hand-edit a section (e.g. the abstract is short — faster to write than to iterate).
-- `/supervisor-drive` (Phase 3, v0.4) — when shipped, this will be the engine that can chain `/outline-expand` → N × `/iterate-revision` autonomously.
+- `/supervisor-drive` (Phase 3) — when shipped, this will be the engine that can chain `/outline-expand` → N × `/iterate-revision` autonomously.
 
 Phase 04's user summary surfaces this explicitly with the per-section command lines pre-filled.
 

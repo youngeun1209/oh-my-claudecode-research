@@ -24,7 +24,7 @@ From phase 06 (normal halt path), phase 04 (exception path, skipping phase 05), 
 ### 1. Compute initial vs final state diff
 
 - Re-read all 5 state files (via the state-read primitive — one call per file).
-- Reconstruct the initial state from the first `phase: "start"` record's surrounding state snapshot if available. If no snapshot was captured (v0.4 does not snapshot — the diff is computed against the engines' before-and-after writes recorded in `_run-log.jsonl`), use the `_run-log.jsonl` per-iter records to infer the changes.
+- Reconstruct the initial state from the first `phase: "start"` record's surrounding state snapshot if available. If no snapshot was captured (OMCR does not snapshot — the diff is computed against the engines' before-and-after writes recorded in `_run-log.jsonl`), use the `_run-log.jsonl` per-iter records to infer the changes.
 - Build the diff:
 
   ```
@@ -216,7 +216,7 @@ Plan-only's final line has `verdict: "DONE"` and `reason: "plan-only run complet
 
 ### 7. (No-op step)
 
-Reserved for future per-phase hooks (e.g., webhook integration in v0.5+). At v0.4 this step does nothing.
+Reserved for future per-phase hooks (e.g., webhook integration as a future addition). This step currently does nothing.
 
 ## Failure modes
 

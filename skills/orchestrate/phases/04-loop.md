@@ -155,7 +155,7 @@ Execute in order:
 ## Cost model
 
 Post-hoc, single-iteration granularity. There is no pre-flight token
-estimation in v0.2 (Phase 0 decision §6). `budget_tokens` is honored
+estimation currently (Phase 0 decision §6). `budget_tokens` is honored
 **at the iteration boundary** — a runaway iteration is bounded by one
 iteration's actual cost, not by mid-iteration aborts. With default
 `max_iter = 3` this is acceptable.
@@ -199,4 +199,4 @@ estimation; this primitive's input contract already accepts
   locally. Engines that want to push prompt the user from their report
   phase, matching `manuscript-scaffold` phase 4 convention.
 - Does NOT lock the state directory against concurrent runs. Serial
-  execution is the v0.2 assumption (Phase 0 decision §4).
+  execution is the current assumption (Phase 0 decision §4).

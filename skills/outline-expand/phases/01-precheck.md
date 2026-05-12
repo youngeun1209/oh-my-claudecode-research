@@ -9,7 +9,7 @@ Parse the outline, decide which sections will be drafted this run, and prepare t
 From the slash command:
 - `<outline-path>` — positional, required
 - `--sections <list>` — optional, comma-separated section names
-- `--max-iter-per-section N` — optional, accepted but unused in v0.2
+- `--max-iter-per-section N` — optional, accepted but unused currently
 
 ## Steps
 

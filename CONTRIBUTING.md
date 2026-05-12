@@ -124,6 +124,6 @@ There's no formal test suite. Smoke checks before opening a PR:
 - Marketplace listing.
 - An MCP server.
 - General-purpose orchestration agents (those belong in upstream OMC).
-- Heavy harness extensions (statusline, keyword auto-trigger) — see the v0.2 backlog discussion in the project plan.
+- Heavy harness extensions (statusline, keyword auto-trigger) — see the future backlog discussion in the project plan.
 
 PRs that move toward any of these will be redirected.

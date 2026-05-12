@@ -39,7 +39,7 @@ Each recipe pairs one OMCR-side asset (agent or command) with one OMC orchestrat
 
 ### How these recipes work — type the commands in order
 
-There is **no automatic pipeline** between OMCR agents and OMC orchestrators in v0.1.x. OMCR's 6 agents are prompt-only and do not invoke OMC slash commands directly (a "detect-and-enhance" auto-invocation is on the v0.2 backlog — see [OMC-Tool-Reference.md](OMC-Tool-Reference.md#how-omcr-side-agents-can-call-omc-tools)). "Pairing" in this section means **workflow-stage co-residence**, not magical chaining: you, the user, type each command in turn in the same Claude Code session. The handoff between an OMCR agent and an OMC skill is typically a file path (e.g. `.omc/specs/...`, `.claude/agent-memory/...`) or a natural-language quote of the previous step's output. Each recipe below lists the exact commands in execution order — treat them as a typing sequence, not as one fused command.
+There is **no automatic pipeline** between OMCR agents and OMC orchestrators in v0.1.x. OMCR's 6 agents are prompt-only and do not invoke OMC slash commands directly (a "detect-and-enhance" auto-invocation is on the future backlog — see [OMC-Tool-Reference.md](OMC-Tool-Reference.md#how-omcr-side-agents-can-call-omc-tools)). "Pairing" in this section means **workflow-stage co-residence**, not magical chaining: you, the user, type each command in turn in the same Claude Code session. The handoff between an OMCR agent and an OMC skill is typically a file path (e.g. `.omc/specs/...`, `.claude/agent-memory/...`) or a natural-language quote of the previous step's output. Each recipe below lists the exact commands in execution order — treat them as a typing sequence, not as one fused command.
 
 ### Recipe R1 — Start research on a new topic
 
@@ -163,9 +163,9 @@ For these, treat the same pattern as R1–R4: type each command in turn, hand of
 | Must-finish revision | `@paper-writer` + `/oh-my-claudecode:ralph` | Loop until `@reviewer` signs off on the manuscript |
 | Figure dispatch | `/todofig` + `/oh-my-claudecode:team` | Generate N missing figures in parallel |
 
-## Recipes — pairing OMCR engines with OMC orchestrators (v0.4+)
+## Recipes — pairing OMCR engines with OMC orchestrators
 
-The R1–R4 recipes above pair OMCR **agents** (`@supervisor`, `@analysis-implementer`, `@reviewer`, `@paper-writer`, …) with OMC orchestrators. The five recipes below pair OMCR's **6 engines** (the slash commands `/iterate-revision`, `/literature-sweep`, `/respond-reviewer`, `/figure-bake`, `/outline-expand`, `/supervisor-drive` introduced in v0.2–v0.4) with OMC's generic execution modes (`/ralph`, `/team`, `/ultraqa`, `/autopilot`) and OMC specialist agents (`@verifier`, `@tracer`). Each recipe gives a concrete command, a 2–3 sentence "why this composition", and forward-links to OMCR's engine doc + the OMC reference.
+The R1–R4 recipes above pair OMCR **agents** (`@supervisor`, `@analysis-implementer`, `@reviewer`, `@paper-writer`, …) with OMC orchestrators. The five recipes below pair OMCR's **6 engines** (the slash commands `/iterate-revision`, `/literature-sweep`, `/respond-reviewer`, `/figure-bake`, `/outline-expand`, `/supervisor-drive`) with OMC's generic execution modes (`/ralph`, `/team`, `/ultraqa`, `/autopilot`) and OMC specialist agents (`@verifier`, `@tracer`). Each recipe gives a concrete command, a 2–3 sentence "why this composition", and forward-links to OMCR's engine doc + the OMC reference.
 
 These compose because OMCR engines and OMC skills share no state: OMCR writes to `.claude/omcr-state/`, OMC writes to `.omc/`. Each layer's verdicts surface to the other unchanged — OMCR's `DONE | BLOCKED | HALT` per-engine verdicts are exactly what OMC's outer loop checks. See [Orchestration-Comparison.md](Orchestration-Comparison.md) for the full task → tool matrix backing these five.
 

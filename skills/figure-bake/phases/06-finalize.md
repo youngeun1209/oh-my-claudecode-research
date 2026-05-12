@@ -5,7 +5,7 @@ description: Phase 6 of /figure-bake. Render the user-facing run summary, sugges
 
 # Phase 6 — Finalize
 
-User-facing summary after the loop exits. Pulls the loop primitive's return value plus the latest `figures.json.figures[<fig-id>]` state, renders a readable block to the Claude Code transcript, and appends one summary line to `_run-log.jsonl` (in addition to the start + end records the orchestrate loop primitive already wrote). No git commit, no push — those stay out of v0.2 by default.
+User-facing summary after the loop exits. Pulls the loop primitive's return value plus the latest `figures.json.figures[<fig-id>]` state, renders a readable block to the Claude Code transcript, and appends one summary line to `_run-log.jsonl` (in addition to the start + end records the orchestrate loop primitive already wrote). No git commit, no push — those stay out by default.
 
 This phase mirrors `/iterate-revision/phases/05-finalize.md` in structure; the only differences are the state file (`figures.json` here vs. `paper.json + reviews.json` there) and the "suggested next" hints (figure-flavored, not section-flavored).
 
@@ -192,11 +192,11 @@ is the canonical record of this run; figures.json is durable.
 
 ## Step 6 — No git commit, no push
 
-v0.2 does **not** commit on behalf of the user from this phase. If `on_iter_end == "git-commit"` was set on the loop primitive (currently never set by this engine), the loop already committed per-iter; phase 06 still does nothing extra.
+OMCR does **not** commit on behalf of the user from this phase. If `on_iter_end == "git-commit"` was set on the loop primitive (currently never set by this engine), the loop already committed per-iter; phase 06 still does nothing extra.
 
 Embedding the figure into the manuscript is the user's call — phase 06's DONE block suggests `/sync`, which uses `cropfig` func 3 to insert `![Figure N](figures/<fig_id>.png)` links into the outline at each result heading. That side-effect-bearing step deserves user confirmation, not automation here.
 
-Future versions may add a `--commit` flag that triggers a single final commit here with a message like `omcr: figure-bake <fig_id> <verdict> (<iter_count> iter)`. That is a v0.3+ concern.
+Future versions may add a `--commit` flag that triggers a single final commit here with a message like `omcr: figure-bake <fig_id> <verdict> (<iter_count> iter)`. That is a future-version concern.
 
 ## Failure modes
 

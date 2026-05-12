@@ -33,7 +33,7 @@ a different exit signal, encode it into the `reason` string.
 ## `verdict_rule_spec` shape
 
 Engines pass a rule as **data**, not code. The primitive interprets the
-data and applies it. Two rule families are supported in v0.2:
+data and applies it. Two rule families are supported currently:
 
 ### Rule family A — `severity-threshold` (most engines)
 

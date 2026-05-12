@@ -309,7 +309,7 @@ These do not change the verdict; they alert the user to inspect specific artifac
 ## What this phase does NOT do
 
 - Does **not** invoke any subagent. Pure state writes + transcript output.
-- Does **not** commit to git. v0.2 leaves git out of the rebuttal flow. Future versions may add a `--commit` flag.
+- Does **not** commit to git. OMCR leaves git out of the rebuttal flow. Future versions may add a `--commit` flag.
 - Does **not** push to Overleaf or any remote. Manuscript-scaffold owns push flows.
 - Does **not** re-dispatch any comment. The user re-runs the engine after acting on the summary.
 - Does **not** auto-run `/iterate-revision` on edited sections. It only **suggests** the user run it. Engines are leaves (Phase 2 decision §5).

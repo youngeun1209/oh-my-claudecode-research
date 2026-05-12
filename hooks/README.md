@@ -70,7 +70,7 @@ Set in `.claude/settings.json` `env` block (project) or shell environment (sessi
 
 ## When NOT to extend in this plugin
 
-- A keyword auto-trigger `UserPromptSubmit` hook (mirroring OMC's `keyword-detector.mjs`). Risk of false positives in research prose is real; leave to v0.2 or per-project hooks.
+- A keyword auto-trigger `UserPromptSubmit` hook (mirroring OMC's `keyword-detector.mjs`). Risk of false positives in research prose is real; leave to future work or per-project hooks.
 - A full settings-template `.claude/settings.json.example`. Per-project drift makes a static template low-value; the wiring guidance in this file should be enough.
 
 ## Smoke-test a fresh checkout

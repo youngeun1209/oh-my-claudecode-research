@@ -1,6 +1,6 @@
 # Orchestration model
 
-OMCR v0.2+ ships a small set of orchestration primitives that engine
+OMCR+ ships a small set of orchestration primitives that engine
 skills (`/iterate-revision`, `/literature-sweep`, `/respond-reviewer`,
 `/figure-bake`, `/outline-expand`, `/supervisor-drive`) compose into
 their workflows. This page explains the model so contributors can
@@ -44,7 +44,7 @@ do that for them.
 
 ### Schema versioning
 
-Every JSON state file carries a `schema_version` field. v0.2 ships
+Every JSON state file carries a `schema_version` field. OMCR ships
 `"1"` (a JSON **string**, not int — so a future `"1.1"` bump can
 remain semver-shaped). The string-versus-int choice mirrors how
 `templates/journal-registry.json` already keys venues by string.
@@ -53,11 +53,11 @@ remain semver-shaped). The string-versus-int choice mirrors how
 |---|---|
 | `"1"`   | The shape documented on this page. |
 | `"1.x"` | Additive change — new optional fields. Old readers ignore unknown fields. |
-| `"2"`   | Breaking change — requires a migration runner. Deferred to v0.5+. |
+| `"2"`   | Breaking change — requires a migration runner. Deferred. |
 
 When the orchestrate `state-read` primitive sees a `schema_version` it
 does not recognize, it prints a warning and proceeds. There is no
-auto-migration in v0.2. If you maintain an engine, do not branch on
+auto-migration currently. If you maintain an engine, do not branch on
 schema_version values that do not yet exist.
 
 ## The 4 primitives
@@ -94,7 +94,7 @@ verdict carries.
 
 ## Cost model — post-hoc only
 
-OMCR v0.2 does not pre-flight token cost. The `loop` primitive records
+OMCR does not pre-flight token cost. The `loop` primitive records
 **actual** `tokens_used` to `_run-log.jsonl` after each iteration. If
 the engine passed a `budget_tokens` cap, the loop emits `HALT` **at
 the iteration boundary** when cumulative usage exceeds the cap — never
@@ -237,20 +237,20 @@ You should be able to read an engine's SKILL.md and know exactly what
 state it touches and what its dispatch plan looks like, without
 reading any orchestrate phase files.
 
-## Serial execution — v0.2 assumption
+## Serial execution — current assumption
 
-OMCR v0.2 runs **one engine at a time** per project. There is no lock
+OMCR runs **one engine at a time** per project. There is no lock
 file in `.claude/omcr-state/`. The realistic concurrency vector is
 Phase 3's autonomous supervisor scheduling overlapping subagents, and
 the orchestration roadmap defers a lock mechanism to that phase.
 A solo researcher with one Claude Code session cannot run two engines
 simultaneously through the normal entrypoints — slash commands are
-turn-based — so the serial assumption holds for the v0.2 audience.
+turn-based — so the serial assumption holds for the current audience.
 
 `_run-log.jsonl` records start + end timestamps for every run. That is
-the only race detection v0.2 provides. If you see overlapping
+the only race detection OMCR currently provides. If you see overlapping
 `started`/`ended` windows across two runs in the same project, you are
-in a regime v0.2 does not support.
+in a regime OMCR does not support.
 
 ## See also
 

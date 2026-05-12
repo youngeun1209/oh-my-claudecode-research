@@ -104,7 +104,7 @@ Pass forward all updated state. Phase 06 owns the termination decision.
 
 - Does **not** push to a remote. Local commits only.
 - Does **not** make a commit if `no_commit` is set. The `--no-commit` flag is binding for the entire drive — once set (either by the user or by the auto-fallback when not in a repo), never overridden mid-drive.
-- Does **not** modify the commit message format at runtime. The format is fixed for v0.4 so `git log --grep="run="` is reliable.
+- Does **not** modify the commit message format at runtime. The format is fixed for now so `git log --grep="run="` is reliable.
 - Does **not** include the engine's `run_id_engine` in the commit message. The supervisor's `run_id` is the user-visible thread; the engine's id is in `_run-log.jsonl` for cross-reference but would clutter `git log`.
 - Does **not** retry on commit failure. Same Phase 3 §2 spirit applied to local actions.
 - Does **not** evaluate the engine's verdict — that is phase 04's job (it sets the verdict; phase 05 records and commits).

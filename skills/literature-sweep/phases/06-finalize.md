@@ -59,7 +59,7 @@ Track `csv_appended_count` and `csv_refreshed_count`.
 
 ## Step 3 — Update `citations.json`
 
-Re-read `citations.json` via [`../../orchestrate/phases/01-state-read.md`](../../orchestrate/phases/01-state-read.md) with `name = citations`. (Re-reading rather than using the in-memory `citations_state` from phase 01 guards against the unlikely case that a concurrent process touched the file — even though serial execution is the v0.2 assumption, the atomic pattern costs almost nothing.)
+Re-read `citations.json` via [`../../orchestrate/phases/01-state-read.md`](../../orchestrate/phases/01-state-read.md) with `name = citations`. (Re-reading rather than using the in-memory `citations_state` from phase 01 guards against the unlikely case that a concurrent process touched the file — even though serial execution is the current assumption, the atomic pattern costs almost nothing.)
 
 Apply two updates:
 
@@ -220,9 +220,9 @@ If `notes` is non-empty in any verdict branch, render the notes list under a `No
 
 ## Step 6 — No git commit, no push
 
-v0.2 does **not** commit or push on behalf of the user from this phase. The bibliography is durable, citations.json is durable, the CSV is durable — those writes are the deliverable. If the user wants a snapshot commit, they run `/sync` next.
+OMCR does **not** commit or push on behalf of the user from this phase. The bibliography is durable, citations.json is durable, the CSV is durable — those writes are the deliverable. If the user wants a snapshot commit, they run `/sync` next.
 
-A future flag (`--commit` or `--push`) is a v0.3+ concern. The pattern matches `iterate-revision` phase 05 step 5 and `manuscript-scaffold` phase 04 prompt-to-push convention.
+A future flag (`--commit` or `--push`) is a future-version concern. The pattern matches `iterate-revision` phase 05 step 5 and `manuscript-scaffold` phase 04 prompt-to-push convention.
 
 ## Failure modes
 

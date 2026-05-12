@@ -4,10 +4,10 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Repository status
 
-Active development on v0.2–v0.4 orchestration engines (no release tag yet; plugin manifest still declares 0.1.0). Current state ships:
+OMCR is at **v0.1**, work-in-progress. The only tagged releases are `v0.1.0` and `v0.1.1`; the plugin manifest (`.claude-plugin/plugin.json`) declares `0.1.0`. Everything currently on `main` — including the orchestration engines and the autonomous supervisor — is unreleased v0.1 work. There is no v0.2 / v0.3 / v0.4 — those labels showed up in earlier docs by mistake and are being removed. Current tree ships:
 - 6 research-team agents (`agents/`)
 - 10 slash commands (`commands/`) — 4 setup/workflow (`/omcr-setup`, `/start-research`, `/todofig`, `/sync`) + 6 orchestration engines (`/iterate-revision`, `/literature-sweep`, `/respond-reviewer`, `/figure-bake`, `/outline-expand`, `/supervisor-drive`)
-- 14 skills (`skills/`) — 7 setup/workflow skills + 1 primitive (`orchestrate`) + 6 engine skills backing the new commands
+- 14 skills (`skills/`) — 7 setup/workflow skills + 1 primitive (`orchestrate`) + 6 engine skills backing the orchestration commands
 - 4 lightweight hooks (`hooks/`)
 - a canonical memory schema (`templates/MEMORY.template.md`)
 - canonical orchestration-state schemas (`develop/example-state/` — tracked reference for `.claude/omcr-state/{paper,reviews,citations,figures,rebuttals}.json` + `_run-log.jsonl`)
@@ -58,32 +58,32 @@ oh-my-claudecode-research/
 │   ├── start-research.md             # /start-research → skills/start-research/
 │   ├── todofig.md                    # /todofig → skills/todofig/
 │   ├── sync.md                       # /sync → skills/sync/
-│   ├── iterate-revision.md           # /iterate-revision → skills/iterate-revision/ (Phase 1 engine)
-│   ├── literature-sweep.md           # /literature-sweep → skills/literature-sweep/ (Phase 2 engine)
-│   ├── respond-reviewer.md           # /respond-reviewer → skills/respond-reviewer/ (Phase 2 engine)
-│   ├── figure-bake.md                # /figure-bake → skills/figure-bake/ (Phase 2 engine)
-│   ├── outline-expand.md             # /outline-expand → skills/outline-expand/ (Phase 2 engine)
-│   └── supervisor-drive.md           # /supervisor-drive → skills/supervisor-drive/ (Phase 3 autonomous orchestrator)
+│   ├── iterate-revision.md           # /iterate-revision → skills/iterate-revision/
+│   ├── literature-sweep.md           # /literature-sweep → skills/literature-sweep/
+│   ├── respond-reviewer.md           # /respond-reviewer → skills/respond-reviewer/
+│   ├── figure-bake.md                # /figure-bake → skills/figure-bake/
+│   ├── outline-expand.md             # /outline-expand → skills/outline-expand/
+│   └── supervisor-drive.md           # /supervisor-drive → skills/supervisor-drive/
 ├── skills/                           # 14 skills: 1 primitive + 6 engines + 7 setup/workflow
-│   ├── orchestrate/                  # PRIMITIVE: state-read + dispatch + evaluate + loop (Phase 0). Internal — composed by engines, never invoked directly.
+│   ├── orchestrate/                  # PRIMITIVE: state-read + dispatch + evaluate + loop. Internal — composed by engines, never invoked directly.
 │   │   ├── SKILL.md
 │   │   └── phases/{01-state-read,02-dispatch,03-evaluate,04-loop}.md
-│   ├── iterate-revision/             # ENGINE: writer ↔ reviewer loop on one section (Phase 1)
+│   ├── iterate-revision/             # ENGINE: writer ↔ reviewer loop on one section
 │   │   ├── SKILL.md
 │   │   └── phases/{01-precheck,02-draft-or-revise,03-review,04-evaluate,05-finalize}.md
-│   ├── literature-sweep/             # ENGINE: parallel curator dispatch + verify-citation hard gate (Phase 2)
+│   ├── literature-sweep/             # ENGINE: parallel curator dispatch + verify-citation hard gate
 │   │   ├── SKILL.md
 │   │   └── phases/{01-precheck,02-search,03-parallel-read,04-deduplicate,05-verify,06-finalize}.md
-│   ├── respond-reviewer/             # ENGINE: classify-and-dispatch rebuttal letter (Phase 2)
+│   ├── respond-reviewer/             # ENGINE: classify-and-dispatch rebuttal letter
 │   │   ├── SKILL.md
 │   │   └── phases/{01-parse-letter,02-classify,03-dispatch-per-comment,04-aggregate,05-evaluate,06-finalize}.md
-│   ├── figure-bake/                  # ENGINE: 3-agent figure loop with cropfig integration (Phase 2)
+│   ├── figure-bake/                  # ENGINE: 3-agent figure loop with cropfig integration
 │   │   ├── SKILL.md
 │   │   └── phases/{01-precheck,02-brief,03-implement,04-critique,05-evaluate,06-finalize}.md
-│   ├── outline-expand/               # ENGINE: map-reduce parallel section drafting (Phase 2)
+│   ├── outline-expand/               # ENGINE: map-reduce parallel section drafting
 │   │   ├── SKILL.md
 │   │   └── phases/{01-precheck,02-map,03-reduce,04-finalize}.md
-│   ├── supervisor-drive/             # ENGINE: autonomous orchestrator with 6 safety gates (Phase 3)
+│   ├── supervisor-drive/             # ENGINE: autonomous orchestrator with 6 safety gates
 │   │   ├── SKILL.md
 │   │   └── phases/{00-resume-check,01-state-survey,02-action-plan,03-confirm-or-auto,04-engine-invoke,05-checkpoint,06-iterate-or-finalize,07-report}.md
 │   ├── cropfig/                      # generic figure-only crop (env-var + CLAUDE.md driven)
@@ -137,7 +137,7 @@ oh-my-claudecode-research/
 │   │   ├── figures.json              # per-figure brief / impl / critique status
 │   │   ├── rebuttals.json            # per-run rebuttal entries from /respond-reviewer
 │   │   └── _run-log.jsonl            # append-only run log (one JSON per line)
-│   └── (other develop/ files are gitignored — Phase 0-4 design notes, decisions, test fixtures, smoketest)
+│   └── (other develop/ files are gitignored — design notes, decisions, test fixtures, smoketest)
 ├── wiki/                             # 15-page documentation deep dive (browse here or push to GitHub Wiki)
 │   ├── Home.md                       # navigation hub
 │   ├── Getting-Started.md            # install + first session

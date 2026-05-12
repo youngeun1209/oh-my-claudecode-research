@@ -92,8 +92,8 @@ This is strict on purpose — see Phase 3 §1 in [`develop/phase-3-decisions.md`
 ## What this command does NOT do
 
 - Does **not** call engines directly. Engines are leaves; only the supervisor-drive skill chains them, and even then by re-evaluating state from scratch between every step (Phase 3 §3).
-- Does **not** dispatch multiple engines in parallel. Single-target only at v0.4 (Phase 3 §4). Parallel batch is a v0.5+ backlog item.
-- Does **not** override the bottleneck-ranker via CLAUDE.md. Hardcoded at v0.4 (Phase 3 §5). Escape hatches: `--interactive` (pick an alternative each step) and `--plan-only` (inspect without running).
+- Does **not** dispatch multiple engines in parallel. Single-target only currently (Phase 3 §4). Parallel batch is a future backlog item.
+- Does **not** override the bottleneck-ranker via CLAUDE.md. Hardcoded currently (Phase 3 §5). Escape hatches: `--interactive` (pick an alternative each step) and `--plan-only` (inspect without running).
 - Does **not** retry engine exceptions. Halt-on-exception, no retry (Phase 3 §2). A `run_error.json` is written next to `_run-log.jsonl` and the loop jumps to the final report.
 - Does **not** push to a remote. Per-engine commits are local. If you want to push afterward, run `/sync` or use the manuscript-scaffold push flow.
 

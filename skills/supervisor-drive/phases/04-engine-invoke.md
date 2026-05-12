@@ -349,5 +349,5 @@ Then jump to phase 06 (which routes to phase 07 since verdict ∈ {DONE, HALT}).
 - Does **not** bypass any gate based on mode. Every gate is confirm-required even in `--auto`.
 - Does **not** commit to git. Phase 05 owns commits.
 - Does **not** read state files directly except for the priority-8 `submission_ready` write. Phase 01 reads; phase 04 dispatches.
-- Does **not** modify the gate trigger keyword lists at runtime. Adding gates / triggers is a v0.5+ refinement; v0.4 lists are locked above.
+- Does **not** modify the gate trigger keyword lists at runtime. Adding gates / triggers is a future refinement; the lists above are locked above.
 - Does **not** time-out user confirmation in `--auto`. If the user walks away from the terminal during a safety-gate prompt, the drive simply waits. This is the right tradeoff: a misclick on a 30-second timeout could ship a fabricated citation.

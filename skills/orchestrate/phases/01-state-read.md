@@ -55,7 +55,7 @@ Execute in order:
      has no schema_version field — assuming "1"`. Proceed.
    - If field present but not `"1"`: print warning `state-read:
      <name>.json schema_version is <value>, expected "1" — proceeding
-     anyway (no migration runner at v0.2, see Phase 0 decision §2)`.
+     anyway (no migration runner currently, see Phase 0 decision §2)`.
      Proceed.
    - No migration logic. None. This is intentional.
 
@@ -167,9 +167,9 @@ where the same atomic pattern applies.
 
 ## What this primitive does NOT do
 
-- Does NOT migrate between schema versions. Deferred to v0.5+ when a
+- Does NOT migrate between schema versions. Deferred to a future iteration when a
   real `"2"` ships.
-- Does NOT lock the file against concurrent writers. v0.2 assumes
+- Does NOT lock the file against concurrent writers. OMCR assumes
   serial execution (Phase 0 decision §4). Phase 3 will revisit.
 - Does NOT validate field-level types beyond the parse + schema_version
   check. Engine phases that depend on specific fields are responsible

@@ -7,7 +7,7 @@ description: For each non-structural comment, dispatch the labelled agent with t
 
 For every comment whose `agent` is non-null (i.e., label is `prose`, `analysis`, `citation`, or `clarification`), dispatch that agent with the comment text and a tightly-scoped manuscript slice. `structural` comments collect into a user-attention list that phase 06 surfaces.
 
-This phase is the **fan-out** of the classify-and-dispatch shape. Each non-structural comment is one independent Agent-tool call — the dispatches do not share context, do not see each other's outputs, and are sequenced serially (Phase 0 decision §4 — v0.2 is serial-only).
+This phase is the **fan-out** of the classify-and-dispatch shape. Each non-structural comment is one independent Agent-tool call — the dispatches do not share context, do not see each other's outputs, and are sequenced serially (Phase 0 decision §4 — currently serial-only).
 
 This phase composes [`../../orchestrate/phases/02-dispatch.md`](../../orchestrate/phases/02-dispatch.md) once per non-structural comment.
 

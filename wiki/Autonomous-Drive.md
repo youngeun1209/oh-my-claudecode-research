@@ -109,11 +109,11 @@ Every dispatch passes through 6 pre-dispatch gates. **Every gate is confirm-requ
 
 Multiple gates can trip on one dispatch — each must be confirmed in order. A typed `yes` is **not** acceptable for a gate; the confirmation phrase is distinct on purpose. Making the wrong choice should require a deliberate keystroke.
 
-The full implementation lives in [`skills/supervisor-drive/phases/04-engine-invoke.md`](../skills/supervisor-drive/phases/04-engine-invoke.md). The trigger keyword lists are locked at v0.4 — adding gates or changing triggers is a v0.5+ refinement.
+The full implementation lives in [`skills/supervisor-drive/phases/04-engine-invoke.md`](../skills/supervisor-drive/phases/04-engine-invoke.md). The trigger keyword lists are locked currently — adding gates or changing triggers is a future refinement.
 
 ## The hardcoded priority rules
 
-The bottleneck-ranker. Phase 02 of the skill applies these in order; first match wins. Hardcoded at v0.4 per Phase 3 decision §5 — no CLAUDE.md-driven override.
+The bottleneck-ranker. Phase 02 of the skill applies these in order; first match wins. Hardcoded currently per Phase 3 decision §5 — no CLAUDE.md-driven override.
 
 | # | Trigger | Engine / response |
 |---|---|---|
@@ -136,7 +136,7 @@ If you disagree with the ranking for a specific run, two escape hatches exist:
 - `--interactive` — the user picks an `alternative` each step.
 - `--plan-only` — inspect the plan, then stop and run the engine you actually want manually.
 
-User-configurable priority overrides are a v0.5 backlog item. v0.4 ships with hardcoded rules so the v0.5 design has a clean baseline.
+User-configurable priority overrides are a future backlog item. OMCR ships with hardcoded rules so the future design has a clean baseline.
 
 ## `--resume <run-id>` and `--fresh`
 
@@ -205,7 +205,7 @@ This makes the loop fully described by `loop { survey → plan → confirm → d
 
 This invariant is what makes the supervisor auditable. The full pattern is documented in [Orchestration model](Orchestration-Model.md); see also Phase 2 decision §5 (engines are leaves) and Phase 3 decision §3 (no inter-engine chaining).
 
-## Why single-target only at v0.4
+## Why single-target only currently
 
 Phase 3 decision §4 (locked, user ACK): `next_action` is always exactly one engine + one target per iter. No parallel dispatch.
 
@@ -216,7 +216,7 @@ Parallel dispatch multiplies every Phase 3 risk by N:
 - "Halt" gets ambiguous when one of three parallel engines errored.
 - `_run-log.jsonl` needs a new schema for grouped runs.
 
-Each is a v0.5+ problem. Single-target also keeps the example-session traces readable. Researchers iterating on a paper rarely need true parallelism — sequential runs are bounded by user attention anyway. Users who want parallelism today can run two Claude Code sessions side-by-side at their own risk.
+Each is a future-iteration problem. Single-target also keeps the example-session traces readable. Researchers iterating on a paper rarely need true parallelism — sequential runs are bounded by user attention anyway. Users who want parallelism today can run two Claude Code sessions side-by-side at their own risk.
 
 ## What the supervisor does NOT do
 

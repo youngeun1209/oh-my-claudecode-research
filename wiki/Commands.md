@@ -209,7 +209,7 @@ Output:
 - Fig 5 figure-descriptor memory says "Raw / Own / Other" but slide shows "Baseline / Treatment / Sham" — please reconcile.
 ```
 
-## Orchestration engines (v0.2–v0.4)
+## Orchestration engines
 
 Six engine commands automate multi-step research workflows. Each engine reads/writes state in `.claude/omcr-state/`, dispatches one or more agent personas via the [`orchestrate`](../skills/orchestrate/SKILL.md) primitive skill, and reports a DONE / CONTINUE / BLOCKED / HALT verdict. Engines are **leaves** — they never call other slash-command engines; cross-engine coordination is the autonomous `/supervisor-drive`'s job.
 

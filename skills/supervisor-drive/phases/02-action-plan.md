@@ -2,7 +2,7 @@
 
 Apply the **hardcoded bottleneck-ranker** to `current_picture` and emit a structured plan: one `next_action` (always single-target — Phase 3 §4) plus an `alternatives` list for the interactive-mode picker.
 
-**Priority rules are hardcoded at v0.4.** Per Phase 3 §5 (locked decision): no `CLAUDE.md`-driven override, no JSON config knob, no flag. Users who disagree on a specific run use `--interactive` (and pick from `alternatives`) or `--plan-only` (inspect and stop). The v0.5 backlog item is "user-configurable priority overrides" — keep this file's rules byte-stable at v0.4 so the v0.5 design has a clean baseline.
+**Priority rules are hardcoded currently.** Per Phase 3 §5 (locked decision): no `CLAUDE.md`-driven override, no JSON config knob, no flag. Users who disagree on a specific run use `--interactive` (and pick from `alternatives`) or `--plan-only` (inspect and stop). The future backlog item is "user-configurable priority overrides" — keep this file's rules byte-stable currently so the future design has a clean baseline.
 
 ## Inputs
 
@@ -78,7 +78,7 @@ Action: dispatch `/literature-sweep <topic>`. The topic resolution rule:
 }
 ```
 
-If a `@literature-curator` direct dispatch is more appropriate (e.g., only 1 placeholder, a known citekey is needed — not a topic sweep), the engine-of-choice belongs to the supervisor here. v0.4 always picks `/literature-sweep` because that engine is the leaf the supervisor is allowed to dispatch; the per-placeholder workflow (a direct `@literature-curator` dispatch with the placeholder context) is a v0.5 refinement and is not yet emitted by phase 02.
+If a `@literature-curator` direct dispatch is more appropriate (e.g., only 1 placeholder, a known citekey is needed — not a topic sweep), the engine-of-choice belongs to the supervisor here. the current implementation always picks `/literature-sweep` because that engine is the leaf the supervisor is allowed to dispatch; the per-placeholder workflow (a direct `@literature-curator` dispatch with the placeholder context) is a future refinement and is not yet emitted by phase 02.
 
 ### Priority 4 — Unwritten sections (`status: empty`)
 
@@ -269,5 +269,5 @@ Pass forward:
 - Does **not** apply safety gates. Phase 04 does that, post-confirmation.
 - Does **not** combine multiple engines into one plan. Single-target invariant (Phase 3 §4).
 - Does **not** read `_run-log.jsonl` itself (it consumes `current_picture.prior_trail` and `current_picture.recent_runs`, which phase 01 populated).
-- Does **not** override the priority table from a CLAUDE.md block. Hardcoded at v0.4 per Phase 3 §5.
-- Does **not** rank alternatives by anything other than the natural order of the underlying state (e.g., section declaration order in `paper.json`). v0.5 may revisit.
+- Does **not** override the priority table from a CLAUDE.md block. Hardcoded currently per Phase 3 §5.
+- Does **not** rank alternatives by anything other than the natural order of the underlying state (e.g., section declaration order in `paper.json`). a future iteration may revisit.

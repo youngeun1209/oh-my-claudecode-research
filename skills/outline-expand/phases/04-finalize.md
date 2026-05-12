@@ -237,11 +237,11 @@ durable.
 
 ## Step 7 — No git commit, no auto-iterate
 
-Mirroring `/iterate-revision` phase 05 step 5: v0.2 does **not** commit on the user's behalf from this phase. The drift artifact and section files are unstaged after the run. Users who want them committed run `git add -A && git commit` themselves.
+Mirroring `/iterate-revision` phase 05 step 5: OMCR does **not** commit on the user's behalf from this phase. The drift artifact and section files are unstaged after the run. Users who want them committed run `git add -A && git commit` themselves.
 
 This engine also does **not** auto-invoke `/iterate-revision`. Phase 2 decision §5 (engines are leaves) is binding. The user reads the suggested-next block and runs the engines they want.
 
-A future v0.3+ may add a `--auto-iterate` flag that chains `/iterate-revision` per section — but that decision is owned by Phase 3's `/supervisor-drive`, not by this engine.
+A future iteration may add a `--auto-iterate` flag that chains `/iterate-revision` per section — but that decision is owned by Phase 3's `/supervisor-drive`, not by this engine.
 
 ## Failure modes
 

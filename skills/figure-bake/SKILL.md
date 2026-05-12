@@ -130,7 +130,7 @@ Why the default `max_iter = 3` is deliberately small: each iter triggers real co
 
 ## Re-running policy
 
-- Already-DONE figure (status fields all `approved` / `done`) + first invocation in a fresh session → phase 01 lets the run proceed (the user re-invoked for a reason — perhaps the data changed). Iter counter continues; no early-exit flag in v0.2.
+- Already-DONE figure (status fields all `approved` / `done`) + first invocation in a fresh session → phase 01 lets the run proceed (the user re-invoked for a reason — perhaps the data changed). Iter counter continues; no early-exit flag currently.
 - BLOCKED figure → phase 01 lets the run proceed; the user is expected to have addressed the critical issue (revised the brief, fixed the data, or moved to a different `vector_path`) before re-running. Iter counter continues.
 - HALT figure → phase 01 lets the run proceed; iter counter continues from where it left off.
 - Missing fig-id in `figures.json` → phase 01 creates the entry (with `brief_status: "missing"`, `impl_status: "missing"`, `critique_status: "pending"`, `iter: 0`, and a templated `vector_path` of `<manuscript_root>/figures/<fig-id>.pdf`) and proceeds into phase 02.

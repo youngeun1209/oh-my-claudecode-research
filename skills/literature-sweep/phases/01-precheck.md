@@ -79,7 +79,7 @@ Per [`develop/phase-2-decisions.md`](../../../develop/phase-2-decisions.md) §1:
   ```
 - If `P > 4`: warn and clamp to 4:
   ```
-  literature-sweep: --parallel <value> exceeds the v0.2 cap of 4 — clamping to 4.
+  literature-sweep: --parallel <value> exceeds the cap of 4 — clamping to 4.
   Rationale: above 4 instances the speedup collapses while CrossRef / OpenAlex
   rate-limiting risk grows. See phase-2-decisions.md §1.
   ```

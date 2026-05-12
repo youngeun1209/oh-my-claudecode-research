@@ -148,7 +148,7 @@ The loop primitive also applies its post-hoc `budget_tokens` cap here (Phase 0 d
 ## What this phase does NOT do
 
 - Does **not** invoke any subagent. Pure logic + state writes.
-- Does **not** decide whether to commit (loop's `on_iter_end` owns that; v0.2 leaves it off).
+- Does **not** decide whether to commit (loop's `on_iter_end` owns that; OMCR currently leaves it off).
 - Does **not** modify `_run-log.jsonl`. The loop primitive owns that file.
 - Does **not** touch `citations.json` or `figures.json`. Out of scope for `/iterate-revision`.
 - Does **not** invent verdict values. Only the four are allowed.

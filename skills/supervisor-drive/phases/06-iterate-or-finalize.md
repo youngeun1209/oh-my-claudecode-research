@@ -29,7 +29,7 @@ If phase 04 already flipped `paper.json.submission_ready = true` (priority 8 pat
 Specifically, this condition fires if **either** of:
 
 - Phase 04 set `submission_ready` directly (priority 8 from phase 02).
-- A re-read of `paper.json` shows `submission_ready == true` (some engine the supervisor dispatched flipped it — unusual but possible in v0.5+).
+- A re-read of `paper.json` shows `submission_ready == true` (some engine the supervisor dispatched flipped it — unusual but possible currently+).
 
 Verdict: `DONE`. Jump to phase 07 with `final_verdict: "DONE"`.
 

@@ -99,7 +99,7 @@ Per-iter cost is dominated by the persona body inline (writer ~250 lines, review
 
 - Does **not** track which issues were "already fixed" across iterations. Only the most recent review is passed to the writer (Phase 1 decision Q1). The reviewer's iter-N+1 read is what catches regressions.
 - Does **not** auto-call `verify-citation` when the reviewer flags a missing citation. Citation flags land as ordinary `major`/`minor` issues; the writer addresses them next iter or leaves a `[CITE: ...]` placeholder for `@literature-curator`. (Phase 1 decision Q3 — deferred to Phase 2 `/respond-reviewer`.)
-- Does **not** commit to git between iterations by default. Per-iter commit is an opt-in flag (passed to the loop primitive's `on_iter_end` slot); v0.2 leaves it off.
+- Does **not** commit to git between iterations by default. Per-iter commit is an opt-in flag (passed to the loop primitive's `on_iter_end` slot); OMCR currently leaves it off.
 - Does **not** call another engine. Engines are leaves; if you need to chain, that is `/supervisor-drive`'s job in Phase 3.
 - Does **not** rewrite `main.tex` or any non-section file. The writer touches the section file only.
 

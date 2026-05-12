@@ -1,6 +1,6 @@
 # Phase 5 — Finalize
 
-User-facing summary after the loop exits. Pulls the loop primitive's return value and renders it as a few lines the user can read in the Claude Code transcript. Appends one summary line to `_run-log.jsonl` (in addition to the start + end records the orchestrate loop primitive already wrote). No git commit, no push — those stay out of v0.2 by default.
+User-facing summary after the loop exits. Pulls the loop primitive's return value and renders it as a few lines the user can read in the Claude Code transcript. Appends one summary line to `_run-log.jsonl` (in addition to the start + end records the orchestrate loop primitive already wrote). No git commit, no push — those stay out by default.
 
 ## Inputs (from the loop primitive)
 
@@ -150,9 +150,9 @@ above is the canonical record of this run; reviews.json + paper.json are durable
 
 ## Step 5 — No git commit
 
-v0.2 does **not** commit on behalf of the user from this phase. If `on_iter_end == "git-commit"` was set on the loop primitive (currently never set by this engine), the loop already committed per-iter; phase 05 still does nothing.
+OMCR does **not** commit on behalf of the user from this phase. If `on_iter_end == "git-commit"` was set on the loop primitive (currently never set by this engine), the loop already committed per-iter; phase 05 still does nothing.
 
-Future versions may add a `--commit` flag that triggers a single final commit here with a message like `omcr: iterate-revision <section_name> <verdict> (<iter_count> iter)`. That is a v0.3+ concern.
+Future versions may add a `--commit` flag that triggers a single final commit here with a message like `omcr: iterate-revision <section_name> <verdict> (<iter_count> iter)`. That is a future-version concern.
 
 ## Failure modes
 

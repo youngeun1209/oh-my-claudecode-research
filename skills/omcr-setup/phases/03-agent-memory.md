@@ -2,7 +2,7 @@
 
 Two infrastructure scaffolds in one phase: agent memory directories (so
 the 6 personas have a persistence target on first run) and the
-orchestration state directory (so the v0.2+ engines have empty state
+orchestration state directory (so the orchestration engines have empty state
 files to read).
 
 ## Part A — Agent memory (6 personas)
@@ -35,7 +35,7 @@ Record what was created vs. skipped so phase 6 can summarize.
 
 Scaffold the `.claude/omcr-state/` directory and seed it with the four
 empty JSON state files plus an empty append-only run log. These are the
-files the v0.2+ orchestration engines (`/iterate-revision`,
+files the orchestration engines (`/iterate-revision`,
 `/literature-sweep`, `/respond-reviewer`, `/figure-bake`,
 `/outline-expand`, `/supervisor-drive`) read on every run.
 
@@ -93,6 +93,6 @@ before writing.
 - Does NOT populate `paper.json` with a working title / hypothesis /
   venue. Those fields stay `null` here; `/start-research` fills them
   during its interview phase.
-- Does NOT migrate state between schema versions. v0.2 ships only
+- Does NOT migrate state between schema versions. OMCR ships only
   `"1"`; future migration is deferred per Phase 0 decision §2.
 - Does NOT create `.claude/omcr-state/logs/`. Flat layout only.

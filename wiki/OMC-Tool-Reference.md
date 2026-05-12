@@ -134,7 +134,7 @@ Currently (v0.1.x), OMCR's 6 agents are prompt-only — they don't directly invo
 - A user can ask `@analysis-implementer` to "use python_repl to test the spin-test" and the agent will use OMC's MCP tool naturally.
 - A user can ask `@supervisor` to "search session history for our decision about parameter k" and the agent will use `session_search`.
 
-In OMCR v0.2 (per the project's v0.2 backlog), agents may be retrofitted to use the "detect-and-enhance" pattern — automatically use OMC's tools when available, fall back to plain instructions when not.
+In OMCR (per the project's future backlog), agents may be retrofitted to use the "detect-and-enhance" pattern — automatically use OMC's tools when available, fall back to plain instructions when not.
 
 ## Quick lookup — common research tasks → OMC tool
 

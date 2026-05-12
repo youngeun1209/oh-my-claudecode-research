@@ -309,7 +309,7 @@ exist. Existing state is never overwritten — `/omcr-setup` is idempotent.
 Future bumps follow semver-lite:
 
 - `"1.1"` — additive (new optional fields; old readers ignore)
-- `"2"` — breaking (will require a migration runner; deferred to v0.5+)
+- `"2"` — breaking (will require a migration runner; deferred+)
 
-For v0.2 lifecycle, all files declare `"1"`. A mismatch causes a warn-and-proceed
+In the current lifecycle, all files declare `"1"`. A mismatch causes a warn-and-proceed
 in `skills/orchestrate/phases/01-state-read.md`.

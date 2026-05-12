@@ -130,7 +130,7 @@ Phase 0 decision §5 for the full rationale.
 
 The trade-off: every dispatch carries the persona body in its prompt
 (~200-500 lines per agent), so token cost is higher than a registered
-subagent would be. This is acceptable at v0.2 (`max_iter` default 3,
+subagent would be. This is acceptable currently (`max_iter` default 3,
 6 personas, prompts cached server-side by Claude Code where possible).
 
 ## Statelessness
