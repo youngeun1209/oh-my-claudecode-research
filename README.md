@@ -46,7 +46,7 @@ The 4 setup/workflow slash commands are thin dispatchers — each forwards `$ARG
 | `todofig` | Backs `/todofig`. Compare a captured figure deck against the outline; produce a prioritized P0/P1/P2 TODO of gaps. |
 | `cropfig` | Three-step pipeline from a `.key`/`.pptx` deck to manuscript + outline artifacts: per-slide vector PDFs (cropped, manuscript-grade) + outline-grade PNGs. Invoked directly or by other commands; no slash. |
 | `verify-citation` | Existence + metadata check via CrossRef/OpenAlex. Gates every entry `@literature-curator` adds, writes verification verdict into the project summary table. |
-| `manuscript-scaffold` | Copy the bundled LaTeX skeleton into the user's manuscript dir, optionally apply a journal-specific `\documentclass` from the bundled registry, optionally clone an Overleaf project (token never persisted to tracked files), commit on the default branch, ask before pushing. Called by `/start-research` phase 5; also standalone-invocable. |
+| `manuscript-scaffold` | Copy the bundled LaTeX skeleton into the user's manuscript dir, optionally apply a journal-specific `\documentclass` from the bundled registry, optionally clone an Overleaf project (token never persisted to tracked files), commit on the default branch, ask before pushing. Called by `/start-research` phase 6; also standalone-invocable. |
 
 ### 4 hooks
 
@@ -167,7 +167,7 @@ OMCR treats [`oh-my-claudecode`](https://github.com/Yeachan-Heo/oh-my-claudecode
 | `@git-master` agent | Atomic-commit discipline — independently revertable analysis steps. |
 | `/oh-my-claudecode:autoresearch` skill | Bounded evaluator-driven iteration loop with per-iteration JSON + decision logs. |
 | `/oh-my-claudecode:deep-interview` skill | Socratic clarification of vague research goals into testable hypotheses. |
-| OMC orchestration skills (`ralph`, `team`, `autopilot`, `ralplan`, `ultraqa`, `autoresearch`, …) | Multi-iteration / parallel / consensus orchestrators for analysis runs, literature scans, must-finish revisions. See [`wiki/With-OMC.md#recipes--pairing-omcr-with-omc`](wiki/With-OMC.md#recipes--pairing-omcr-with-omc) for 4 worked recipes. |
+| OMC orchestration skills (`ralph`, `team`, `autopilot`, `ralplan`, `ultraqa`, `autoresearch`, …) | Multi-iteration / parallel / consensus orchestrators for analysis runs, literature scans, must-finish revisions. See [`wiki/With-OMC.md#recipes--pairing-omcr-with-omc`](wiki/With-OMC.md#recipes--pairing-omcr-with-omc) for 5 worked recipes. |
 | `wiki_*` / `notepad_*` / `state_*` / `python_repl` MCP tools | Literature wiki / hypothesis register / experiment-run registry / stateful Python REPL. |
 
 Install OMC alongside via the Claude Code marketplace, or `npm i -g oh-my-claude-sisyphus`. Full mapping: [`wiki/With-OMC.md`](wiki/With-OMC.md) + [`wiki/OMC-Tool-Reference.md`](wiki/OMC-Tool-Reference.md).

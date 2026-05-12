@@ -1,6 +1,6 @@
 # Contributing to oh-my-claudecode-research
 
-This is a small repo with a focused scope: 6 research-team agents, 4 lightweight hooks, and field-specific example presets. Contributions that fit that scope are welcome. Contributions that expand it (npm publishing, build pipelines, domain-specific helpers in the core, etc.) probably belong in upstream [`oh-my-claudecode`](https://github.com/Yeachan-Heo/oh-my-claudecode) instead.
+This is a small repo with a focused scope: 6 research-team agents, 10 slash commands, 14 skills, 4 lightweight hooks, and field-specific example presets. Contributions that fit that scope are welcome. Contributions that expand it (npm publishing, build pipelines, domain-specific helpers in the core, etc.) probably belong in upstream [`oh-my-claudecode`](https://github.com/Yeachan-Heo/oh-my-claudecode) instead.
 
 ## How to propose a new agent
 
