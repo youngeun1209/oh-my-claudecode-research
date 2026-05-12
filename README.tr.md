@@ -14,51 +14,6 @@ OMCR, [oh-my-claudecode](https://github.com/Yeachan-Heo/oh-my-claudecode)'un ara
 
 > **Tam dokümantasyon:** [`wiki/Home.md`](wiki/Home.md)
 
-## What you get
-
-### 6 agents (`@`-mention)
-
-| Agent | Role |
-|---|---|
-| `@supervisor` | PI seviyesinde bilimsel vizyon koruyucusu + proje orkestratörü. Merkezi hipotezi sahiplenir; alt ajanlara delege eder. |
-| `@analysis-implementer` | Pipeline, istatistiksel analiz, ML/simülasyon modellerini uygular. Varsayılan olarak alan-nötr. |
-| `@paper-writer` | Manuscript bölümlerini high-impact dergi düzeyinde nesirle yazar. |
-| `@figure-descriptor` | Şekilleri implementasyona hazır brief'ler olarak tasarlar — görüntü üretmez. |
-| `@reviewer` | Hedef venue seviyesinde gönderim öncesi adversarial review. |
-| `@literature-curator` | Projenin BibTeX'i ve literature summary table'ını lockstep tutar. `[CITE: ...]` placeholder'larını çözer, atıfları `verify-citation` skill'iyle doğrular, asla uydurmaz. |
-
-### 4 slash commands (projenizin CLAUDE.md'si üzerinden parametrelenir)
-
-| Command | What it does |
-|---|---|
-| `/omcr-setup` | Kurulum tarzı: `CLAUDE.md`'ye boş işaretleyici blokları, `.claude/agent-memory/` dizinleri, boş `references.bib`/`references.csv`, ve `.claude/settings.json`'da küratörlü izin allowlist'i yerleştirir. **Araştırmanız hakkında soru sormaz.** Proje başına bir kez çalıştırın. |
-| `/start-research [minimal\|neuro-fmri]` | Mülakat tarzı: `CLAUDE.md` placeholder'larını doldurur (çalışma başlığı, hipotez, hedef venue, datasetler, anlatı omurgası), isteğe bağlı olarak ajan belleğine bir preset uygular, LaTeX manuscript dizinini scaffold eder (`manuscript-scaffold` skill'i aracılığıyla, dergi template'i + opsiyonel Overleaf clone ile). Eğer `/omcr-setup` çalıştırılmamışsa önce onu çalıştırmayı önerir. |
-| `/todofig [Fig N]` | Yakalanan bir figure deck'i bir outline ile karşılaştırır → P0/P1/P2 öncelikli TODO. |
-| `/sync` | Mevcut durumu (deck) hedefle (outline) uzlaştırır, ajan belleklerini tazeler, isteğe bağlı olarak crop'lanmış figure'ları hedef belgeye gömer. Bir snapshot, TODO değil. |
-
-### 14 skills
-
-4 setup/workflow slash komutu thin dispatcher'lardır — her biri `$ARGUMENTS`'i eşleşen bir skill'e forward eder. `cropfig`, `verify-citation`, `manuscript-scaffold` bağımsız olarak da çağrılabilir. **Ek olarak** 1 primitive (`orchestrate` — dahili, 4 fazdan compose olur) + 6 orkestrasyon komutunu destekleyen engine skill; tam walkthrough [`wiki/Using-Orchestration.md`](wiki/Using-Orchestration.md). Aşağıdaki tablo 7 setup/workflow skill'ini kapsar.
-
-| Skill | What it does |
-|---|---|
-| `omcr-setup` | `/omcr-setup` arkasında. Kurulum tarzı: `CLAUDE.md` işaretleyici blokları, agent-memory dizinleri, bibliografi dosyaları, küratörlü izin allowlist'i scaffold eder. |
-| `start-research` | `/start-research` arkasında. Mülakat tarzı ilk proje init: scaffold edilmiş `CLAUDE.md` placeholder'larını doldurur, isteğe bağlı preset overlay uygular, manuscript scaffold'u `manuscript-scaffold`'a delege eder. |
-| `sync` | `/sync` arkasında. Mevcut durumu (yakalanmış figure deck) outline ile uzlaştırır; ajan belleklerini olgusal drift'lerle tazeler; sadece snapshot (TODO yok). |
-| `todofig` | `/todofig` arkasında. Yakalanmış figure deck ile outline'ı karşılaştırır; gap'ler için P0/P1/P2 öncelikli TODO üretir. |
-| `cropfig` | `.key`/`.pptx` deck'ten manuscript + outline artifact'larına üç adımlı pipeline: slide-başına vektör PDF (cropped, manuscript-grade) + outline-grade PNG. Doğrudan veya başka komutlar tarafından çağrılır; slash yok. |
-| `verify-citation` | CrossRef/OpenAlex aracılığıyla varlık + metadata kontrolü. `@literature-curator`'ın eklediği her girdiyi gate'ler, doğrulama sonucunu projenin summary table'ına yazar. |
-| `manuscript-scaffold` | Paketlenmiş LaTeX skeleton'u kullanıcının manuscript dizinine kopyalar, isteğe bağlı olarak paketlenmiş registry'den dergiye özel `\documentclass` uygular, isteğe bağlı olarak bir Overleaf projesini clone'lar (token tracked dosyalara persist edilmez), default branch'e commit atar, push öncesi sorar. `/start-research` faz 6 tarafından çağrılır; bağımsız olarak da çağrılabilir. |
-
-### 4 hooks
-
-| Hook | Event | Behavior |
-|---|---|---|
-| `pii-scrub` | `PreToolUse:Write\|Edit` | PII (varsayılan: email / SSN / subject ID; yapılandırılabilir) içeren write'ları engeller. |
-| `memory-load` | `SessionStart` | `.claude/agent-memory/*/MEMORY.md`'yi oturum bağlamına otomatik inject eder. |
-| `citation-warn` | `PostToolUse:Write\|Edit` | Manuscript markdown'da atıfsız paragraflar olduğunda heuristic, bloklamayan uyarı. |
-| `setup-nudge` | `SessionStart` | CLAUDE.md'de `## Project context` veya `## Research stack` blokları yoksa, `/omcr-setup` ardından `/start-research` çalıştırmak için bloklamayan tek satırlık dürtü. |
-
 ## Install
 
 **Önerilen — Claude Code marketplace akışı** (satır başına bir slash komutu, teker teker girin):
@@ -121,6 +76,51 @@ Kurduktan sonra bir araştırma projesi açın ve sırayla çalıştırın:
 ```
 
 Tam walkthrough: [`wiki/Getting-Started.md`](wiki/Getting-Started.md)
+
+## What you get
+
+### 6 agents (`@`-mention)
+
+| Agent | Role |
+|---|---|
+| `@supervisor` | PI seviyesinde bilimsel vizyon koruyucusu + proje orkestratörü. Merkezi hipotezi sahiplenir; alt ajanlara delege eder. |
+| `@analysis-implementer` | Pipeline, istatistiksel analiz, ML/simülasyon modellerini uygular. Varsayılan olarak alan-nötr. |
+| `@paper-writer` | Manuscript bölümlerini high-impact dergi düzeyinde nesirle yazar. |
+| `@figure-descriptor` | Şekilleri implementasyona hazır brief'ler olarak tasarlar — görüntü üretmez. |
+| `@reviewer` | Hedef venue seviyesinde gönderim öncesi adversarial review. |
+| `@literature-curator` | Projenin BibTeX'i ve literature summary table'ını lockstep tutar. `[CITE: ...]` placeholder'larını çözer, atıfları `verify-citation` skill'iyle doğrular, asla uydurmaz. |
+
+### 4 slash commands (projenizin CLAUDE.md'si üzerinden parametrelenir)
+
+| Command | What it does |
+|---|---|
+| `/omcr-setup` | Kurulum tarzı: `CLAUDE.md`'ye boş işaretleyici blokları, `.claude/agent-memory/` dizinleri, boş `references.bib`/`references.csv`, ve `.claude/settings.json`'da küratörlü izin allowlist'i yerleştirir. **Araştırmanız hakkında soru sormaz.** Proje başına bir kez çalıştırın. |
+| `/start-research [minimal\|neuro-fmri]` | Mülakat tarzı: `CLAUDE.md` placeholder'larını doldurur (çalışma başlığı, hipotez, hedef venue, datasetler, anlatı omurgası), isteğe bağlı olarak ajan belleğine bir preset uygular, LaTeX manuscript dizinini scaffold eder (`manuscript-scaffold` skill'i aracılığıyla, dergi template'i + opsiyonel Overleaf clone ile). Eğer `/omcr-setup` çalıştırılmamışsa önce onu çalıştırmayı önerir. |
+| `/todofig [Fig N]` | Yakalanan bir figure deck'i bir outline ile karşılaştırır → P0/P1/P2 öncelikli TODO. |
+| `/sync` | Mevcut durumu (deck) hedefle (outline) uzlaştırır, ajan belleklerini tazeler, isteğe bağlı olarak crop'lanmış figure'ları hedef belgeye gömer. Bir snapshot, TODO değil. |
+
+### 14 skills
+
+4 setup/workflow slash komutu thin dispatcher'lardır — her biri `$ARGUMENTS`'i eşleşen bir skill'e forward eder. `cropfig`, `verify-citation`, `manuscript-scaffold` bağımsız olarak da çağrılabilir. **Ek olarak** 1 primitive (`orchestrate` — dahili, 4 fazdan compose olur) + 6 orkestrasyon komutunu destekleyen engine skill; tam walkthrough [`wiki/Using-Orchestration.md`](wiki/Using-Orchestration.md). Aşağıdaki tablo 7 setup/workflow skill'ini kapsar.
+
+| Skill | What it does |
+|---|---|
+| `omcr-setup` | `/omcr-setup` arkasında. Kurulum tarzı: `CLAUDE.md` işaretleyici blokları, agent-memory dizinleri, bibliografi dosyaları, küratörlü izin allowlist'i scaffold eder. |
+| `start-research` | `/start-research` arkasında. Mülakat tarzı ilk proje init: scaffold edilmiş `CLAUDE.md` placeholder'larını doldurur, isteğe bağlı preset overlay uygular, manuscript scaffold'u `manuscript-scaffold`'a delege eder. |
+| `sync` | `/sync` arkasında. Mevcut durumu (yakalanmış figure deck) outline ile uzlaştırır; ajan belleklerini olgusal drift'lerle tazeler; sadece snapshot (TODO yok). |
+| `todofig` | `/todofig` arkasında. Yakalanmış figure deck ile outline'ı karşılaştırır; gap'ler için P0/P1/P2 öncelikli TODO üretir. |
+| `cropfig` | `.key`/`.pptx` deck'ten manuscript + outline artifact'larına üç adımlı pipeline: slide-başına vektör PDF (cropped, manuscript-grade) + outline-grade PNG. Doğrudan veya başka komutlar tarafından çağrılır; slash yok. |
+| `verify-citation` | CrossRef/OpenAlex aracılığıyla varlık + metadata kontrolü. `@literature-curator`'ın eklediği her girdiyi gate'ler, doğrulama sonucunu projenin summary table'ına yazar. |
+| `manuscript-scaffold` | Paketlenmiş LaTeX skeleton'u kullanıcının manuscript dizinine kopyalar, isteğe bağlı olarak paketlenmiş registry'den dergiye özel `\documentclass` uygular, isteğe bağlı olarak bir Overleaf projesini clone'lar (token tracked dosyalara persist edilmez), default branch'e commit atar, push öncesi sorar. `/start-research` faz 6 tarafından çağrılır; bağımsız olarak da çağrılabilir. |
+
+### 4 hooks
+
+| Hook | Event | Behavior |
+|---|---|---|
+| `pii-scrub` | `PreToolUse:Write\|Edit` | PII (varsayılan: email / SSN / subject ID; yapılandırılabilir) içeren write'ları engeller. |
+| `memory-load` | `SessionStart` | `.claude/agent-memory/*/MEMORY.md`'yi oturum bağlamına otomatik inject eder. |
+| `citation-warn` | `PostToolUse:Write\|Edit` | Manuscript markdown'da atıfsız paragraflar olduğunda heuristic, bloklamayan uyarı. |
+| `setup-nudge` | `SessionStart` | CLAUDE.md'de `## Project context` veya `## Research stack` blokları yoksa, `/omcr-setup` ardından `/start-research` çalıştırmak için bloklamayan tek satırlık dürtü. |
 
 ## Documentation
 

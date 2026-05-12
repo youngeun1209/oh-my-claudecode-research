@@ -14,51 +14,6 @@ OMCR — это исследовательский собрат [oh-my-claudecod
 
 > **Полная документация:** [`wiki/Home.md`](wiki/Home.md)
 
-## What you get
-
-### 6 agents (`@`-mention)
-
-| Agent | Role |
-|---|---|
-| `@supervisor` | Хранитель научного видения уровня PI + оркестратор проекта. Владеет центральной гипотезой; делегирует субагентам. |
-| `@analysis-implementer` | Реализует пайплайны, статистический анализ, ML/симуляционные модели. По умолчанию domain-neutral. |
-| `@paper-writer` | Пишет секции manuscript на уровне прозы high-impact журнала. |
-| `@figure-descriptor` | Проектирует figure как готовые к реализации briefs — изображения не генерирует. |
-| `@reviewer` | Соревновательная пред-сабмиссионная ревью на уровне целевого venue. |
-| `@literature-curator` | Синхронно владеет BibTeX и literature summary table проекта. Разрешает плейсхолдеры `[CITE: ...]`, верифицирует цитирования через скилл `verify-citation`, никогда не фабрикует. |
-
-### 4 slash commands (параметризуются через CLAUDE.md вашего проекта)
-
-| Command | What it does |
-|---|---|
-| `/omcr-setup` | Установочный режим: раскладывает пустые маркерные блоки в `CLAUDE.md`, директории `.claude/agent-memory/`, пустые `references.bib`/`references.csv`, и курированный allowlist прав в `.claude/settings.json`. **Не задаёт вопросов о вашем исследовании.** Запускайте один раз на проект. |
-| `/start-research [minimal\|neuro-fmri]` | Интервью-режим: заполняет плейсхолдеры в `CLAUDE.md` (working title, гипотеза, целевой venue, датасеты, нарративная линия), опционально применяет пресет к памяти агентов, scaffold LaTeX-директории manuscript (через скилл `manuscript-scaffold`, с шаблоном журнала + опциональным Overleaf clone). Если `/omcr-setup` ещё не выполнялся — предложит выполнить сначала. |
-| `/todofig [Fig N]` | Сравнивает захваченный figure deck с outline → приоритизированный TODO P0/P1/P2. |
-| `/sync` | Согласовывает текущее состояние (deck) с целью (outline), обновляет память агентов, опционально встраивает cropped figure в целевой документ. Снимок состояния, не TODO. |
-
-### 14 skills
-
-4 setup/workflow слеш-команды — это thin dispatcher: каждая форвардит `$ARGUMENTS` соответствующему скиллу. `cropfig`, `verify-citation`, `manuscript-scaffold` также вызываются самостоятельно. **Плюс** 1 primitive (`orchestrate` — внутренний, состоит из 4 фаз) + 6 engine-скиллов, backing 6 оркестрационных команд; полный гайд в [`wiki/Using-Orchestration.md`](wiki/Using-Orchestration.md). Таблица ниже покрывает 7 setup/workflow скиллов.
-
-| Skill | What it does |
-|---|---|
-| `omcr-setup` | Бэкает `/omcr-setup`. Установочный режим: scaffold маркерных блоков `CLAUDE.md`, agent-memory директорий, файлов библиографии, курированного allowlist прав. |
-| `start-research` | Бэкает `/start-research`. Интервью-режим инициализации первого проекта: заполняет уже scaffold-нутые плейсхолдеры `CLAUDE.md`, опционально применяет preset overlay, делегирует manuscript scaffold в `manuscript-scaffold`. |
-| `sync` | Бэкает `/sync`. Согласовывает текущее состояние (захваченный figure deck) с outline; обновляет память агентов фактическими дрифтами; только снимок состояния (без TODO). |
-| `todofig` | Бэкает `/todofig`. Сравнивает захваченный figure deck с outline; выдаёт приоритизированный TODO P0/P1/P2 по gap-ам. |
-| `cropfig` | Трёхшаговый пайплайн от `.key`/`.pptx` deck до артефактов manuscript + outline: per-slide векторные PDF (cropped, manuscript-grade) + outline-grade PNG. Вызывается напрямую или другими командами; без слеша. |
-| `verify-citation` | Проверка существования + метаданных через CrossRef/OpenAlex. Гейтит каждую запись, которую добавляет `@literature-curator`, пишет вердикт верификации в summary table проекта. |
-| `manuscript-scaffold` | Копирует встроенный LaTeX skeleton в директорию manuscript пользователя, опционально применяет journal-специфичный `\documentclass` из встроенного registry, опционально клонирует Overleaf проект (токен никогда не persist-ится в tracked файлы), коммитит в default branch, спрашивает перед push. Вызывается из `/start-research` фазы 6; также вызывается самостоятельно. |
-
-### 4 hooks
-
-| Hook | Event | Behavior |
-|---|---|---|
-| `pii-scrub` | `PreToolUse:Write\|Edit` | Блокирует запись с PII (по умолчанию: email / SSN / subject ID; конфигурируется). |
-| `memory-load` | `SessionStart` | Авто-инжектит `.claude/agent-memory/*/MEMORY.md` в контекст сессии. |
-| `citation-warn` | `PostToolUse:Write\|Edit` | Эвристическое не-блокирующее предупреждение, когда в manuscript markdown есть абзацы без цитат. |
-| `setup-nudge` | `SessionStart` | Не-блокирующее однострочное напоминание запустить `/omcr-setup`, затем `/start-research`, если в CLAUDE.md нет блоков `## Project context` или `## Research stack`. |
-
 ## Install
 
 **Рекомендуется — поток Claude Code marketplace** (по одной слеш-команде на строку, вводите по одной):
@@ -121,6 +76,51 @@ cp /path/to/checkout/agents/*.md /path/to/your-project/.claude/agents/
 ```
 
 Полный гайд: [`wiki/Getting-Started.md`](wiki/Getting-Started.md)
+
+## What you get
+
+### 6 agents (`@`-mention)
+
+| Agent | Role |
+|---|---|
+| `@supervisor` | Хранитель научного видения уровня PI + оркестратор проекта. Владеет центральной гипотезой; делегирует субагентам. |
+| `@analysis-implementer` | Реализует пайплайны, статистический анализ, ML/симуляционные модели. По умолчанию domain-neutral. |
+| `@paper-writer` | Пишет секции manuscript на уровне прозы high-impact журнала. |
+| `@figure-descriptor` | Проектирует figure как готовые к реализации briefs — изображения не генерирует. |
+| `@reviewer` | Соревновательная пред-сабмиссионная ревью на уровне целевого venue. |
+| `@literature-curator` | Синхронно владеет BibTeX и literature summary table проекта. Разрешает плейсхолдеры `[CITE: ...]`, верифицирует цитирования через скилл `verify-citation`, никогда не фабрикует. |
+
+### 4 slash commands (параметризуются через CLAUDE.md вашего проекта)
+
+| Command | What it does |
+|---|---|
+| `/omcr-setup` | Установочный режим: раскладывает пустые маркерные блоки в `CLAUDE.md`, директории `.claude/agent-memory/`, пустые `references.bib`/`references.csv`, и курированный allowlist прав в `.claude/settings.json`. **Не задаёт вопросов о вашем исследовании.** Запускайте один раз на проект. |
+| `/start-research [minimal\|neuro-fmri]` | Интервью-режим: заполняет плейсхолдеры в `CLAUDE.md` (working title, гипотеза, целевой venue, датасеты, нарративная линия), опционально применяет пресет к памяти агентов, scaffold LaTeX-директории manuscript (через скилл `manuscript-scaffold`, с шаблоном журнала + опциональным Overleaf clone). Если `/omcr-setup` ещё не выполнялся — предложит выполнить сначала. |
+| `/todofig [Fig N]` | Сравнивает захваченный figure deck с outline → приоритизированный TODO P0/P1/P2. |
+| `/sync` | Согласовывает текущее состояние (deck) с целью (outline), обновляет память агентов, опционально встраивает cropped figure в целевой документ. Снимок состояния, не TODO. |
+
+### 14 skills
+
+4 setup/workflow слеш-команды — это thin dispatcher: каждая форвардит `$ARGUMENTS` соответствующему скиллу. `cropfig`, `verify-citation`, `manuscript-scaffold` также вызываются самостоятельно. **Плюс** 1 primitive (`orchestrate` — внутренний, состоит из 4 фаз) + 6 engine-скиллов, backing 6 оркестрационных команд; полный гайд в [`wiki/Using-Orchestration.md`](wiki/Using-Orchestration.md). Таблица ниже покрывает 7 setup/workflow скиллов.
+
+| Skill | What it does |
+|---|---|
+| `omcr-setup` | Бэкает `/omcr-setup`. Установочный режим: scaffold маркерных блоков `CLAUDE.md`, agent-memory директорий, файлов библиографии, курированного allowlist прав. |
+| `start-research` | Бэкает `/start-research`. Интервью-режим инициализации первого проекта: заполняет уже scaffold-нутые плейсхолдеры `CLAUDE.md`, опционально применяет preset overlay, делегирует manuscript scaffold в `manuscript-scaffold`. |
+| `sync` | Бэкает `/sync`. Согласовывает текущее состояние (захваченный figure deck) с outline; обновляет память агентов фактическими дрифтами; только снимок состояния (без TODO). |
+| `todofig` | Бэкает `/todofig`. Сравнивает захваченный figure deck с outline; выдаёт приоритизированный TODO P0/P1/P2 по gap-ам. |
+| `cropfig` | Трёхшаговый пайплайн от `.key`/`.pptx` deck до артефактов manuscript + outline: per-slide векторные PDF (cropped, manuscript-grade) + outline-grade PNG. Вызывается напрямую или другими командами; без слеша. |
+| `verify-citation` | Проверка существования + метаданных через CrossRef/OpenAlex. Гейтит каждую запись, которую добавляет `@literature-curator`, пишет вердикт верификации в summary table проекта. |
+| `manuscript-scaffold` | Копирует встроенный LaTeX skeleton в директорию manuscript пользователя, опционально применяет journal-специфичный `\documentclass` из встроенного registry, опционально клонирует Overleaf проект (токен никогда не persist-ится в tracked файлы), коммитит в default branch, спрашивает перед push. Вызывается из `/start-research` фазы 6; также вызывается самостоятельно. |
+
+### 4 hooks
+
+| Hook | Event | Behavior |
+|---|---|---|
+| `pii-scrub` | `PreToolUse:Write\|Edit` | Блокирует запись с PII (по умолчанию: email / SSN / subject ID; конфигурируется). |
+| `memory-load` | `SessionStart` | Авто-инжектит `.claude/agent-memory/*/MEMORY.md` в контекст сессии. |
+| `citation-warn` | `PostToolUse:Write\|Edit` | Эвристическое не-блокирующее предупреждение, когда в manuscript markdown есть абзацы без цитат. |
+| `setup-nudge` | `SessionStart` | Не-блокирующее однострочное напоминание запустить `/omcr-setup`, затем `/start-research`, если в CLAUDE.md нет блоков `## Project context` или `## Research stack`. |
 
 ## Documentation
 

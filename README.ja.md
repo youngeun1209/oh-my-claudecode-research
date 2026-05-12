@@ -14,51 +14,6 @@ OMCR は [oh-my-claudecode](https://github.com/Yeachan-Heo/oh-my-claudecode) の
 
 > **完全なドキュメント:** [`wiki/Home.md`](wiki/Home.md)
 
-## What you get
-
-### 6 agents (`@`-mention)
-
-| Agent | Role |
-|---|---|
-| `@supervisor` | PI レベルの科学的ビジョン保持者 + プロジェクトオーケストレーター。中心仮説を保持し、サブエージェントに委譲。 |
-| `@analysis-implementer` | パイプライン、統計分析、ML/シミュレーションモデルを実装。デフォルトは分野ニュートラル。 |
-| `@paper-writer` | high-impact ジャーナル級の文章品質で manuscript セクションを起草。 |
-| `@figure-descriptor` | 実装可能な brief 形式で図を設計 ── 画像生成はしない。 |
-| `@reviewer` | ターゲット venue 水準での投稿前敵対的レビュー。 |
-| `@literature-curator` | プロジェクトの BibTeX と literature summary table を同期保持。`[CITE: ...]` プレースホルダを解決し、`verify-citation` スキルで引用を検証、捏造は一切しない。 |
-
-### 4 slash commands (プロジェクトの CLAUDE.md でパラメータ化)
-
-| Command | What it does |
-|---|---|
-| `/omcr-setup` | インストール型: 空の `CLAUDE.md` マーカーブロック、`.claude/agent-memory/` ディレクトリ、空の `references.bib`/`references.csv`、そしてキュレーションされた `.claude/settings.json` パーミッション allowlist を敷きます。**リサーチ内容については質問しません。** プロジェクトごとに 1 回実行。 |
-| `/start-research [minimal\|neuro-fmri]` | インタビュー型: `CLAUDE.md` プレースホルダ(作業タイトル、仮説、ターゲット venue、データセット、ナラティブ)を埋め、オプションでエージェントメモリにプリセットを適用、LaTeX manuscript ディレクトリを scaffold(`manuscript-scaffold` スキル経由、ジャーナルテンプレート + 任意の Overleaf clone)。`/omcr-setup` 未実行なら先に実行するか確認。 |
-| `/todofig [Fig N]` | 取得済み figure deck と outline を比較 → P0/P1/P2 優先度の TODO。 |
-| `/sync` | 現在の状態(deck)と目標(outline)を調停、エージェントメモリを更新、任意で crop 済み figure をターゲット文書に埋め込み。状態スナップショット(TODO ではない)。 |
-
-### 14 skills
-
-4 つの setup/workflow スラッシュコマンドは thin dispatcher ── 各自 `$ARGUMENTS` を同名スキルに転送します。`cropfig`、`verify-citation`、`manuscript-scaffold` は単独でも呼び出し可能。**さらに** 1 つの primitive(`orchestrate` ── 内部用、4 つの phase で構成) + 6 つのオーケストレーションコマンドを支える engine skill。フルウォークスルーは [`wiki/Using-Orchestration.md`](wiki/Using-Orchestration.md)。下表は 7 つの setup/workflow スキルをカバーします。
-
-| Skill | What it does |
-|---|---|
-| `omcr-setup` | `/omcr-setup` を支える。インストール型: `CLAUDE.md` マーカーブロック、agent-memory ディレクトリ、bibliography ファイル、キュレーション済みパーミッション allowlist を scaffold。 |
-| `start-research` | `/start-research` を支える。インタビュー型の初回プロジェクト初期化: scaffold 済み `CLAUDE.md` プレースホルダを埋め、オプションでプリセットを適用、manuscript scaffold は `manuscript-scaffold` に委譲。 |
-| `sync` | `/sync` を支える。現状(取得済み figure deck)と outline を調停、事実的な drift でエージェントメモリを更新、状態スナップショットのみ(TODO は出さない)。 |
-| `todofig` | `/todofig` を支える。取得済み figure deck と outline を比較し、gap に対する P0/P1/P2 優先度 TODO を生成。 |
-| `cropfig` | `.key`/`.pptx` deck から manuscript + outline アーティファクトまでの 3 段階パイプライン: スライド単位のベクター PDF(crop 済み、manuscript-grade) + outline-grade PNG。直接呼び出すか他コマンドが呼び出す。スラッシュなし。 |
-| `verify-citation` | CrossRef/OpenAlex による存在 + メタデータチェック。`@literature-curator` が追加するすべてのエントリを gate し、検証結果をプロジェクトの summary table に書き込む。 |
-| `manuscript-scaffold` | バンドル済み LaTeX skeleton をユーザの manuscript ディレクトリにコピー、オプションでバンドル済み registry からジャーナル固有の `\documentclass` を適用、オプションで Overleaf プロジェクトを clone(token は tracked ファイルに永続化しない)、デフォルトブランチに commit、push 前に確認。`/start-research` の phase 6 から呼び出される。単独呼び出しも可。 |
-
-### 4 hooks
-
-| Hook | Event | Behavior |
-|---|---|---|
-| `pii-scrub` | `PreToolUse:Write\|Edit` | PII(デフォルト: メール / SSN / subject ID。設定可能)を含む書き込みをブロック。 |
-| `memory-load` | `SessionStart` | `.claude/agent-memory/*/MEMORY.md` をセッションコンテキストに自動注入。 |
-| `citation-warn` | `PostToolUse:Write\|Edit` | manuscript markdown に引用なしの段落があればヒューリスティックに警告(ブロックしない)。 |
-| `setup-nudge` | `SessionStart` | CLAUDE.md に `## Project context` または `## Research stack` ブロックがない場合、`/omcr-setup` → `/start-research` を実行するよう一行で nudge(ブロックしない)。 |
-
 ## Install
 
 **推奨 ── Claude Code marketplace 経由**(1 行ずつ、スラッシュコマンドを 1 つずつ入力):
@@ -121,6 +76,51 @@ cp /path/to/checkout/agents/*.md /path/to/your-project/.claude/agents/
 ```
 
 フルウォークスルー: [`wiki/Getting-Started.md`](wiki/Getting-Started.md)
+
+## What you get
+
+### 6 agents (`@`-mention)
+
+| Agent | Role |
+|---|---|
+| `@supervisor` | PI レベルの科学的ビジョン保持者 + プロジェクトオーケストレーター。中心仮説を保持し、サブエージェントに委譲。 |
+| `@analysis-implementer` | パイプライン、統計分析、ML/シミュレーションモデルを実装。デフォルトは分野ニュートラル。 |
+| `@paper-writer` | high-impact ジャーナル級の文章品質で manuscript セクションを起草。 |
+| `@figure-descriptor` | 実装可能な brief 形式で図を設計 ── 画像生成はしない。 |
+| `@reviewer` | ターゲット venue 水準での投稿前敵対的レビュー。 |
+| `@literature-curator` | プロジェクトの BibTeX と literature summary table を同期保持。`[CITE: ...]` プレースホルダを解決し、`verify-citation` スキルで引用を検証、捏造は一切しない。 |
+
+### 4 slash commands (プロジェクトの CLAUDE.md でパラメータ化)
+
+| Command | What it does |
+|---|---|
+| `/omcr-setup` | インストール型: 空の `CLAUDE.md` マーカーブロック、`.claude/agent-memory/` ディレクトリ、空の `references.bib`/`references.csv`、そしてキュレーションされた `.claude/settings.json` パーミッション allowlist を敷きます。**リサーチ内容については質問しません。** プロジェクトごとに 1 回実行。 |
+| `/start-research [minimal\|neuro-fmri]` | インタビュー型: `CLAUDE.md` プレースホルダ(作業タイトル、仮説、ターゲット venue、データセット、ナラティブ)を埋め、オプションでエージェントメモリにプリセットを適用、LaTeX manuscript ディレクトリを scaffold(`manuscript-scaffold` スキル経由、ジャーナルテンプレート + 任意の Overleaf clone)。`/omcr-setup` 未実行なら先に実行するか確認。 |
+| `/todofig [Fig N]` | 取得済み figure deck と outline を比較 → P0/P1/P2 優先度の TODO。 |
+| `/sync` | 現在の状態(deck)と目標(outline)を調停、エージェントメモリを更新、任意で crop 済み figure をターゲット文書に埋め込み。状態スナップショット(TODO ではない)。 |
+
+### 14 skills
+
+4 つの setup/workflow スラッシュコマンドは thin dispatcher ── 各自 `$ARGUMENTS` を同名スキルに転送します。`cropfig`、`verify-citation`、`manuscript-scaffold` は単独でも呼び出し可能。**さらに** 1 つの primitive(`orchestrate` ── 内部用、4 つの phase で構成) + 6 つのオーケストレーションコマンドを支える engine skill。フルウォークスルーは [`wiki/Using-Orchestration.md`](wiki/Using-Orchestration.md)。下表は 7 つの setup/workflow スキルをカバーします。
+
+| Skill | What it does |
+|---|---|
+| `omcr-setup` | `/omcr-setup` を支える。インストール型: `CLAUDE.md` マーカーブロック、agent-memory ディレクトリ、bibliography ファイル、キュレーション済みパーミッション allowlist を scaffold。 |
+| `start-research` | `/start-research` を支える。インタビュー型の初回プロジェクト初期化: scaffold 済み `CLAUDE.md` プレースホルダを埋め、オプションでプリセットを適用、manuscript scaffold は `manuscript-scaffold` に委譲。 |
+| `sync` | `/sync` を支える。現状(取得済み figure deck)と outline を調停、事実的な drift でエージェントメモリを更新、状態スナップショットのみ(TODO は出さない)。 |
+| `todofig` | `/todofig` を支える。取得済み figure deck と outline を比較し、gap に対する P0/P1/P2 優先度 TODO を生成。 |
+| `cropfig` | `.key`/`.pptx` deck から manuscript + outline アーティファクトまでの 3 段階パイプライン: スライド単位のベクター PDF(crop 済み、manuscript-grade) + outline-grade PNG。直接呼び出すか他コマンドが呼び出す。スラッシュなし。 |
+| `verify-citation` | CrossRef/OpenAlex による存在 + メタデータチェック。`@literature-curator` が追加するすべてのエントリを gate し、検証結果をプロジェクトの summary table に書き込む。 |
+| `manuscript-scaffold` | バンドル済み LaTeX skeleton をユーザの manuscript ディレクトリにコピー、オプションでバンドル済み registry からジャーナル固有の `\documentclass` を適用、オプションで Overleaf プロジェクトを clone(token は tracked ファイルに永続化しない)、デフォルトブランチに commit、push 前に確認。`/start-research` の phase 6 から呼び出される。単独呼び出しも可。 |
+
+### 4 hooks
+
+| Hook | Event | Behavior |
+|---|---|---|
+| `pii-scrub` | `PreToolUse:Write\|Edit` | PII(デフォルト: メール / SSN / subject ID。設定可能)を含む書き込みをブロック。 |
+| `memory-load` | `SessionStart` | `.claude/agent-memory/*/MEMORY.md` をセッションコンテキストに自動注入。 |
+| `citation-warn` | `PostToolUse:Write\|Edit` | manuscript markdown に引用なしの段落があればヒューリスティックに警告(ブロックしない)。 |
+| `setup-nudge` | `SessionStart` | CLAUDE.md に `## Project context` または `## Research stack` ブロックがない場合、`/omcr-setup` → `/start-research` を実行するよう一行で nudge(ブロックしない)。 |
 
 ## Documentation
 

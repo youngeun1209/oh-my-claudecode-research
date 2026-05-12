@@ -14,51 +14,6 @@ Un equipo de investigación de 6 agentes + 6 motores de orquestación + 4 comand
 
 > **Documentación completa:** [`wiki/Home.md`](wiki/Home.md)
 
-## What you get
-
-### 6 agents (`@`-mention)
-
-| Agent | Role |
-|---|---|
-| `@supervisor` | Guardián de la visión científica a nivel de PI + orquestador del proyecto. Posee la hipótesis central; delega en subagentes. |
-| `@analysis-implementer` | Implementa pipelines, análisis estadísticos, modelos de ML/simulación. Por defecto neutral al campo. |
-| `@paper-writer` | Redacta secciones del manuscrito con calidad de prosa de revista de alto impacto. |
-| `@figure-descriptor` | Diseña figuras como briefs listos para implementar — no genera imágenes. |
-| `@reviewer` | Revisión adversaria pre-envío al nivel del venue objetivo. |
-| `@literature-curator` | Mantiene en lockstep el BibTeX y la summary table de literatura del proyecto. Resuelve placeholders `[CITE: ...]`, verifica citas vía la skill `verify-citation`, nunca fabrica. |
-
-### 4 slash commands (parametrizados vía el CLAUDE.md de tu proyecto)
-
-| Command | What it does |
-|---|---|
-| `/omcr-setup` | Estilo instalación: planta bloques marcadores vacíos en `CLAUDE.md`, directorios `.claude/agent-memory/`, `references.bib`/`references.csv` vacíos, y una allowlist de permisos curada en `.claude/settings.json`. **No hace preguntas sobre tu investigación.** Ejecutar una vez por proyecto. |
-| `/start-research [minimal\|neuro-fmri]` | Estilo entrevista: rellena los placeholders de `CLAUDE.md` (working title, hipótesis, venue objetivo, datasets, hilo narrativo), aplica opcionalmente un preset a la memoria de los agentes, hace scaffold del directorio LaTeX del manuscrito (vía la skill `manuscript-scaffold`, con plantilla de revista + Overleaf clone opcional). Ofrece ejecutar `/omcr-setup` primero si no se ha hecho. |
-| `/todofig [Fig N]` | Compara un deck de figuras capturado contra un outline → TODO priorizado P0/P1/P2. |
-| `/sync` | Reconcilia el estado actual (deck) con el objetivo (outline), refresca la memoria de los agentes, opcionalmente embebe figuras croppeadas en un documento objetivo. Snapshot de estado, no un TODO. |
-
-### 14 skills
-
-Los 4 comandos slash setup/workflow son thin dispatchers — cada uno reenvía `$ARGUMENTS` a una skill correspondiente. `cropfig`, `verify-citation`, `manuscript-scaffold` son invocables de forma independiente. **Además** 1 primitive (`orchestrate` — interna, compone vía 4 fases) + 6 engine skills que respaldan los 6 comandos de orquestación; recorrido completo en [`wiki/Using-Orchestration.md`](wiki/Using-Orchestration.md). La tabla debajo cubre las 7 skills setup/workflow.
-
-| Skill | What it does |
-|---|---|
-| `omcr-setup` | Respalda `/omcr-setup`. Estilo instalación: scaffold de bloques marcadores en `CLAUDE.md`, directorios agent-memory, archivos de bibliografía, allowlist de permisos curada. |
-| `start-research` | Respalda `/start-research`. Init estilo entrevista del primer proyecto: rellena los placeholders de `CLAUDE.md` ya scaffoldeados, aplica opcionalmente una preset overlay, delega el manuscript scaffold a `manuscript-scaffold`. |
-| `sync` | Respalda `/sync`. Reconcilia el estado actual (deck de figuras capturado) con el outline; refresca la memoria de los agentes con drifts factuales; sólo snapshot de estado (sin TODO). |
-| `todofig` | Respalda `/todofig`. Compara un deck de figuras capturado con el outline; produce un TODO priorizado P0/P1/P2 de los gaps. |
-| `cropfig` | Pipeline de tres pasos desde un deck `.key`/`.pptx` a artefactos de manuscrito + outline: PDFs vectoriales por slide (croppeados, calidad manuscrito) + PNGs calidad outline. Invocada directamente o por otros comandos; sin slash. |
-| `verify-citation` | Comprobación de existencia + metadatos vía CrossRef/OpenAlex. Hace de gate para cada entrada que `@literature-curator` añade, escribe el veredicto de verificación en la summary table del proyecto. |
-| `manuscript-scaffold` | Copia el LaTeX skeleton incluido al directorio de manuscrito del usuario, aplica opcionalmente un `\documentclass` específico de revista desde el registry incluido, opcionalmente clona un proyecto Overleaf (el token nunca se persiste en archivos tracked), commit en la rama por defecto, pregunta antes de push. Llamado por `/start-research` fase 6; también invocable de forma independiente. |
-
-### 4 hooks
-
-| Hook | Event | Behavior |
-|---|---|---|
-| `pii-scrub` | `PreToolUse:Write\|Edit` | Bloquea writes que contengan PII (por defecto: emails / SSN / IDs de sujeto; configurable). |
-| `memory-load` | `SessionStart` | Auto-inyecta `.claude/agent-memory/*/MEMORY.md` en el contexto de la sesión. |
-| `citation-warn` | `PostToolUse:Write\|Edit` | Aviso heurístico no bloqueante cuando el markdown del manuscrito tiene párrafos sin citar. |
-| `setup-nudge` | `SessionStart` | Empujón de una línea no bloqueante para ejecutar `/omcr-setup` y después `/start-research` si CLAUDE.md no tiene los bloques `## Project context` o `## Research stack`. |
-
 ## Install
 
 **Recomendado — flujo Claude Code marketplace** (un comando slash por línea, introducir uno a uno):
@@ -121,6 +76,51 @@ Tras ambos, empieza una conversación real:
 ```
 
 Recorrido completo: [`wiki/Getting-Started.md`](wiki/Getting-Started.md)
+
+## What you get
+
+### 6 agents (`@`-mention)
+
+| Agent | Role |
+|---|---|
+| `@supervisor` | Guardián de la visión científica a nivel de PI + orquestador del proyecto. Posee la hipótesis central; delega en subagentes. |
+| `@analysis-implementer` | Implementa pipelines, análisis estadísticos, modelos de ML/simulación. Por defecto neutral al campo. |
+| `@paper-writer` | Redacta secciones del manuscrito con calidad de prosa de revista de alto impacto. |
+| `@figure-descriptor` | Diseña figuras como briefs listos para implementar — no genera imágenes. |
+| `@reviewer` | Revisión adversaria pre-envío al nivel del venue objetivo. |
+| `@literature-curator` | Mantiene en lockstep el BibTeX y la summary table de literatura del proyecto. Resuelve placeholders `[CITE: ...]`, verifica citas vía la skill `verify-citation`, nunca fabrica. |
+
+### 4 slash commands (parametrizados vía el CLAUDE.md de tu proyecto)
+
+| Command | What it does |
+|---|---|
+| `/omcr-setup` | Estilo instalación: planta bloques marcadores vacíos en `CLAUDE.md`, directorios `.claude/agent-memory/`, `references.bib`/`references.csv` vacíos, y una allowlist de permisos curada en `.claude/settings.json`. **No hace preguntas sobre tu investigación.** Ejecutar una vez por proyecto. |
+| `/start-research [minimal\|neuro-fmri]` | Estilo entrevista: rellena los placeholders de `CLAUDE.md` (working title, hipótesis, venue objetivo, datasets, hilo narrativo), aplica opcionalmente un preset a la memoria de los agentes, hace scaffold del directorio LaTeX del manuscrito (vía la skill `manuscript-scaffold`, con plantilla de revista + Overleaf clone opcional). Ofrece ejecutar `/omcr-setup` primero si no se ha hecho. |
+| `/todofig [Fig N]` | Compara un deck de figuras capturado contra un outline → TODO priorizado P0/P1/P2. |
+| `/sync` | Reconcilia el estado actual (deck) con el objetivo (outline), refresca la memoria de los agentes, opcionalmente embebe figuras croppeadas en un documento objetivo. Snapshot de estado, no un TODO. |
+
+### 14 skills
+
+Los 4 comandos slash setup/workflow son thin dispatchers — cada uno reenvía `$ARGUMENTS` a una skill correspondiente. `cropfig`, `verify-citation`, `manuscript-scaffold` son invocables de forma independiente. **Además** 1 primitive (`orchestrate` — interna, compone vía 4 fases) + 6 engine skills que respaldan los 6 comandos de orquestación; recorrido completo en [`wiki/Using-Orchestration.md`](wiki/Using-Orchestration.md). La tabla debajo cubre las 7 skills setup/workflow.
+
+| Skill | What it does |
+|---|---|
+| `omcr-setup` | Respalda `/omcr-setup`. Estilo instalación: scaffold de bloques marcadores en `CLAUDE.md`, directorios agent-memory, archivos de bibliografía, allowlist de permisos curada. |
+| `start-research` | Respalda `/start-research`. Init estilo entrevista del primer proyecto: rellena los placeholders de `CLAUDE.md` ya scaffoldeados, aplica opcionalmente una preset overlay, delega el manuscript scaffold a `manuscript-scaffold`. |
+| `sync` | Respalda `/sync`. Reconcilia el estado actual (deck de figuras capturado) con el outline; refresca la memoria de los agentes con drifts factuales; sólo snapshot de estado (sin TODO). |
+| `todofig` | Respalda `/todofig`. Compara un deck de figuras capturado con el outline; produce un TODO priorizado P0/P1/P2 de los gaps. |
+| `cropfig` | Pipeline de tres pasos desde un deck `.key`/`.pptx` a artefactos de manuscrito + outline: PDFs vectoriales por slide (croppeados, calidad manuscrito) + PNGs calidad outline. Invocada directamente o por otros comandos; sin slash. |
+| `verify-citation` | Comprobación de existencia + metadatos vía CrossRef/OpenAlex. Hace de gate para cada entrada que `@literature-curator` añade, escribe el veredicto de verificación en la summary table del proyecto. |
+| `manuscript-scaffold` | Copia el LaTeX skeleton incluido al directorio de manuscrito del usuario, aplica opcionalmente un `\documentclass` específico de revista desde el registry incluido, opcionalmente clona un proyecto Overleaf (el token nunca se persiste en archivos tracked), commit en la rama por defecto, pregunta antes de push. Llamado por `/start-research` fase 6; también invocable de forma independiente. |
+
+### 4 hooks
+
+| Hook | Event | Behavior |
+|---|---|---|
+| `pii-scrub` | `PreToolUse:Write\|Edit` | Bloquea writes que contengan PII (por defecto: emails / SSN / IDs de sujeto; configurable). |
+| `memory-load` | `SessionStart` | Auto-inyecta `.claude/agent-memory/*/MEMORY.md` en el contexto de la sesión. |
+| `citation-warn` | `PostToolUse:Write\|Edit` | Aviso heurístico no bloqueante cuando el markdown del manuscrito tiene párrafos sin citar. |
+| `setup-nudge` | `SessionStart` | Empujón de una línea no bloqueante para ejecutar `/omcr-setup` y después `/start-research` si CLAUDE.md no tiene los bloques `## Project context` o `## Research stack`. |
 
 ## Documentation
 

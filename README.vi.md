@@ -14,51 +14,6 @@ OMCR là phiên bản chuyên cho nghiên cứu của [oh-my-claudecode](https:/
 
 > **Tài liệu đầy đủ:** [`wiki/Home.md`](wiki/Home.md)
 
-## What you get
-
-### 6 agents (`@`-mention)
-
-| Agent | Role |
-|---|---|
-| `@supervisor` | Người giữ tầm nhìn khoa học cấp PI + người điều phối dự án. Sở hữu giả thuyết trung tâm; ủy quyền cho subagent. |
-| `@analysis-implementer` | Triển khai pipeline, phân tích thống kê, mô hình ML/mô phỏng. Mặc định trung tính theo ngành. |
-| `@paper-writer` | Soạn các phần manuscript với chất lượng văn xuôi tạp chí high-impact. |
-| `@figure-descriptor` | Thiết kế figure dưới dạng brief sẵn sàng triển khai — không tạo ảnh. |
-| `@reviewer` | Review đối kháng trước khi submit ở mức của venue mục tiêu. |
-| `@literature-curator` | Sở hữu đồng bộ BibTeX và bảng tóm tắt literature của dự án. Giải quyết placeholder `[CITE: ...]`, xác minh trích dẫn qua skill `verify-citation`, không bao giờ bịa. |
-
-### 4 slash commands (tham số hóa qua CLAUDE.md của dự án)
-
-| Command | What it does |
-|---|---|
-| `/omcr-setup` | Kiểu cài đặt: scaffold các block marker rỗng trong `CLAUDE.md`, thư mục `.claude/agent-memory/`, `references.bib`/`references.csv` rỗng, và một allowlist quyền được tuyển chọn trong `.claude/settings.json`. **Không hỏi gì về nghiên cứu của bạn.** Chạy một lần mỗi dự án. |
-| `/start-research [minimal\|neuro-fmri]` | Kiểu phỏng vấn: điền các placeholder trong `CLAUDE.md` (working title, giả thuyết, venue mục tiêu, dataset, mạch truyện), tùy chọn áp preset vào agent memory, scaffold thư mục LaTeX manuscript (qua skill `manuscript-scaffold`, kèm template tạp chí + clone Overleaf tùy chọn). Đề nghị chạy `/omcr-setup` trước nếu chưa chạy. |
-| `/todofig [Fig N]` | So sánh deck figure đã chụp với outline → TODO ưu tiên P0/P1/P2. |
-| `/sync` | Đồng bộ trạng thái hiện tại (deck) với mục tiêu (outline), refresh agent memory, tùy chọn nhúng figure đã crop vào tài liệu mục tiêu. Snapshot trạng thái, không phải TODO. |
-
-### 14 skills
-
-4 lệnh slash setup/workflow là thin dispatcher — mỗi cái forward `$ARGUMENTS` đến skill cùng tên. `cropfig`, `verify-citation`, `manuscript-scaffold` cũng có thể gọi độc lập. **Cộng thêm** 1 primitive (`orchestrate` — nội bộ, ghép từ 4 phase) + 6 engine skill backing 6 lệnh điều phối; hướng dẫn đầy đủ ở [`wiki/Using-Orchestration.md`](wiki/Using-Orchestration.md). Bảng dưới phủ 7 skill setup/workflow.
-
-| Skill | What it does |
-|---|---|
-| `omcr-setup` | Backing `/omcr-setup`. Kiểu cài đặt: scaffold block marker trong `CLAUDE.md`, thư mục agent-memory, file bibliography, allowlist quyền được tuyển chọn. |
-| `start-research` | Backing `/start-research`. Init dự án đầu kiểu phỏng vấn: điền các placeholder đã scaffold trong `CLAUDE.md`, tùy chọn áp preset overlay, ủy quyền manuscript scaffold cho `manuscript-scaffold`. |
-| `sync` | Backing `/sync`. Đồng bộ trạng thái hiện tại (deck figure đã chụp) với outline; refresh agent memory bằng drift thực tế; chỉ snapshot trạng thái (không TODO). |
-| `todofig` | Backing `/todofig`. So sánh deck figure đã chụp với outline; tạo TODO ưu tiên P0/P1/P2 cho các gap. |
-| `cropfig` | Pipeline ba bước từ deck `.key`/`.pptx` đến artifact manuscript + outline: PDF vector từng slide (đã crop, chất lượng manuscript) + PNG chất lượng outline. Gọi trực tiếp hoặc bởi lệnh khác; không có slash. |
-| `verify-citation` | Kiểm tra tồn tại + metadata qua CrossRef/OpenAlex. Gate mọi entry mà `@literature-curator` thêm vào, ghi phán quyết xác minh vào summary table của dự án. |
-| `manuscript-scaffold` | Sao chép LaTeX skeleton đi kèm vào thư mục manuscript của người dùng, tùy chọn áp `\documentclass` đặc thù tạp chí từ registry đi kèm, tùy chọn clone dự án Overleaf (token không persist vào file được track), commit trên nhánh mặc định, hỏi trước khi push. Được `/start-research` phase 6 gọi; cũng có thể gọi độc lập. |
-
-### 4 hooks
-
-| Hook | Event | Behavior |
-|---|---|---|
-| `pii-scrub` | `PreToolUse:Write\|Edit` | Chặn write chứa PII (mặc định: email / SSN / subject ID; có thể cấu hình). |
-| `memory-load` | `SessionStart` | Tự inject `.claude/agent-memory/*/MEMORY.md` vào context phiên. |
-| `citation-warn` | `PostToolUse:Write\|Edit` | Cảnh báo heuristic không chặn khi markdown manuscript có đoạn không trích dẫn. |
-| `setup-nudge` | `SessionStart` | Nudge một dòng không chặn để chạy `/omcr-setup` rồi `/start-research` nếu CLAUDE.md thiếu block `## Project context` hoặc `## Research stack`. |
-
 ## Install
 
 **Khuyến nghị — quy trình Claude Code marketplace** (mỗi lệnh slash một dòng, gõ từng cái một):
@@ -121,6 +76,51 @@ Sau cả hai, bắt đầu cuộc trò chuyện thật:
 ```
 
 Hướng dẫn đầy đủ: [`wiki/Getting-Started.md`](wiki/Getting-Started.md)
+
+## What you get
+
+### 6 agents (`@`-mention)
+
+| Agent | Role |
+|---|---|
+| `@supervisor` | Người giữ tầm nhìn khoa học cấp PI + người điều phối dự án. Sở hữu giả thuyết trung tâm; ủy quyền cho subagent. |
+| `@analysis-implementer` | Triển khai pipeline, phân tích thống kê, mô hình ML/mô phỏng. Mặc định trung tính theo ngành. |
+| `@paper-writer` | Soạn các phần manuscript với chất lượng văn xuôi tạp chí high-impact. |
+| `@figure-descriptor` | Thiết kế figure dưới dạng brief sẵn sàng triển khai — không tạo ảnh. |
+| `@reviewer` | Review đối kháng trước khi submit ở mức của venue mục tiêu. |
+| `@literature-curator` | Sở hữu đồng bộ BibTeX và bảng tóm tắt literature của dự án. Giải quyết placeholder `[CITE: ...]`, xác minh trích dẫn qua skill `verify-citation`, không bao giờ bịa. |
+
+### 4 slash commands (tham số hóa qua CLAUDE.md của dự án)
+
+| Command | What it does |
+|---|---|
+| `/omcr-setup` | Kiểu cài đặt: scaffold các block marker rỗng trong `CLAUDE.md`, thư mục `.claude/agent-memory/`, `references.bib`/`references.csv` rỗng, và một allowlist quyền được tuyển chọn trong `.claude/settings.json`. **Không hỏi gì về nghiên cứu của bạn.** Chạy một lần mỗi dự án. |
+| `/start-research [minimal\|neuro-fmri]` | Kiểu phỏng vấn: điền các placeholder trong `CLAUDE.md` (working title, giả thuyết, venue mục tiêu, dataset, mạch truyện), tùy chọn áp preset vào agent memory, scaffold thư mục LaTeX manuscript (qua skill `manuscript-scaffold`, kèm template tạp chí + clone Overleaf tùy chọn). Đề nghị chạy `/omcr-setup` trước nếu chưa chạy. |
+| `/todofig [Fig N]` | So sánh deck figure đã chụp với outline → TODO ưu tiên P0/P1/P2. |
+| `/sync` | Đồng bộ trạng thái hiện tại (deck) với mục tiêu (outline), refresh agent memory, tùy chọn nhúng figure đã crop vào tài liệu mục tiêu. Snapshot trạng thái, không phải TODO. |
+
+### 14 skills
+
+4 lệnh slash setup/workflow là thin dispatcher — mỗi cái forward `$ARGUMENTS` đến skill cùng tên. `cropfig`, `verify-citation`, `manuscript-scaffold` cũng có thể gọi độc lập. **Cộng thêm** 1 primitive (`orchestrate` — nội bộ, ghép từ 4 phase) + 6 engine skill backing 6 lệnh điều phối; hướng dẫn đầy đủ ở [`wiki/Using-Orchestration.md`](wiki/Using-Orchestration.md). Bảng dưới phủ 7 skill setup/workflow.
+
+| Skill | What it does |
+|---|---|
+| `omcr-setup` | Backing `/omcr-setup`. Kiểu cài đặt: scaffold block marker trong `CLAUDE.md`, thư mục agent-memory, file bibliography, allowlist quyền được tuyển chọn. |
+| `start-research` | Backing `/start-research`. Init dự án đầu kiểu phỏng vấn: điền các placeholder đã scaffold trong `CLAUDE.md`, tùy chọn áp preset overlay, ủy quyền manuscript scaffold cho `manuscript-scaffold`. |
+| `sync` | Backing `/sync`. Đồng bộ trạng thái hiện tại (deck figure đã chụp) với outline; refresh agent memory bằng drift thực tế; chỉ snapshot trạng thái (không TODO). |
+| `todofig` | Backing `/todofig`. So sánh deck figure đã chụp với outline; tạo TODO ưu tiên P0/P1/P2 cho các gap. |
+| `cropfig` | Pipeline ba bước từ deck `.key`/`.pptx` đến artifact manuscript + outline: PDF vector từng slide (đã crop, chất lượng manuscript) + PNG chất lượng outline. Gọi trực tiếp hoặc bởi lệnh khác; không có slash. |
+| `verify-citation` | Kiểm tra tồn tại + metadata qua CrossRef/OpenAlex. Gate mọi entry mà `@literature-curator` thêm vào, ghi phán quyết xác minh vào summary table của dự án. |
+| `manuscript-scaffold` | Sao chép LaTeX skeleton đi kèm vào thư mục manuscript của người dùng, tùy chọn áp `\documentclass` đặc thù tạp chí từ registry đi kèm, tùy chọn clone dự án Overleaf (token không persist vào file được track), commit trên nhánh mặc định, hỏi trước khi push. Được `/start-research` phase 6 gọi; cũng có thể gọi độc lập. |
+
+### 4 hooks
+
+| Hook | Event | Behavior |
+|---|---|---|
+| `pii-scrub` | `PreToolUse:Write\|Edit` | Chặn write chứa PII (mặc định: email / SSN / subject ID; có thể cấu hình). |
+| `memory-load` | `SessionStart` | Tự inject `.claude/agent-memory/*/MEMORY.md` vào context phiên. |
+| `citation-warn` | `PostToolUse:Write\|Edit` | Cảnh báo heuristic không chặn khi markdown manuscript có đoạn không trích dẫn. |
+| `setup-nudge` | `SessionStart` | Nudge một dòng không chặn để chạy `/omcr-setup` rồi `/start-research` nếu CLAUDE.md thiếu block `## Project context` hoặc `## Research stack`. |
 
 ## Documentation
 

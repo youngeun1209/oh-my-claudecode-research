@@ -14,51 +14,6 @@ OMCR 是 [oh-my-claudecode](https://github.com/Yeachan-Heo/oh-my-claudecode) 的
 
 > **完整文档:** [`wiki/Home.md`](wiki/Home.md)
 
-## What you get
-
-### 6 agents (`@`-mention)
-
-| Agent | Role |
-|---|---|
-| `@supervisor` | PI 级别的科学愿景守护者兼项目编排者。拥有中心假设,委派给子代理。 |
-| `@analysis-implementer` | 实现数据管道、统计分析、ML/模拟模型。默认领域中立。 |
-| `@paper-writer` | 以高影响力期刊水准撰写 manuscript 章节。 |
-| `@figure-descriptor` | 以可实现的 brief 形式设计图表 —— 不生成图像。 |
-| `@reviewer` | 按目标 venue 水准做提交前的对抗性审稿。 |
-| `@literature-curator` | 同步维护项目的 BibTeX 与 literature summary table。解析 `[CITE: ...]` 占位符,通过 `verify-citation` 技能验证引用,绝不捏造。 |
-
-### 4 slash commands (通过项目 CLAUDE.md 参数化)
-
-| Command | What it does |
-|---|---|
-| `/omcr-setup` | 安装式:铺设空的 `CLAUDE.md` 标记块、`.claude/agent-memory/` 目录、空的 `references.bib`/`references.csv`,以及精心挑选的 `.claude/settings.json` 权限 allowlist。**不询问你的研究内容。** 每个项目运行一次即可。 |
-| `/start-research [minimal\|neuro-fmri]` | 访谈式:填充 `CLAUDE.md` 占位符(工作标题、假设、目标 venue、数据集、叙述主线),可选地为代理记忆应用预设,scaffold LaTeX manuscript 目录(通过 `manuscript-scaffold` 技能,可选 journal template + Overleaf clone)。如未运行 `/omcr-setup`,会询问是否先运行。 |
-| `/todofig [Fig N]` | 对比已捕获的 figure deck 与 outline → 优先级 P0/P1/P2 的 TODO。 |
-| `/sync` | 调和当前状态(deck)与目标(outline),刷新代理记忆,可选地将 cropped figure 嵌入目标文档。是状态快照而非 TODO。 |
-
-### 14 skills
-
-4 个 setup/workflow 斜杠命令是 thin dispatcher —— 各自把 `$ARGUMENTS` 转发给同名技能。`cropfig`、`verify-citation`、`manuscript-scaffold` 也可独立调用。**额外加上** 1 个 primitive(`orchestrate` —— 内部使用,由 4 个 phase 组合而成) + 6 个支撑 6 个编排命令的引擎技能;完整教程见 [`wiki/Using-Orchestration.md`](wiki/Using-Orchestration.md)。下表覆盖 7 个 setup/workflow 技能。
-
-| Skill | What it does |
-|---|---|
-| `omcr-setup` | 支撑 `/omcr-setup`。安装式:scaffold `CLAUDE.md` 标记块、agent-memory 目录、bibliography 文件、精选权限 allowlist。 |
-| `start-research` | 支撑 `/start-research`。访谈式首项目初始化:填充 scaffold 后的 `CLAUDE.md` 占位符,可选应用预设覆盖,manuscript scaffold 委派给 `manuscript-scaffold`。 |
-| `sync` | 支撑 `/sync`。调和当前状态(捕获的 figure deck)与 outline;以事实性 drift 刷新代理记忆;仅状态快照(不生成 TODO)。 |
-| `todofig` | 支撑 `/todofig`。对比已捕获的 figure deck 与 outline;生成 gap 的 P0/P1/P2 优先级 TODO。 |
-| `cropfig` | 从 `.key`/`.pptx` deck 到 manuscript + outline artifact 的三步管道:逐 slide 矢量 PDF(cropped、manuscript-grade) + outline-grade PNG。直接调用或由其他命令调用;无斜杠。 |
-| `verify-citation` | 通过 CrossRef/OpenAlex 做存在性 + 元数据检查。把守 `@literature-curator` 添加的每一条,把验证结论写入项目 summary table。 |
-| `manuscript-scaffold` | 把内置的 LaTeX skeleton 复制到用户 manuscript 目录,可选地从内置 registry 应用 journal 专属 `\documentclass`,可选地 clone Overleaf 项目(token 不会 persist 到 tracked 文件),在默认分支 commit,push 前会询问。被 `/start-research` 的 phase 6 调用;也可独立调用。 |
-
-### 4 hooks
-
-| Hook | Event | Behavior |
-|---|---|---|
-| `pii-scrub` | `PreToolUse:Write\|Edit` | 阻止包含 PII(默认:邮箱 / SSN / subject ID;可配置)的写入。 |
-| `memory-load` | `SessionStart` | 自动将 `.claude/agent-memory/*/MEMORY.md` 注入会话上下文。 |
-| `citation-warn` | `PostToolUse:Write\|Edit` | manuscript markdown 中存在无引用段落时给出启发式警告(不阻断)。 |
-| `setup-nudge` | `SessionStart` | 若 CLAUDE.md 缺少 `## Project context` 或 `## Research stack` 块,给出运行 `/omcr-setup` 然后 `/start-research` 的一行提示(不阻断)。 |
-
 ## Install
 
 **推荐 —— Claude Code marketplace 流程**(每行一个斜杠命令,逐条输入):
@@ -121,6 +76,51 @@ cp /path/to/checkout/agents/*.md /path/to/your-project/.claude/agents/
 ```
 
 完整教程: [`wiki/Getting-Started.md`](wiki/Getting-Started.md)
+
+## What you get
+
+### 6 agents (`@`-mention)
+
+| Agent | Role |
+|---|---|
+| `@supervisor` | PI 级别的科学愿景守护者兼项目编排者。拥有中心假设,委派给子代理。 |
+| `@analysis-implementer` | 实现数据管道、统计分析、ML/模拟模型。默认领域中立。 |
+| `@paper-writer` | 以高影响力期刊水准撰写 manuscript 章节。 |
+| `@figure-descriptor` | 以可实现的 brief 形式设计图表 —— 不生成图像。 |
+| `@reviewer` | 按目标 venue 水准做提交前的对抗性审稿。 |
+| `@literature-curator` | 同步维护项目的 BibTeX 与 literature summary table。解析 `[CITE: ...]` 占位符,通过 `verify-citation` 技能验证引用,绝不捏造。 |
+
+### 4 slash commands (通过项目 CLAUDE.md 参数化)
+
+| Command | What it does |
+|---|---|
+| `/omcr-setup` | 安装式:铺设空的 `CLAUDE.md` 标记块、`.claude/agent-memory/` 目录、空的 `references.bib`/`references.csv`,以及精心挑选的 `.claude/settings.json` 权限 allowlist。**不询问你的研究内容。** 每个项目运行一次即可。 |
+| `/start-research [minimal\|neuro-fmri]` | 访谈式:填充 `CLAUDE.md` 占位符(工作标题、假设、目标 venue、数据集、叙述主线),可选地为代理记忆应用预设,scaffold LaTeX manuscript 目录(通过 `manuscript-scaffold` 技能,可选 journal template + Overleaf clone)。如未运行 `/omcr-setup`,会询问是否先运行。 |
+| `/todofig [Fig N]` | 对比已捕获的 figure deck 与 outline → 优先级 P0/P1/P2 的 TODO。 |
+| `/sync` | 调和当前状态(deck)与目标(outline),刷新代理记忆,可选地将 cropped figure 嵌入目标文档。是状态快照而非 TODO。 |
+
+### 14 skills
+
+4 个 setup/workflow 斜杠命令是 thin dispatcher —— 各自把 `$ARGUMENTS` 转发给同名技能。`cropfig`、`verify-citation`、`manuscript-scaffold` 也可独立调用。**额外加上** 1 个 primitive(`orchestrate` —— 内部使用,由 4 个 phase 组合而成) + 6 个支撑 6 个编排命令的引擎技能;完整教程见 [`wiki/Using-Orchestration.md`](wiki/Using-Orchestration.md)。下表覆盖 7 个 setup/workflow 技能。
+
+| Skill | What it does |
+|---|---|
+| `omcr-setup` | 支撑 `/omcr-setup`。安装式:scaffold `CLAUDE.md` 标记块、agent-memory 目录、bibliography 文件、精选权限 allowlist。 |
+| `start-research` | 支撑 `/start-research`。访谈式首项目初始化:填充 scaffold 后的 `CLAUDE.md` 占位符,可选应用预设覆盖,manuscript scaffold 委派给 `manuscript-scaffold`。 |
+| `sync` | 支撑 `/sync`。调和当前状态(捕获的 figure deck)与 outline;以事实性 drift 刷新代理记忆;仅状态快照(不生成 TODO)。 |
+| `todofig` | 支撑 `/todofig`。对比已捕获的 figure deck 与 outline;生成 gap 的 P0/P1/P2 优先级 TODO。 |
+| `cropfig` | 从 `.key`/`.pptx` deck 到 manuscript + outline artifact 的三步管道:逐 slide 矢量 PDF(cropped、manuscript-grade) + outline-grade PNG。直接调用或由其他命令调用;无斜杠。 |
+| `verify-citation` | 通过 CrossRef/OpenAlex 做存在性 + 元数据检查。把守 `@literature-curator` 添加的每一条,把验证结论写入项目 summary table。 |
+| `manuscript-scaffold` | 把内置的 LaTeX skeleton 复制到用户 manuscript 目录,可选地从内置 registry 应用 journal 专属 `\documentclass`,可选地 clone Overleaf 项目(token 不会 persist 到 tracked 文件),在默认分支 commit,push 前会询问。被 `/start-research` 的 phase 6 调用;也可独立调用。 |
+
+### 4 hooks
+
+| Hook | Event | Behavior |
+|---|---|---|
+| `pii-scrub` | `PreToolUse:Write\|Edit` | 阻止包含 PII(默认:邮箱 / SSN / subject ID;可配置)的写入。 |
+| `memory-load` | `SessionStart` | 自动将 `.claude/agent-memory/*/MEMORY.md` 注入会话上下文。 |
+| `citation-warn` | `PostToolUse:Write\|Edit` | manuscript markdown 中存在无引用段落时给出启发式警告(不阻断)。 |
+| `setup-nudge` | `SessionStart` | 若 CLAUDE.md 缺少 `## Project context` 或 `## Research stack` 块,给出运行 `/omcr-setup` 然后 `/start-research` 的一行提示(不阻断)。 |
 
 ## Documentation
 
