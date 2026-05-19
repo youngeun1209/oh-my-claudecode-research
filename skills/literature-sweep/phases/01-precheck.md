@@ -7,7 +7,7 @@ Validate the call, resolve paths, ping the metadata sources, and clamp `--parall
 
 ## Inputs
 
-From the slash command:
+From the skill:
 
 - `<topic>` — positional, required. Free-form string (e.g., `"neural manifolds in motor cortex"`).
 - `--n N` — optional, default `20`.
@@ -25,7 +25,7 @@ Execute in order. Abort on the first failure unless the step says otherwise.
 - If the resulting string is empty, abort with:
   ```
   literature-sweep: topic is required.
-  Example: /literature-sweep "neural manifolds in motor cortex"
+  Example: $literature-sweep "neural manifolds in motor cortex"
   ```
 - If the topic is shorter than 4 characters after stripping, warn but proceed:
   ```
@@ -89,14 +89,14 @@ Record the clamped value as `parallel`. Phase 03 uses it.
 
 ### 6. Resolve `bib_file` and `summary_file`
 
-Use the standard three-layer resolution (env → CLAUDE.md `## Research stack` → defaults). First non-empty wins:
+Use the standard three-layer resolution (env → AGENTS.md `## Research stack` → defaults). First non-empty wins:
 
 | Path | Env var | `## Research stack` field | Default |
 |---|---|---|---|
-| `bib_file` | `CLAUDE_RESEARCH_BIB_FILE` | `BibTeX file` | `references.bib` |
-| `summary_file` | `CLAUDE_RESEARCH_SUMMARY_FILE` | `Summary file` | `references.csv` |
+| `bib_file` | `CODEX_RESEARCH_BIB_FILE` | `BibTeX file` | `references.bib` |
+| `summary_file` | `CODEX_RESEARCH_SUMMARY_FILE` | `Summary file` | `references.csv` |
 
-Resolution is relative to the project root (the Claude Code session's working directory).
+Resolution is relative to the project root (the Codex session's working directory).
 
 Also consult `paper.json.manuscript_root` if the resolved `bib_file` is a bare filename (no path separator). Prefer `<manuscript_root>/references.bib` over a root-level `references.bib` when both exist. If neither exists yet, fall back to `<manuscript_root>/references.bib` so phase 06 writes alongside the LaTeX scaffold.
 
@@ -105,20 +105,20 @@ Record the absolute paths for `bib_file` and `summary_file`. Phase 05 reads `bib
 If the parent directory of either path does not exist, abort:
 ```
 literature-sweep: parent directory for <bib_file or summary_file> does not exist.
-Run /omcr-setup or /start-research first, or pass the correct path via
-CLAUDE.md ## Research stack block.
+Run $omxr-setup or $start-research first, or pass the correct path via
+AGENTS.md ## Research stack block.
 ```
 
 If the parent directory exists but is not writable, abort with the OS-level permission error.
 
 ### 7. Bootstrap `citations.json`
 
-Call the orchestrate state-read primitive at [`../../orchestrate/phases/01-state-read.md`](../../orchestrate/phases/01-state-read.md) with `name = citations`. This creates `.claude/omcr-state/citations.json` from the empty schema if it doesn't exist, otherwise reads and parses the existing file.
+Call the orchestrate state-read primitive at [`../../orchestrate/phases/01-state-read.md`](../../orchestrate/phases/01-state-read.md) with `name = citations`. This creates `.omx/state/omxr/citations.json` from the empty schema if it doesn't exist, otherwise reads and parses the existing file.
 
 If the bootstrap path was taken (state-read just created the file), warn:
 ```
 literature-sweep: citations.json was missing — bootstrapped an empty one. Run
-/omcr-setup first if you intended to use existing citation state.
+$omxr-setup first if you intended to use existing citation state.
 ```
 
 Record the parsed `citations_state` dict. Phase 04 reads its `verified` list (for cross-sweep dedupe); phase 06 writes the `last_sweep` block back.
@@ -187,4 +187,4 @@ Pass forward to phase 02:
 - Does **not** issue any real search query. That is phase 02.
 - Does **not** write to `references.bib`, the CSV, or `citations.json` (other than the bootstrap created by the state-read primitive on first run).
 - Does **not** verify any candidate against CrossRef / OpenAlex. That is phase 05.
-- Does **not** modify `paper.json`. `/literature-sweep` is keyed off `citations.json`, not `paper.json`.
+- Does **not** modify `paper.json`. `$literature-sweep` is keyed off `citations.json`, not `paper.json`.

@@ -6,7 +6,7 @@ Validate the call, resolve state, and decide whether the loop should even run. O
 
 ## Inputs
 
-From the slash command:
+From the skill:
 - `<section-path>` — positional, required
 - `--max-iter N` — optional, default `3`
 - `--venue VENUE` — optional, falls back to `paper.json.venue`
@@ -19,7 +19,7 @@ Execute in order. Abort on the first failure unless the step says otherwise.
 
 ### 1. Validate `<section-path>`
 
-- The path is interpreted relative to the project root (the Claude Code session's working directory).
+- The path is interpreted relative to the project root (the Codex session's working directory).
 - Verify the file exists. If not, abort with:
   ```
   iterate-revision: <section-path> not found.
@@ -38,8 +38,8 @@ Call the primitive at [`../../orchestrate/phases/01-state-read.md`](../../orches
 
 If the bootstrap path was taken (state-read just created the file), warn:
 ```
-iterate-revision: paper.json was missing — bootstrapped an empty one. Run /omcr-setup
-or /start-research first if you intended to use existing state.
+iterate-revision: paper.json was missing — bootstrapped an empty one. Run $omxr-setup
+or $start-research first if you intended to use existing state.
 ```
 Then proceed.
 
@@ -72,7 +72,7 @@ Resolution order (first non-empty wins):
 If neither resolves to a non-empty string, abort with:
 ```
 iterate-revision: venue required. Either pass --venue VENUE or set paper.json.venue
-(via /start-research or hand-edit).
+(via $start-research or hand-edit).
 ```
 
 Record the resolved venue. Phase 03 uses it to set reviewer strictness.
@@ -119,7 +119,7 @@ If `paper.json.sections[section_name].status == "approved"` AND `--force` is **f
 ```
 iterate-revision: <section_name> is already approved (iter <N>).
 Pass --force to re-iterate, or move on:
-  /iterate-revision <next-unwritten-section>
+  $iterate-revision <next-unwritten-section>
 ```
 
 Do not touch `paper.json` in this branch.

@@ -1,6 +1,6 @@
 # Phase 02 — dispatch (primitive)
 
-Invoke a persona subagent through Claude Code's Agent tool with the
+Invoke a persona subagent through Codex's Agent tool with the
 persona's markdown body inlined as the prompt prefix. Returns the
 agent's output plus metadata.
 
@@ -8,14 +8,14 @@ agent's output plus metadata.
 
 | Name | Required | Type | Purpose |
 |---|---|---|---|
-| `persona` | yes | string | One of the 6 OMCR personas (see below). |
+| `persona` | yes | string | One of the 6 OMXR personas (see below). |
 | `task_brief` | yes | string | Natural-language task description. Engine-specific. |
 | `state_slice` | no | dict / null | Optional context to inline (e.g., the relevant `paper.json` section only — never the whole state). |
 | `expected_output_schema` | no | dict / null | Optional shape hint. If given, the primitive attempts to parse the agent's response into this shape and returns both raw + parsed. |
 
 ### Allowed `persona` values
 
-Exactly these six. No others exist in OMCR:
+Exactly these six. No others exist in OMXR:
 
 - `supervisor`
 - `analysis-implementer`
@@ -31,11 +31,11 @@ paper-writer, figure-descriptor, reviewer, literature-curator}`.
 ## Subagent type
 
 **Always `subagent_type: "general-purpose"`.** Per Phase 0 decision §5,
-OMCR does not attempt to register each persona as a first-class Claude
+OMXR does not attempt to register each persona as a first-class Codex
 Code subagent type. Instead the persona's markdown body is inlined as
-the prompt prefix. This keeps OMCR portable across Claude Code versions
+the prompt prefix. This keeps OMXR portable across Codex versions
 and makes runs reproducible by hand (a user can copy the dispatched
-prompt out of `_run-log.jsonl` and paste it into a fresh Claude Code
+prompt out of `_run-log.jsonl` and paste it into a fresh Codex
 session).
 
 ## Behavior
@@ -43,14 +43,14 @@ session).
 Execute in order:
 
 1. **Resolve persona body.** Read `<plugin_root>/agents/<persona>.md`.
-   `$CLAUDE_PLUGIN_ROOT` gives the plugin root. If the agent file does
+   `$CODEX_PLUGIN_ROOT` gives the plugin root. If the agent file does
    not exist, abort with `dispatch: persona file
    agents/<persona>.md not found at plugin root`.
 
 2. **Strip YAML frontmatter.** Detect a leading `---\n...\n---\n` block
    and remove it. Keep only the markdown body. The frontmatter's
    `name`, `description`, `model`, `color`, `memory` fields are
-   metadata for Claude Code itself — they should not be repeated to
+   metadata for Codex itself — they should not be repeated to
    the dispatched subagent.
 
 3. **Assemble the prompt.** Concatenate in this order, separated by
@@ -84,8 +84,8 @@ Execute in order:
 
 4. **Invoke the Agent tool.**
    - `subagent_type`: `"general-purpose"` (always)
-   - `description`: `"omcr/<persona>: <first 60 chars of task_brief>"` —
-     keeps `_run-log.jsonl` and Claude Code's UI scannable.
+   - `description`: `"omxr/<persona>: <first 60 chars of task_brief>"` —
+     keeps `_run-log.jsonl` and Codex's UI scannable.
    - `prompt`: the assembled prompt from step 3.
 
 5. **Capture the response.** Take the agent's final text response as
@@ -121,25 +121,25 @@ folds this into the engine's working state and proceeds.
 
 ## Why inlined, not registered
 
-OMCR personas in `agents/*.md` are already self-contained: role
+OMXR personas in `agents/*.md` are already self-contained: role
 description, constraints, language directive, memory pointer. Inlining
-is a 10-line implementation. Registering each persona as a Claude Code
-subagent type would couple OMCR to a registration mechanism that varies
-by Claude Code version and would add setup steps to `/omcr-setup`. See
+is a 10-line implementation. Registering each persona as a Codex
+subagent type would couple OMXR to a registration mechanism that varies
+by Codex version and would add setup steps to `$omxr-setup`. See
 Phase 0 decision §5 for the full rationale.
 
 The trade-off: every dispatch carries the persona body in its prompt
 (~200-500 lines per agent), so token cost is higher than a registered
 subagent would be. This is acceptable currently (`max_iter` default 3,
-6 personas, prompts cached server-side by Claude Code where possible).
+6 personas, prompts cached server-side by Codex where possible).
 
 ## Statelessness
 
-Claude Code's Agent tool spawns a **fresh** subagent with no prior
+Codex's Agent tool spawns a **fresh** subagent with no prior
 conversation context. Each dispatch is therefore **stateless** — the
 caller passes everything the persona needs through `task_brief` and
 `state_slice`. The persona reads its own memory from
-`.claude/agent-memory/<persona>/MEMORY.md` (the `memory-load.sh` hook
+`.omx/omxr/agent-memory/<persona>/MEMORY.md` (the `memory-load.sh` hook
 puts MEMORY.md content into the session context that subagents
 inherit), but nothing from a previous dispatch persists.
 

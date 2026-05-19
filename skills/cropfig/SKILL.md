@@ -9,7 +9,7 @@ Three-step pipeline that produces, from a `.key` or `.pptx` deck, both manuscrip
 
 <Use_When>
 - You author figures in Keynote/PowerPoint and need (a) vector PDFs to drop into a LaTeX manuscript and (b) low-resolution PNGs to embed into an outline doc that already carries caption text.
-- The `/sync` command needs to embed figure-only PNGs into an outline document at each result section.
+- The `$sync` command needs to embed figure-only PNGs into an outline document at each result section.
 - Preparing figures for slides / social-media / a reviewer response where the caption is supplied separately.
 </Use_When>
 
@@ -25,7 +25,7 @@ Required inputs: the deck path + (for func 3) the manuscript dir and outline fil
 | Variable | Default | Used by | Purpose |
 |---|---|---|---|
 | `DECK_FILE` | (required) | func 1, 2, 3 | Path to a `.key` or `.pptx` deck. Step 1 + 2 read it directly; step 3 derives `<deck_parent>/pdf/` and `<deck_parent>/png/` from it. |
-| `MANUSCRIPT_DIR` | `paper` | func 3 | LaTeX manuscript root. Cropped PDFs land in `<MANUSCRIPT_DIR>/figures/figureNN.pdf`. Matches `/omcr-setup`'s default. |
+| `MANUSCRIPT_DIR` | `paper` | func 3 | LaTeX manuscript root. Cropped PDFs land in `<MANUSCRIPT_DIR>/figures/figureNN.pdf`. Matches `$omxr-setup`'s default. |
 | `OUTLINE_FILE` | `outline.md` | func 3 | Outline markdown file. PNGs land in `<dirname(OUTLINE_FILE)>/figures/figureNN.png`; image links are inserted into the outline itself. |
 | `RESULT_PATTERN` | `^### Result (\d+)` | func 3 | Regex with a single capture group = figure number. Used to find result headings in the outline. |
 | `CROPFIG_PROBE_DPI` | `100` | func 2 | DPI used for the probe rasterization that drives crop-bound detection. Higher = slower but slightly tighter crops. |
@@ -47,9 +47,9 @@ dirname($OUTLINE_FILE)/
 └── figures/figureNN.png          # func 3 copies here for the markdown
 ```
 
-These defaults match `/omcr-setup`'s conventions (`Manuscript dir: paper/`, `Outline file: outline.md`, `Result pattern: ^### Result (\d+)`). See `wiki/Configuration.md` for the CLAUDE.md Research-stack schema.
+These defaults match `$omxr-setup`'s conventions (`Manuscript dir: paper/`, `Outline file: outline.md`, `Result pattern: ^### Result (\d+)`). See `wiki/Configuration.md` for the AGENTS.md Research-stack schema.
 
-On first invocation with no `DECK_FILE` and no project `Deck file` in CLAUDE.md, ask the user for the deck path then offer to persist it to the project's CLAUDE.md.
+On first invocation with no `DECK_FILE` and no project `Deck file` in AGENTS.md, ask the user for the deck path then offer to persist it to the project's AGENTS.md.
 </Configuration>
 
 <Steps>
@@ -60,7 +60,7 @@ Run the exporter with a temp staging directory:
 
 ```bash
 STAGE=$(mktemp -d)
-python3 "$CLAUDE_PLUGIN_ROOT"/skills/cropfig/export_deck.py "$DECK_FILE" "$STAGE"
+python3 "$CODEX_PLUGIN_ROOT"/skills/cropfig/export_deck.py "$DECK_FILE" "$STAGE"
 ```
 
 Dispatch inside `export_deck.py` — each format uses its native app to avoid cross-format import drift:
@@ -74,14 +74,14 @@ The single deck PDF is then split into `figure01.pdf`, `figure02.pdf`, … using
 ### Step 2 — Crop + emit both artifacts (`crop_figures.py`)
 
 ```bash
-python3 "$CLAUDE_PLUGIN_ROOT"/skills/cropfig/crop_figures.py "$STAGE"
+python3 "$CODEX_PLUGIN_ROOT"/skills/cropfig/crop_figures.py "$STAGE"
 rm -rf "$STAGE"
 ```
 
 This writes to `<dirname($DECK_FILE)>/pdf/` and `<dirname($DECK_FILE)>/png/`. To write elsewhere, pass positional output dirs:
 
 ```bash
-python3 "$CLAUDE_PLUGIN_ROOT"/skills/cropfig/crop_figures.py "$STAGE" "$PDF_OUT" "$PNG_OUT"
+python3 "$CODEX_PLUGIN_ROOT"/skills/cropfig/crop_figures.py "$STAGE" "$PDF_OUT" "$PNG_OUT"
 ```
 
 For each slide PDF, the script:
@@ -95,7 +95,7 @@ Both outputs share the same crop decision because the PNG is a downsampled view 
 ### Step 3 — Upload to manuscript + outline (`upload_figures.py`)
 
 ```bash
-python3 "$CLAUDE_PLUGIN_ROOT"/skills/cropfig/upload_figures.py
+python3 "$CODEX_PLUGIN_ROOT"/skills/cropfig/upload_figures.py
 ```
 
 Reads from `<deck_parent>/pdf/` and `<deck_parent>/png/` (so func 2 must have run first). Does two things:

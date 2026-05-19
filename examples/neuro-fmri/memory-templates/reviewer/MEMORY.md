@@ -2,7 +2,7 @@
 
 > **Skeleton only.** Specific reviewer concerns, manuscript versions, and
 > resolution narratives have been stripped. Copy into your own project's
-> `.claude/agent-memory/reviewer/MEMORY.md` and fill in.
+> `.omx/omxr/agent-memory/reviewer/MEMORY.md` and fill in.
 
 **Last synced:** [YYYY-MM-DD]
 

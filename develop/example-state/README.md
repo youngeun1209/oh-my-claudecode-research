@@ -1,7 +1,7 @@
 # `develop/example-state/`
 
-Canonical empty-state JSONs for OMCR's orchestration state store. These are
-the files `/omcr-setup` writes into the user's `.claude/omcr-state/` on first
+Canonical empty-state JSONs for OMXR's orchestration state store. These are
+the files `$omxr-setup` writes into the user's `.omx/state/omxr/` on first
 run.
 
 **Tracked, not gitignored** — the parent `.gitignore` has `!/develop/example-state/`
@@ -16,7 +16,7 @@ being local working docs.
 | `reviews.json` | Append-only history of reviewer verdicts | `runs: []` |
 | `citations.json` | BibTeX queue + verification states | `queue: []`, `verified: []`, `last_sweep: null` |
 | `figures.json` | Per-figure design/impl/critique status | `figures: {}` |
-| `rebuttals.json` | Append-only per-run rebuttal entries (one per `/respond-reviewer` invocation) | `rebuttals: []` |
+| `rebuttals.json` | Append-only per-run rebuttal entries (one per `$respond-reviewer` invocation) | `rebuttals: []` |
 | `_run-log.jsonl` | Append-only run log (one JSON per line) | Empty file |
 
 ## Schema reference
@@ -141,7 +141,7 @@ stub.
 
 ### `rebuttals.json` — populated example
 
-Owned by the `/respond-reviewer` engine. One entry per engine run; entries are
+Owned by the `$respond-reviewer` engine. One entry per engine run; entries are
 append-only (a re-run of the same review letter creates a new entry, never
 overwrites). Each entry records the full per-comment classification, dispatched
 response, supervisor verdict, and the path to the assembled rebuttal letter.
@@ -190,15 +190,15 @@ response, supervisor verdict, and the path to the assembled rebuttal letter.
           "target_section": "results",
           "figure_id":      "fig3",
           "classification_reason": "reviewer asks for a redraw of Figure 3 with the additional control condition",
-          "response":       "We agree that Figure 3 needs the additional control. The redraw should use the existing data slice at data/control_v2/; we suggest running /figure-bake fig3 to execute.",
+          "response":       "We agree that Figure 3 needs the additional control. The redraw should use the existing data slice at data/control_v2/; we suggest running $figure-bake fig3 to execute.",
           "actions_taken":  ["identified data slice for redraw at data/control_v2/"],
           "files_touched":  [],
           "citations_added": [],
-          "next_steps":     ["/figure-bake fig3"],
+          "next_steps":     ["$figure-bake fig3"],
           "parse_error":    null,
           "dispatch_error": null,
           "verdict":        "deferred",
-          "verdict_reason": "redraw requires /figure-bake — engines do not auto-invoke other engines"
+          "verdict_reason": "redraw requires $figure-bake — engines do not auto-invoke other engines"
         },
         {
           "comment_id":     "R1.3",
@@ -256,7 +256,7 @@ response, supervisor verdict, and the path to the assembled rebuttal letter.
         }
       ],
       "user_attention_count": 1,
-      "suggested_next_steps": ["/figure-bake fig3"],
+      "suggested_next_steps": ["$figure-bake fig3"],
       "summary": {
         "n_comments":       5,
         "n_dispatched":     4,
@@ -275,13 +275,13 @@ response, supervisor verdict, and the path to the assembled rebuttal letter.
 
 **Label enum:** `prose | analysis | citation | clarification | structural`
 **Per-comment verdict enum:** `addressed | deferred | disputed`
-**Run-level verdict enum:** `DONE | HALT | BLOCKED` (no `CONTINUE` — `/respond-reviewer` is single-pass)
+**Run-level verdict enum:** `DONE | HALT | BLOCKED` (no `CONTINUE` — `$respond-reviewer` is single-pass)
 
 **`agent` semantics:** maps from `label` per the engine's classification taxonomy.
 `structural` always has `agent: null` — these comments are routed to the
 user-attention list and never auto-dispatched (Phase 2 ethical gate). Figure
 redraws are labeled `analysis` and routed to `@analysis-implementer` with the
-figure id; the response typically includes `/figure-bake <id>` in `next_steps`
+figure id; the response typically includes `$figure-bake <id>` in `next_steps`
 because engines do not call other engines (Phase 2 decision §5).
 
 **`letter_path` format:** the path extension records the chosen output format
@@ -297,11 +297,11 @@ JSONL = one JSON object per line. Append-only; never overwritten.
 {"run_id": "a1b2c3d4-0001-...", "engine": "iterate-revision", "args": {"section": "sections/results.tex", "max_iter": 3, "venue": "NeuroImage"}, "started": "2026-05-11T14:00:00Z", "ended": "2026-05-11T14:03:42Z", "iter_count": 1, "verdict": "CONTINUE", "tokens_used": 8400, "section_path": "sections/results.tex"}
 ```
 
-## How `/omcr-setup` uses these
+## How `$omxr-setup` uses these
 
-`/omcr-setup` reads each file in this directory and writes its content into
-the user's `.claude/omcr-state/<file>` only if the target doesn't already
-exist. Existing state is never overwritten — `/omcr-setup` is idempotent.
+`$omxr-setup` reads each file in this directory and writes its content into
+the user's `.omx/state/omxr/<file>` only if the target doesn't already
+exist. Existing state is never overwritten — `$omxr-setup` is idempotent.
 
 ## Schema version migration
 

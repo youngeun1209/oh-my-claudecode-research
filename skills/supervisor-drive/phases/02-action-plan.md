@@ -2,7 +2,7 @@
 
 Apply the **hardcoded bottleneck-ranker** to `current_picture` and emit a structured plan: one `next_action` (always single-target — Phase 3 §4) plus an `alternatives` list for the interactive-mode picker.
 
-**Priority rules are hardcoded currently.** Per Phase 3 §5 (locked decision): no `CLAUDE.md`-driven override, no JSON config knob, no flag. Users who disagree on a specific run use `--interactive` (and pick from `alternatives`) or `--plan-only` (inspect and stop). The future backlog item is "user-configurable priority overrides" — keep this file's rules byte-stable currently so the future design has a clean baseline.
+**Priority rules are hardcoded currently.** Per Phase 3 §5 (locked decision): no `AGENTS.md`-driven override, no JSON config knob, no flag. Users who disagree on a specific run use `--interactive` (and pick from `alternatives`) or `--plan-only` (inspect and stop). The future backlog item is "user-configurable priority overrides" — keep this file's rules byte-stable currently so the future design has a clean baseline.
 
 ## Inputs
 
@@ -45,7 +45,7 @@ Action: HALT with TBD advisory. Same rationale as priority 1 — no engine auto-
   "next_action": {
     "engine":   null,
     "args":     {},
-    "reason":   "Section <name> is blocked-on-tbd. Resolve [TBD: ...] markers or re-invoke /iterate-revision <path> --allow-tbd.",
+    "reason":   "Section <name> is blocked-on-tbd. Resolve [TBD: ...] markers or re-invoke $iterate-revision <path> --allow-tbd.",
     "priority": 2,
     "verdict":  "HALT"
   },
@@ -60,7 +60,7 @@ Trigger: **either** of:
 - `current_picture.citations.cite_placeholder_total > 0` (manuscript text has `[CITE: ...]` placeholders), OR
 - `current_picture.citations.queue_pending > 0` (`citations.json.queue` has entries with `status: pending`).
 
-Action: dispatch `/literature-sweep <topic>`. The topic resolution rule:
+Action: dispatch `$literature-sweep <topic>`. The topic resolution rule:
 
 1. If `paper_state.hypothesis` is non-null and non-`[TBD:`, use the first noun-phrase-shaped substring from the hypothesis (the supervisor's heuristic — phase 02 does not need an NLP pipeline; the engine will refine the search anyway).
 2. Else if `citations.json.queue[0].context` exists, use the first 60 chars of that context as the topic.
@@ -71,14 +71,14 @@ Action: dispatch `/literature-sweep <topic>`. The topic resolution rule:
   "next_action": {
     "engine":   "literature-sweep",
     "args":     { "topic": "<resolved topic>" },
-    "reason":   "<N> [CITE:] placeholders in manuscript and <M> pending citations.json.queue entries. Dispatching /literature-sweep to populate references.bib.",
+    "reason":   "<N> [CITE:] placeholders in manuscript and <M> pending citations.json.queue entries. Dispatching $literature-sweep to populate references.bib.",
     "priority": 3
   },
   "alternatives": []
 }
 ```
 
-If a `@literature-curator` direct dispatch is more appropriate (e.g., only 1 placeholder, a known citekey is needed — not a topic sweep), the engine-of-choice belongs to the supervisor here. the current implementation always picks `/literature-sweep` because that engine is the leaf the supervisor is allowed to dispatch; the per-placeholder workflow (a direct `@literature-curator` dispatch with the placeholder context) is a future refinement and is not yet emitted by phase 02.
+If a `@literature-curator` direct dispatch is more appropriate (e.g., only 1 placeholder, a known citekey is needed — not a topic sweep), the engine-of-choice belongs to the supervisor here. the current implementation always picks `$literature-sweep` because that engine is the leaf the supervisor is allowed to dispatch; the per-placeholder workflow (a direct `@literature-curator` dispatch with the placeholder context) is a future refinement and is not yet emitted by phase 02.
 
 ### Priority 4 — Unwritten sections (`status: empty`)
 
@@ -90,7 +90,7 @@ Action branches on whether an outline exists:
    - If `sections_detail[name].outline` is a non-null inline string → use it (the engine receives it via the outline field; no file dispatch).
    - Else check whether `<manuscript_root>/outline.md` exists on disk.
 
-2. **If an outline exists** (inline OR fallback file): dispatch `/outline-expand <outline-path>`. The engine handles every empty section in one map-reduce shot — phase 02 emits one plan, not N plans. The args set `--sections <comma-separated list of every empty section name>` for explicitness (the engine would default to "all not-approved sections", but the supervisor scope-limits it so the run is predictable).
+2. **If an outline exists** (inline OR fallback file): dispatch `$outline-expand <outline-path>`. The engine handles every empty section in one map-reduce shot — phase 02 emits one plan, not N plans. The args set `--sections <comma-separated list of every empty section name>` for explicitness (the engine would default to "all not-approved sections", but the supervisor scope-limits it so the run is predictable).
 
    ```jsonc
    {
@@ -110,14 +110,14 @@ Action branches on whether an outline exists:
    }
    ```
 
-3. **If no outline exists**: dispatch `/iterate-revision <section-path>` on the first empty section (single-section DRAFT mode).
+3. **If no outline exists**: dispatch `$iterate-revision <section-path>` on the first empty section (single-section DRAFT mode).
 
    ```jsonc
    {
      "next_action": {
        "engine":   "iterate-revision",
        "args":     { "section_path": "<first empty section's path>" },
-       "reason":   "Section <name> is empty and no outline.md exists. Single-section draft via /iterate-revision.",
+       "reason":   "Section <name> is empty and no outline.md exists. Single-section draft via $iterate-revision.",
        "priority": 4
      },
      "alternatives": []
@@ -130,7 +130,7 @@ Single-target invariant: always one plan. If there are 3 empty sections, the use
 
 Trigger: `current_picture.paper.sections_by_status.drafted` is non-empty.
 
-Action: dispatch `/iterate-revision <section-path>` on the first drafted section.
+Action: dispatch `$iterate-revision <section-path>` on the first drafted section.
 
 ```jsonc
 {
@@ -156,7 +156,7 @@ Action: dispatch `/iterate-revision <section-path>` on the first drafted section
 
 Trigger: `current_picture.rebuttals.unresolved` is non-empty.
 
-Action: dispatch `/respond-reviewer <letter>` on the first unresolved entry's `review_letter` path.
+Action: dispatch `$respond-reviewer <letter>` on the first unresolved entry's `review_letter` path.
 
 ```jsonc
 {
@@ -176,7 +176,7 @@ Action: dispatch `/respond-reviewer <letter>` on the first unresolved entry's `r
 
 Trigger: `current_picture.figures.diverged` is non-empty (entries where `brief_status: approved` but `impl_status != approved`) OR `current_picture.figures.blocked` is non-empty (entries where the latest critique returned BLOCKED — typically a structural redesign was flagged).
 
-Action: dispatch `/figure-bake <fig-id>`.
+Action: dispatch `$figure-bake <fig-id>`.
 
 ```jsonc
 {
@@ -257,9 +257,9 @@ Pass forward:
 
 | Condition | Behavior |
 |---|---|
-| No priority triggers (paper has zero sections, no citations, no figures, no rebuttals) | Emit priority 8 DONE — submission_ready is vacuously true. This is the empty-project / `/omcr-setup`-only state. Phase 07 will note "no work to drive". |
+| No priority triggers (paper has zero sections, no citations, no figures, no rebuttals) | Emit priority 8 DONE — submission_ready is vacuously true. This is the empty-project / `$omxr-setup`-only state. Phase 07 will note "no work to drive". |
 | `prior_trail.consecutive_blocked >= 2` on the matched plan | Override to HALT with the anti-loop reason. |
-| Priority 4 outline-path resolution fails (no inline outline, no outline.md on disk) | Fall through to the no-outline branch (single-section `/iterate-revision`). Do not abort. |
+| Priority 4 outline-path resolution fails (no inline outline, no outline.md on disk) | Fall through to the no-outline branch (single-section `$iterate-revision`). Do not abort. |
 | Priority 3 topic resolution returns null | Emit the plan with `topic: null` and a reason flagging that the user must supply it. In `--auto`, phase 03 will halt because the engine cannot dispatch with a null required arg. |
 
 ## What this phase does NOT do
@@ -269,5 +269,5 @@ Pass forward:
 - Does **not** apply safety gates. Phase 04 does that, post-confirmation.
 - Does **not** combine multiple engines into one plan. Single-target invariant (Phase 3 §4).
 - Does **not** read `_run-log.jsonl` itself (it consumes `current_picture.prior_trail` and `current_picture.recent_runs`, which phase 01 populated).
-- Does **not** override the priority table from a CLAUDE.md block. Hardcoded currently per Phase 3 §5.
+- Does **not** override the priority table from a AGENTS.md block. Hardcoded currently per Phase 3 §5.
 - Does **not** rank alternatives by anything other than the natural order of the underlying state (e.g., section declaration order in `paper.json`). a future iteration may revisit.

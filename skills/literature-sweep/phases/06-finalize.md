@@ -1,6 +1,6 @@
 # Phase 6 — Finalize
 
-Write the verified entries to `references.bib` and the summary CSV. Populate the `citations.json.last_sweep` block with topic, counts, rejected list, timestamp, and any notes. Append one `phase: "summary"` line to `.claude/omcr-state/_run-log.jsonl`. Render the user-facing summary.
+Write the verified entries to `references.bib` and the summary CSV. Populate the `citations.json.last_sweep` block with topic, counts, rejected list, timestamp, and any notes. Append one `phase: "summary"` line to `.omx/state/omxr/_run-log.jsonl`. Render the user-facing summary.
 
 This phase is the only phase that mutates files on disk. Everything from phase 01 through phase 05 was assembled in-memory.
 
@@ -181,7 +181,7 @@ Suggested next:
   recoverable entries (typos, transient network failures).
   Open <summary_file> and fill the `bucket` / `our_use` columns where supervisor
   has decided how each paper fits the manuscript.
-  /sync                          (snapshot project state)
+  $sync                          (snapshot project state)
 ```
 
 ### When `0 < verify_pass_count < n_requested * 0.7` (low return)
@@ -211,7 +211,7 @@ recorded in citations.json.last_sweep for telemetry.
 
 To debug:
   - Re-run with --parallel 1 if parallel was used.
-  - Confirm network reachability: try /literature-sweep with --source crossref
+  - Confirm network reachability: try $literature-sweep with --source crossref
     only, then with --source openalex only.
   - Confirm the topic resolves something on https://search.crossref.org manually.
 ```
@@ -220,7 +220,7 @@ If `notes` is non-empty in any verdict branch, render the notes list under a `No
 
 ## Step 6 — No git commit, no push
 
-OMCR does **not** commit or push on behalf of the user from this phase. The bibliography is durable, citations.json is durable, the CSV is durable — those writes are the deliverable. If the user wants a snapshot commit, they run `/sync` next.
+OMXR does **not** commit or push on behalf of the user from this phase. The bibliography is durable, citations.json is durable, the CSV is durable — those writes are the deliverable. If the user wants a snapshot commit, they run `$sync` next.
 
 A future flag (`--commit` or `--push`) is a future-version concern. The pattern matches `iterate-revision` phase 05 step 5 and `manuscript-scaffold` phase 04 prompt-to-push convention.
 
@@ -232,7 +232,7 @@ A future flag (`--commit` or `--push`) is a future-version concern. The pattern 
 | `summary_file` write fails | Same atomic guarantee. The bibliography may have been written successfully in step 1; this is acceptable — the user re-runs and step 2's idempotent header check + citekey-row check will not duplicate. |
 | `citations.json` write fails | The on-disk citations.json reflects the pre-phase-06 state (verified array may be missing this run's additions; last_sweep may be stale). Surface the OS error; the user re-runs. |
 | `_run-log.jsonl` append fails | Log a warning. Do not abort. The user has already seen the transcript summary; citations.json.last_sweep is the canonical record. |
-| `verified_entries` empty AND `rejected_entries` empty AND `notes` empty | Should not happen; either the sources were unreachable (notes populated) or there were no candidates (notes populated by phase 02 step 4). If it does happen, render: `"Sweep complete with zero candidates and zero notes — please file an issue against oh-my-claudecode-research with the run_id above."` |
+| `verified_entries` empty AND `rejected_entries` empty AND `notes` empty | Should not happen; either the sources were unreachable (notes populated) or there were no candidates (notes populated by phase 02 step 4). If it does happen, render: `"Sweep complete with zero candidates and zero notes — please file an issue against oh-my-codex-research with the run_id above."` |
 | Disk full on any write | All atomic writes will fail their rename step; the file content stays at the previous version. Surface the OS error and continue with the remaining writes. The user re-runs after freeing space. |
 
 ## What this phase does NOT do

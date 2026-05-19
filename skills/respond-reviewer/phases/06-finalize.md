@@ -118,10 +118,10 @@ If the write fails:
 
 ## Step 3 — Update `paper.json` if any sections changed
 
-If `responses` reported `files_touched` that include any `paper_state.sections[*].path`, the affected sections may have been modified. The engine does not automatically flip their `status` (e.g., to `revising`) — that is `/iterate-revision`'s job and would be premature here. But:
+If `responses` reported `files_touched` that include any `paper_state.sections[*].path`, the affected sections may have been modified. The engine does not automatically flip their `status` (e.g., to `revising`) — that is `$iterate-revision`'s job and would be premature here. But:
 
 - For each section path that appears in `files_touched_all` AND matches a `paper_state.sections[name].path`:
-  - Log to the transcript: `respond-reviewer: section <name> was edited by a dispatched agent — consider running /iterate-revision <path> to re-review.`
+  - Log to the transcript: `respond-reviewer: section <name> was edited by a dispatched agent — consider running $iterate-revision <path> to re-review.`
 - Update `paper_state.last_updated = <UTC ISO-8601 now>`.
 - Write `paper.json` back atomically.
 
@@ -129,7 +129,7 @@ If `--draft-only` was set, this step is a no-op — no sections were edited.
 
 ## Step 4 — Append run records to `_run-log.jsonl`
 
-The orchestrate `loop` primitive normally writes the start + end records, but `/respond-reviewer` does not use the loop primitive as its driver (single-pass engine). This phase writes the equivalent records directly.
+The orchestrate `loop` primitive normally writes the start + end records, but `$respond-reviewer` does not use the loop primitive as its driver (single-pass engine). This phase writes the equivalent records directly.
 
 Append three lines (atomic-append, never overwrite):
 
@@ -219,7 +219,7 @@ Suggested next:
   - Read the rebuttal letter and verify each response matches the manuscript.
   - Compile: cd <manuscript_root> && latexmk -pdf rebuttal-letter.tex
                 (if --format latex)
-  - Re-run /iterate-revision on any section that was edited (see paper.json updates above).
+  - Re-run $iterate-revision on any section that was edited (see paper.json updates above).
 ```
 
 ### HALT
@@ -239,7 +239,7 @@ USER ATTENTION REQUIRED — <N> structural comment(s) need human decision:
 
 These comments were not auto-dispatched (engines do not make framing or scope
 decisions). Address them in the rebuttal letter manually, or revise the
-manuscript and re-run /respond-reviewer with the updated letter.
+manuscript and re-run $respond-reviewer with the updated letter.
 ```
 
 Then, regardless of whether `user_attention` is empty:
@@ -260,9 +260,9 @@ Suggested next:
   - Address disputed responses (rewrite or accept manually).
   - Run any of the suggested follow-up commands (engines do not auto-invoke):
       <render `suggested_next_steps` list from step 2, one per line>
-  - Re-run /respond-reviewer with an updated letter once decisions are made.
+  - Re-run $respond-reviewer with an updated letter once decisions are made.
 
-Full state: .claude/omcr-state/rebuttals.json (run_id=<run_id>)
+Full state: .omx/state/omxr/rebuttals.json (run_id=<run_id>)
 ```
 
 ### BLOCKED
@@ -280,7 +280,7 @@ What was preserved:
   - rebuttals.json entry with verdict=BLOCKED and all per-comment state recorded.
   - _run-log.jsonl start + end + summary records.
 
-After addressing the cause, re-run /respond-reviewer with the same letter. The
+After addressing the cause, re-run $respond-reviewer with the same letter. The
 new run is a fresh entry; the BLOCKED entry stays for audit.
 ```
 
@@ -309,9 +309,9 @@ These do not change the verdict; they alert the user to inspect specific artifac
 ## What this phase does NOT do
 
 - Does **not** invoke any subagent. Pure state writes + transcript output.
-- Does **not** commit to git. OMCR leaves git out of the rebuttal flow. Future versions may add a `--commit` flag.
+- Does **not** commit to git. OMXR leaves git out of the rebuttal flow. Future versions may add a `--commit` flag.
 - Does **not** push to Overleaf or any remote. Manuscript-scaffold owns push flows.
 - Does **not** re-dispatch any comment. The user re-runs the engine after acting on the summary.
-- Does **not** auto-run `/iterate-revision` on edited sections. It only **suggests** the user run it. Engines are leaves (Phase 2 decision §5).
+- Does **not** auto-run `$iterate-revision` on edited sections. It only **suggests** the user run it. Engines are leaves (Phase 2 decision §5).
 - Does **not** modify the rebuttal letter content. Whatever phase 04 rendered is what gets written.
 - Does **not** retry on durable-write failure. One shot per artifact. The fallbacks (transcript print, project-root letter) preserve the work but the user must move them into place manually if the primary write failed.

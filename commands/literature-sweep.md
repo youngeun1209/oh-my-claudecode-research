@@ -2,7 +2,7 @@
 description: Find, summarize, and verify N papers on a topic. Parallel-dispatch engine across `@literature-curator` instances; only verified entries enter the BibTeX file.
 ---
 
-# /literature-sweep
+# $literature-sweep
 
 Dispatcher. Read [`skills/literature-sweep/SKILL.md`](../skills/literature-sweep/SKILL.md) and follow it exactly.
 
@@ -11,7 +11,7 @@ Arguments: `$ARGUMENTS`
 ## Signature
 
 ```
-/literature-sweep <topic> [--n N] [--depth basic|deep] [--source crossref|openalex|both] [--parallel P]
+$literature-sweep <topic> [--n N] [--depth basic|deep] [--source crossref|openalex|both] [--parallel P]
 ```
 
 ## Flags
@@ -26,10 +26,10 @@ Arguments: `$ARGUMENTS`
 ## Examples
 
 ```
-/literature-sweep "neural manifolds in motor cortex"
-/literature-sweep "diffusion models for protein design" --n 30
-/literature-sweep "frontoparietal working memory" --depth deep --parallel 4
-/literature-sweep "transformer attention sparsity" --source crossref --n 15
+$literature-sweep "neural manifolds in motor cortex"
+$literature-sweep "diffusion models for protein design" --n 30
+$literature-sweep "frontoparietal working memory" --depth deep --parallel 4
+$literature-sweep "transformer attention sparsity" --source crossref --n 15
 ```
 
 ## What this engine produces
@@ -37,11 +37,11 @@ Arguments: `$ARGUMENTS`
 - New verified entries appended to `references.bib` (path from `## Research stack` block or `paper.json`).
 - New rows appended to the summary CSV (default `references.csv`) — `citekey | authors | year | title | venue | doi | bucket | our_use | paper_says | cited_sections | verified_on | verify_status`. Human-curated columns left blank for the curator to fill on a later pass.
 - `citations.json.last_sweep` populated with `{topic, n_requested, n_returned, rejected, timestamp, notes}`.
-- One `phase: "summary"` line appended to `.claude/omcr-state/_run-log.jsonl`.
+- One `phase: "summary"` line appended to `.omx/state/omxr/_run-log.jsonl`.
 
 ## What this engine does NOT do
 
 - Does not invent citations. Every entry passes the `verify-citation` skill before landing in `references.bib` — unverified candidates land in `citations.json.last_sweep.rejected` for user review.
-- Does not call another slash command (engines are leaves — Phase 2 decision §5).
-- Does not commit to git. Run `/sync` afterward if you want a snapshot commit.
+- Does not call another skill (engines are leaves — Phase 2 decision §5).
+- Does not commit to git. Run `$sync` afterward if you want a snapshot commit.
 - Does not write manuscript prose. The curator returns BibTeX + summary CSV rows only.

@@ -20,7 +20,7 @@ If `no_commit == false`:
 
 ```
 git add -A
-git commit -m "omcr supervisor-drive: <engine> <args-summary> verdict=<v> run=<supervisor-run_id>"
+git commit -m "omxr supervisor-drive: <engine> <args-summary> verdict=<v> run=<supervisor-run_id>"
 ```
 
 Where:

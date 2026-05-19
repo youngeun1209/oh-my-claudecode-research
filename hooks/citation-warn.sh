@@ -8,11 +8,11 @@
 #
 # Never blocks — exit 0 always. This is a heuristic nudge, not a hard gate.
 #
-# Disable per-project: set CLAUDE_RESEARCH_DISABLE_CITATION_WARN=1.
+# Disable per-project: set CODEX_RESEARCH_DISABLE_CITATION_WARN=1.
 
 set -u
 
-if [[ "${CLAUDE_RESEARCH_DISABLE_CITATION_WARN:-0}" == "1" ]]; then
+if [[ "${CODEX_RESEARCH_DISABLE_CITATION_WARN:-0}" == "1" ]]; then
   exit 0
 fi
 
@@ -62,7 +62,7 @@ for i, p in enumerate(paragraphs, 1):
 if uncited:
     print(f"CITATION-WARN: {file_path}", file=sys.stderr)
     print(f"  paragraphs without citations: {uncited}", file=sys.stderr)
-    print("  (heuristic — set CLAUDE_RESEARCH_DISABLE_CITATION_WARN=1 to silence)", file=sys.stderr)
+    print("  (heuristic — set CODEX_RESEARCH_DISABLE_CITATION_WARN=1 to silence)", file=sys.stderr)
 ' 2>&1)"
 
 # Pass result through (warnings already on stderr from python). Always exit 0.

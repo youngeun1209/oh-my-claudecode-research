@@ -1,0 +1,27 @@
+{
+  "name": "oh-my-codex-research",
+  "version": "0.1.2",
+  "description": "Research-team workflows for OpenAI Codex CLI and oh-my-codex: supervisor, analysis-implementer, paper-writer, figure-descriptor, reviewer, literature-curator.",
+  "author": {
+    "name": "Young-Eun Lee"
+  },
+  "repository": "https://github.com/youngeun1209/oh-my-codex-research",
+  "homepage": "https://github.com/youngeun1209/oh-my-codex-research",
+  "license": "MIT",
+  "keywords": [
+    "codex",
+    "openai",
+    "oh-my-codex",
+    "research",
+    "academic",
+    "agents"
+  ],
+  "skills": "./skills/",
+  "interface": {
+    "displayName": "oh-my-codex-research",
+    "shortDescription": "Research edition workflow bundle for OpenAI Codex CLI and oh-my-codex.",
+    "longDescription": "OMXR adds research-specific Codex skills, project scaffolding, manuscript workflows, citation checks, figure workflows, and setup-installed research agent templates on top of the base oh-my-codex runtime. The plugin manifest exposes skills; runtime hooks, AGENTS.md scaffolding, state, memory, and optional native-agent installation are handled by omx setup plus $omxr-setup.",
+    "developerName": "Young-Eun Lee",
+    "category": "Developer Tools"
+  }
+}

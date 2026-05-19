@@ -1,6 +1,6 @@
 # Phase 1 — State survey
 
-Read all 5 OMCR state files and build a `current_picture` dict that phase 02 (action-plan) consumes. This phase runs at the **start of every iteration**, not just at drive entry — the engines-are-leaves invariant (Phase 3 §3) requires re-reading state from scratch between every step.
+Read all 5 OMXR state files and build a `current_picture` dict that phase 02 (action-plan) consumes. This phase runs at the **start of every iteration**, not just at drive entry — the engines-are-leaves invariant (Phase 3 §3) requires re-reading state from scratch between every step.
 
 ## Inputs
 
@@ -17,7 +17,7 @@ From phase 00 (drive entry) or phase 06 (loop-back):
 
 ### 1. Read each of the 5 state files
 
-Call [`../../orchestrate/phases/01-state-read.md`](../../orchestrate/phases/01-state-read.md) once per name. Each call bootstraps the file if missing — supervisor-drive may run before `/omcr-setup` has fully initialized state, and bootstrap is safe (Phase 0 §1).
+Call [`../../orchestrate/phases/01-state-read.md`](../../orchestrate/phases/01-state-read.md) once per name. Each call bootstraps the file if missing — supervisor-drive may run before `$omxr-setup` has fully initialized state, and bootstrap is safe (Phase 0 §1).
 
 - `state-read(paper)` → `paper_state`
 - `state-read(reviews)` → `reviews_state`
@@ -29,7 +29,7 @@ If any read aborts with a parse error: propagate the abort. The drive cannot pro
 
 ### 2. Read `_run-log.jsonl` recent history
 
-Open `.claude/omcr-state/_run-log.jsonl` and scan from the end. Build a `recent_runs` list of the last 20 records (or all if fewer), parsed as dicts. Skip malformed lines with a warning.
+Open `.omx/state/omxr/_run-log.jsonl` and scan from the end. Build a `recent_runs` list of the last 20 records (or all if fewer), parsed as dicts. Skip malformed lines with a warning.
 
 This list feeds:
 
@@ -41,7 +41,7 @@ This list feeds:
 
 For each `path` in `paper_state.sections[*]` whose file exists on disk, read it and count occurrences of the literal regex `\[CITE:\s*[^\]]+\]`. Record per-section counts.
 
-This is the priority-3 trigger half — combined with `citations_state.queue` pending entries, it tells the ranker whether a `/literature-sweep` is overdue.
+This is the priority-3 trigger half — combined with `citations_state.queue` pending entries, it tells the ranker whether a `$literature-sweep` is overdue.
 
 ### 4. Build the `current_picture` dict
 
@@ -148,7 +148,7 @@ Pass forward `current_picture` + all carry-forward fields from phase 00. Phase 0
 |---|---|
 | Any state-read aborts | Propagate the abort. Drive halts via phase 07 standard path. |
 | `_run-log.jsonl` malformed lines | Skip each one with a warning. |
-| Section `path` references a missing file | Record `cite_placeholder_count: 0` for that section and continue. Phase 02 may pick `/iterate-revision` which will fail the same precheck; that is the correct failure surface. |
+| Section `path` references a missing file | Record `cite_placeholder_count: 0` for that section and continue. Phase 02 may pick `$iterate-revision` which will fail the same precheck; that is the correct failure surface. |
 | Outline file missing for an `empty` section that has `outline: null` | Record `outline: null` (the file-existence check happens in phase 02 when deciding outline-expand vs iterate-revision). |
 
 ## What this phase does NOT do

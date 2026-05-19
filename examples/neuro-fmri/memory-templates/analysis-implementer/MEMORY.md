@@ -2,7 +2,7 @@
 
 > **Skeleton only.** Concrete pipeline parameters, subject IDs, atlas choices,
 > and bug-fix narratives have been stripped. Copy into your own project's
-> `.claude/agent-memory/analysis-implementer/MEMORY.md` and fill in.
+> `.omx/omxr/agent-memory/analysis-implementer/MEMORY.md` and fill in.
 
 **Last synced:** [YYYY-MM-DD]
 

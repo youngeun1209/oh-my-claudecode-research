@@ -27,14 +27,14 @@ This skill reads:
 | Variable | Default | Purpose |
 |---|---|---|
 | `BIB_FILE` | `references.bib` | Path to project BibTeX. Used when verifying by citekey. |
-| `SUMMARY_FILE` | `references.csv` | Project literature summary table. When `--summary-csv` is set (or this is configured in CLAUDE.md), `verified_on` / `verify_status` are written back per citekey. |
+| `SUMMARY_FILE` | `references.csv` | Project literature summary table. When `--summary-csv` is set (or this is configured in AGENTS.md), `verified_on` / `verify_status` are written back per citekey. |
 | `CITATION_VERIFY_EMAIL` | (unset) | Polite-pool email for CrossRef/OpenAlex. Strongly recommended — gives a higher rate limit and prioritizes your requests. |
 | `CITATION_VERIFY_TIMEOUT` | `15` | Request timeout in seconds. |
 
 Resolution order on each invocation:
 1. **Command-line flags** (highest priority).
 2. **Environment variables.**
-3. **Project CLAUDE.md "Research stack" block** — fields `BibTeX file`, `Summary file`, `CrossRef email`.
+3. **Project AGENTS.md "Research stack" block** — fields `BibTeX file`, `Summary file`, `CrossRef email`.
 4. **Defaults above.**
 
 If `BIB_FILE` is not configured on first use, ask the user once and offer to persist it.
@@ -67,7 +67,7 @@ Optional flags:
 ### Step 2 — Run the verifier
 
 ```bash
-python3 "$CLAUDE_PLUGIN_ROOT"/skills/verify-citation/verify_citation.py \
+python3 "$CODEX_PLUGIN_ROOT"/skills/verify-citation/verify_citation.py \
     --bib "$BIB_FILE" \
     --summary-csv "$SUMMARY_FILE"
 ```

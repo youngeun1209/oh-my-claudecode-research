@@ -1,18 +1,18 @@
 # Orchestration model
 
-OMCR+ ships a small set of orchestration primitives that engine
-skills (`/iterate-revision`, `/literature-sweep`, `/respond-reviewer`,
-`/figure-bake`, `/outline-expand`, `/supervisor-drive`) compose into
+OMXR+ ships a small set of orchestration primitives that engine
+skills (`$iterate-revision`, `$literature-sweep`, `$respond-reviewer`,
+`$figure-bake`, `$outline-expand`, `$supervisor-drive`) compose into
 their workflows. This page explains the model so contributors can
 author new engines without re-inventing the wheel and so users can
-read `.claude/omcr-state/` confidently.
+read `.omx/state/omxr/` confidently.
 
 If you are a user and just want a single section revised by the
 reviewer team, you do not need this page — pick the engine from
 [Engines](Commands.md) and run it. This page is for people writing
 engines or debugging a run log.
 
-## The state store — `.claude/omcr-state/`
+## The state store — `.omx/state/omxr/`
 
 A flat directory inside the **user's project** (not the plugin
 install). Contains five files:
@@ -28,23 +28,23 @@ install). Contains five files:
 **Flat layout** — no `logs/` subdirectory, no nested per-engine dirs.
 The leading underscore on `_run-log.jsonl` sorts it to the top of `ls`
 output as the only separation the layout needs. Rationale:
-`.claude/agent-memory/<agent>/MEMORY.md` already adds one level of
-nesting; adding a second tree under `omcr-state/` would double the
+`.omx/omxr/agent-memory/<agent>/MEMORY.md` already adds one level of
+nesting; adding a second tree under `omxr-state/` would double the
 mental model for a single log file.
 
 ### Gitignore status
 
-The whole `.claude/` directory is gitignored by OMCR's default. This
+The whole `.codex/` directory is gitignored by OMXR's default. This
 keeps per-user state — including any sensitive content engines might
 accumulate in `paper.json` (working title, hypothesis) or
 `citations.json` (paper queries with research-question context) — out
 of the project's tracked tree. Users who want versioning can un-ignore
-specific files in their own project's `.gitignore`; OMCR will not
+specific files in their own project's `.gitignore`; OMXR will not
 do that for them.
 
 ### Schema versioning
 
-Every JSON state file carries a `schema_version` field. OMCR ships
+Every JSON state file carries a `schema_version` field. OMXR ships
 `"1"` (a JSON **string**, not int — so a future `"1.1"` bump can
 remain semver-shaped). The string-versus-int choice mirrors how
 `templates/journal-registry.json` already keys venues by string.
@@ -94,7 +94,7 @@ verdict carries.
 
 ## Cost model — post-hoc only
 
-OMCR does not pre-flight token cost. The `loop` primitive records
+OMXR does not pre-flight token cost. The `loop` primitive records
 **actual** `tokens_used` to `_run-log.jsonl` after each iteration. If
 the engine passed a `budget_tokens` cap, the loop emits `HALT` **at
 the iteration boundary** when cumulative usage exceeds the cap — never
@@ -103,12 +103,12 @@ bounded by `max_iter` (default 3).
 
 This is intentional. Pre-flight tokenization would require shipping a
 tokenizer dependency (Python `tiktoken` or equivalent), which breaks
-OMCR's "plain markdown + shell scripts" stance. A rough char-count
+OMXR's "plain markdown + shell scripts" stance. A rough char-count
 heuristic would be wrong often enough to either over-abort or
 under-protect. Post-hoc is honest: the user sees what was actually
 spent.
 
-Phase 4 (`/supervisor-drive`, autonomous mode) is the right place to
+Phase 4 (`$supervisor-drive`, autonomous mode) is the right place to
 add pre-flight estimation; cost-sensitive scheduling is its core value
 prop, and the budget input on the loop primitive is already shaped to
 accept it without API changes.
@@ -156,12 +156,12 @@ cost_estimate_tokens: 25000
 ```
 
 A single integer: a rough per-run token estimate the
-`/supervisor-drive` scheduler uses for budget gating. Phase 3 adds a
+`$supervisor-drive` scheduler uses for budget gating. Phase 3 adds a
 rolling median of the engine's last 5 actuals on top of this constant,
 multiplied by 1.25 padding. The constant only matters for cold-start —
 once 5 actuals exist for the engine, they dominate.
 
-Optional for engines that will never run under `/supervisor-drive`.
+Optional for engines that will never run under `$supervisor-drive`.
 Recommended otherwise.
 
 See [Specializing](Specializing.md) for the full list of
@@ -170,11 +170,11 @@ frontmatter fields including these two.
 ## Engines are leaves — no engine-to-engine calls
 
 A hard architectural rule: **engines never invoke other engines**.
-`/iterate-revision` does not call `/literature-sweep`. `/figure-bake`
-does not call `/respond-reviewer`. They are leaves of the orchestration
+`$iterate-revision` does not call `$literature-sweep`. `$figure-bake`
+does not call `$respond-reviewer`. They are leaves of the orchestration
 tree.
 
-Only `/supervisor-drive` (the autonomous engine, Phase 3) may sequence
+Only `$supervisor-drive` (the autonomous engine, Phase 3) may sequence
 engines — and even it does so by **re-evaluating state between every
 step**, never by invoking an engine from inside another engine's
 dispatch plan. This keeps:
@@ -206,7 +206,7 @@ writes: [paper, reviews]
 cost_estimate_tokens: 25000
 ---
 
-# /iterate-revision
+# $iterate-revision
 
 ## Composition
 
@@ -239,23 +239,23 @@ reading any orchestrate phase files.
 
 ## Serial execution — current assumption
 
-OMCR runs **one engine at a time** per project. There is no lock
-file in `.claude/omcr-state/`. The realistic concurrency vector is
+OMXR runs **one engine at a time** per project. There is no lock
+file in `.omx/state/omxr/`. The realistic concurrency vector is
 Phase 3's autonomous supervisor scheduling overlapping subagents, and
 the orchestration roadmap defers a lock mechanism to that phase.
-A solo researcher with one Claude Code session cannot run two engines
-simultaneously through the normal entrypoints — slash commands are
+A solo researcher with one Codex session cannot run two engines
+simultaneously through the normal entrypoints — skills are
 turn-based — so the serial assumption holds for the current audience.
 
 `_run-log.jsonl` records start + end timestamps for every run. That is
-the only race detection OMCR currently provides. If you see overlapping
+the only race detection OMXR currently provides. If you see overlapping
 `started`/`ended` windows across two runs in the same project, you are
-in a regime OMCR does not support.
+in a regime OMXR does not support.
 
 ## See also
 
 - [Configuration](Configuration.md) — the `## Research stack` block
-  fields, including the new `data_root` for `/figure-bake`.
+  fields, including the new `data_root` for `$figure-bake`.
 - [Specializing](Specializing.md) — preset authoring, including the
   `writes:` and `cost_estimate_tokens:` frontmatter conventions.
 - `develop/phase-0-primitives.md` — internal design doc; full

@@ -6,7 +6,7 @@ Parse the outline, decide which sections will be drafted this run, and prepare t
 
 ## Inputs
 
-From the slash command:
+From the skill:
 - `<outline-path>` — positional, required
 - `--sections <list>` — optional, comma-separated section names
 - `--max-iter-per-section N` — optional, accepted but unused currently
@@ -17,7 +17,7 @@ Execute in order. Abort on the first failure unless the step says otherwise.
 
 ### 1. Validate `<outline-path>`
 
-- The path is interpreted relative to the project root (the Claude Code session's working directory).
+- The path is interpreted relative to the project root (the Codex session's working directory).
 - Verify the file exists. If not, abort with:
   ```
   outline-expand: <outline-path> not found.
@@ -37,8 +37,8 @@ Call the primitive at [`../../orchestrate/phases/01-state-read.md`](../../orches
 
 If the bootstrap path was taken (state-read just created the file), warn:
 ```
-outline-expand: paper.json was missing — bootstrapped an empty one. Run /omcr-setup
-or /start-research first if you intended to use existing state. Continuing with the
+outline-expand: paper.json was missing — bootstrapped an empty one. Run $omxr-setup
+or $start-research first if you intended to use existing state. Continuing with the
 default 5-section schema (abstract, introduction, methods, results, discussion).
 ```
 Then proceed.
@@ -150,7 +150,7 @@ For each candidate in the draftable set, check `paper_state.sections[name].statu
 |---|---|---|
 | `empty` | draft | draft |
 | `drafted` | **skip** (already drafted, log skip line) | draft (re-draft, clobbering existing prose) |
-| `revising` | **skip** (in-flight refinement; user should run `/iterate-revision` to resume) | draft (clobber — user asked) |
+| `revising` | **skip** (in-flight refinement; user should run `$iterate-revision` to resume) | draft (clobber — user asked) |
 | `blocked` | **skip** (user should resolve the block first) | draft (clobber) |
 | `blocked-on-tbd` | **skip** (user should resolve the TBD first) | draft (clobber) |
 | `approved` | **skip** | **skip** — explicit name in `--sections` does NOT override `approved`. Never auto-redraft approved prose. |
@@ -158,7 +158,7 @@ For each candidate in the draftable set, check `paper_state.sections[name].statu
 For each `approved`-and-requested-but-skipped name, log:
 ```
 outline-expand: section "<name>" is already approved; refusing to re-draft.
-To redo an approved section, manually set its status (e.g., via `/sync` or hand-edit
+To redo an approved section, manually set its status (e.g., via `$sync` or hand-edit
 paper.json: sections.<name>.status = "drafted") and re-run.
 ```
 
@@ -181,7 +181,7 @@ If `section_plan` is empty after all guards apply, abort cleanly:
 ```
 outline-expand: nothing to draft. All matched outline sections are already approved
 or were filtered out. Pass --sections <name> to override (except approved), or run
-/iterate-revision <section-path> on existing drafts to refine.
+$iterate-revision <section-path> on existing drafts to refine.
 ```
 
 ### 9. Resolve the shared nomenclature payload
@@ -190,7 +190,7 @@ Phase 02 passes the same nomenclature payload to every dispatch. Build it here s
 
 Read, in priority order:
 
-1. `.claude/agent-memory/paper-writer/nomenclature.md` in the user's project root.
+1. `.omx/omxr/agent-memory/paper-writer/nomenclature.md` in the user's project root.
    - If it exists, read the full content (no length cap — writers benefit from the full file).
    - If it is empty (≤ 5 non-whitespace characters), fall through to step 2.
 2. The minimal stub (verbatim):
@@ -199,7 +199,7 @@ Read, in priority order:
    (No nomenclature.md yet — none has been recorded for this project.
     Use terminology consistent with the Introduction section if one is already
     drafted; if undecided, pick one form and log it in
-    .claude/agent-memory/paper-writer/nomenclature.md so future runs can
+    .omx/omxr/agent-memory/paper-writer/nomenclature.md so future runs can
     converge. Avoid switching between synonyms within a single section.)
    ```
 
@@ -232,7 +232,7 @@ Pass forward to phase 02:
 
 - Does **not** invoke any subagent. Zero dispatches in phase 01.
 - Does **not** write to `paper.json`. Phase 03 owns the writes-back after the prose lands.
-- Does **not** read `reviews.json`, `citations.json`, or `figures.json`. Out of scope for `/outline-expand`.
-- Does **not** scan for `[TBD: ...]` markers in the outline. The `/iterate-revision` engine has that guard; this engine is for first drafts, where TBD markers in the outline are a legitimate way to flag "draft around this" intent. (If a section's outline excerpt contains `[TBD: ...]`, the writer will see it and may either incorporate the marker or work around it; the engine does not gate.)
+- Does **not** read `reviews.json`, `citations.json`, or `figures.json`. Out of scope for `$outline-expand`.
+- Does **not** scan for `[TBD: ...]` markers in the outline. The `$iterate-revision` engine has that guard; this engine is for first drafts, where TBD markers in the outline are a legitimate way to flag "draft around this" intent. (If a section's outline excerpt contains `[TBD: ...]`, the writer will see it and may either incorporate the marker or work around it; the engine does not gate.)
 - Does **not** read the fallback `<manuscript_root>/outline.md`. The user passed an explicit outline path; that path is canonical.
 - Does **not** edit `nomenclature.md`. Reads only.

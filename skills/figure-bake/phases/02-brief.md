@@ -1,6 +1,6 @@
 ---
 name: figure-bake-brief
-description: Phase 2 of /figure-bake. Dispatch @figure-descriptor to produce (or reuse) an implementation-ready design brief for this fig-id. Updates figures.json.figures[<fig-id>].brief + brief_status.
+description: Phase 2 of $figure-bake. Dispatch @figure-descriptor to produce (or reuse) an implementation-ready design brief for this fig-id. Updates figures.json.figures[<fig-id>].brief + brief_status.
 ---
 
 # Phase 2 — Brief

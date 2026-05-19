@@ -110,7 +110,7 @@ This is an `analysis` comment. Your job is to:
 <if figure_id is non-null:>
 The comment requests a figure redraw of "<figure_id>". Do NOT redraw the figure
 yourself in this dispatch. Identify the data/code paths and the redraw scope,
-and note that the user should run `/figure-bake <figure_id>` as a follow-up.
+and note that the user should run `$figure-bake <figure_id>` as a follow-up.
 Engines do not call other engines (Phase 2 decision §5).
 
 <if draft_only is true:>
@@ -126,7 +126,7 @@ Output a JSON object with this shape:
       "<one short string per action, e.g., 'ran sensitivity analysis varying k=3..7' or 'identified data slice for redraw'>"
     ],
     "files_touched":   ["<list of files actually written, or []>"],
-    "next_steps":      ["<optional list of follow-up commands the user should run, e.g., '/figure-bake fig3'>"]
+    "next_steps":      ["<optional list of follow-up commands the user should run, e.g., '$figure-bake fig3'>"]
   }
 ```
 
@@ -276,7 +276,7 @@ Pass forward (everything from phase 02 plus):
 ## What this phase does NOT do
 
 - Does **not** dispatch `structural` comments. Ever. They collect into `user_attention` for phase 06.
-- Does **not** call another engine. If a comment requests a figure redraw, the `@analysis-implementer` dispatch may include `/figure-bake <fig-id>` in its `next_steps` list, but **this engine** does not run it. Engines are leaves (Phase 2 decision §5).
+- Does **not** call another engine. If a comment requests a figure redraw, the `@analysis-implementer` dispatch may include `$figure-bake <fig-id>` in its `next_steps` list, but **this engine** does not run it. Engines are leaves (Phase 2 decision §5).
 - Does **not** loop on weak responses. One dispatch per comment. If phase 05 marks a response `disputed`, the user decides whether to re-run.
 - Does **not** commit to git between dispatches. There is no `on_iter_end` hook in this engine.
 - Does **not** evaluate responses for quality. That is phase 05's job (supervisor re-read).

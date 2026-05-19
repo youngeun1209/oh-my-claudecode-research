@@ -7,14 +7,14 @@ The information flows from one of two sources (in order):
 1. **`templates/journal-registry.json`** — a curated, maintainer-verified entry. Fast, no network. Preferred when available.
 2. **WebFetch fallback** — fetch the venue's publicly-listed author / scope page, summarize, and ask the user to confirm before writing. Used when the registry lookup fails.
 
-The result is written to `.claude/agent-memory/reviewer/MEMORY.md` under a new section "Venue-specific bar". After that, the `memory-load.sh` hook auto-injects it into every `@reviewer` invocation — no further user action.
+The result is written to `.omx/omxr/agent-memory/reviewer/MEMORY.md` under a new section "Venue-specific bar". After that, the `memory-load.sh` hook auto-injects it into every `@reviewer` invocation — no further user action.
 
 ## When to skip
 
 Skip this phase entirely if any of:
 
 - `Target venue` field in `## Project context` is missing, empty, `[TBD]`, or starts with `[TBD:`.
-- `.claude/agent-memory/reviewer/MEMORY.md` already contains a `## Venue-specific bar` section AND is **not byte-identical** to `templates/MEMORY.template.md` (i.e. the user has hand-written content — never overwrite).
+- `.omx/omxr/agent-memory/reviewer/MEMORY.md` already contains a `## Venue-specific bar` section AND is **not byte-identical** to `templates/MEMORY.template.md` (i.e. the user has hand-written content — never overwrite).
 - The user explicitly typed `--no-venue-seed` in `$ARGUMENTS` (record this for the phase 7 report).
 
 If skipped, record the reason (`venue-missing` / `memory-modified` / `user-opted-out`) for the phase 7 report.
@@ -44,9 +44,9 @@ Read `templates/journal-registry.json` (canonical path inside the plugin). Searc
 
 ## Step C — Write to reviewer memory
 
-Open `.claude/agent-memory/reviewer/MEMORY.md` (user's project root, not the plugin tree).
+Open `.omx/omxr/agent-memory/reviewer/MEMORY.md` (user's project root, not the plugin tree).
 
-**If the file is byte-identical to `templates/MEMORY.template.md`** (untouched canonical scaffold from `/omcr-setup`), perform a full structured replacement:
+**If the file is byte-identical to `templates/MEMORY.template.md`** (untouched canonical scaffold from `$omxr-setup`), perform a full structured replacement:
 
 - Update the `**Agent role:**` line to `Adversarial peer reviewer for <Target venue>`.
 - Update `**Last synced:**` to today's ISO date.
@@ -79,8 +79,8 @@ Open `.claude/agent-memory/reviewer/MEMORY.md` (user's project root, not the plu
 - ...
 
 <!--
-  Maintained by /start-research phase 5. To refresh, delete this whole
-  section and re-run /start-research. To override permanently, edit
+  Maintained by $start-research phase 5. To refresh, delete this whole
+  section and re-run $start-research. To override permanently, edit
   freely — the phase will not overwrite a section it already finds here.
 -->
 ````
@@ -107,8 +107,8 @@ Phase 7 lists this on its own line under "Venue scope seed".
 
 ## Re-run policy
 
-Re-running `/start-research` after step C wrote once will fall into `already-seeded` (because the `## Venue-specific bar` section now exists). To refresh:
+Re-running `$start-research` after step C wrote once will fall into `already-seeded` (because the `## Venue-specific bar` section now exists). To refresh:
 
-- User deletes the section manually, then re-runs `/start-research`. The phase will write a fresh seed.
+- User deletes the section manually, then re-runs `$start-research`. The phase will write a fresh seed.
 
 There is intentionally **no `--force-reseed`** — a deletion-by-hand is the explicit, reviewable action, matching the same pattern phase 4 uses for full memory resets.

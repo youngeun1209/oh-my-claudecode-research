@@ -1,6 +1,6 @@
 # Phase 5 — Finalize
 
-User-facing summary after the loop exits. Pulls the loop primitive's return value and renders it as a few lines the user can read in the Claude Code transcript. Appends one summary line to `_run-log.jsonl` (in addition to the start + end records the orchestrate loop primitive already wrote). No git commit, no push — those stay out by default.
+User-facing summary after the loop exits. Pulls the loop primitive's return value and renders it as a few lines the user can read in the Codex transcript. Appends one summary line to `_run-log.jsonl` (in addition to the start + end records the orchestrate loop primitive already wrote). No git commit, no push — those stay out by default.
 
 ## Inputs (from the loop primitive)
 
@@ -60,12 +60,12 @@ Then append one of these verdict-specific blocks:
 Section approved. paper.json: sections[<section_name>].status = "approved".
 
 Suggested next:
-  /iterate-revision <next unwritten or revising section>
-  /todofig                       (check figure-vs-outline gap)
-  /sync                          (snapshot project state)
+  $iterate-revision <next unwritten or revising section>
+  $todofig                       (check figure-vs-outline gap)
+  $sync                          (snapshot project state)
 ```
 
-The "next unwritten or revising section" hint should be filled in from `paper_state.sections` — pick the first key (in `sections` definition order) whose `status` is in `{empty, drafted, revising, blocked, blocked-on-tbd}`. If none exists, suggest `/sync` instead.
+The "next unwritten or revising section" hint should be filled in from `paper_state.sections` — pick the first key (in `sections` definition order) whose `status` is in `{empty, drafted, revising, blocked, blocked-on-tbd}`. If none exists, suggest `$sync` instead.
 
 ### BLOCKED
 
@@ -79,9 +79,9 @@ Critical issue (verbatim from the reviewer):
 This needs human action — new analysis, new data, or a framing decision.
 The reviewer flagged it as structural; another writer iter will not resolve it.
 
-Full review: .claude/omcr-state/reviews.json (run_id=<run_id>)
+Full review: .omx/state/omxr/reviews.json (run_id=<run_id>)
 After addressing, re-run:
-  /iterate-revision <section_path>
+  $iterate-revision <section_path>
 ```
 
 If there are multiple critical issues, list all of them (one per bullet line), then the "full review" hint.
@@ -95,11 +95,11 @@ Iterations exhausted. paper.json: sections[<section_name>].status = "revising".
 The section made progress (each iter cleared some issues); the budget ran out.
 
 Options:
-  /iterate-revision <section_path> --max-iter <iter_count + 2>
+  $iterate-revision <section_path> --max-iter <iter_count + 2>
                                   (bump the cap and continue)
-  Address remaining issues by hand, then re-run /iterate-revision.
+  Address remaining issues by hand, then re-run $iterate-revision.
 
-Full review: .claude/omcr-state/reviews.json (run_id=<run_id>)
+Full review: .omx/state/omxr/reviews.json (run_id=<run_id>)
 ```
 
 ### Fallthrough — `CONTINUE` (should not happen)
@@ -107,7 +107,7 @@ Full review: .claude/omcr-state/reviews.json (run_id=<run_id>)
 If phase 05 sees `verdict == CONTINUE`, render:
 ```
 Engine bug: loop returned CONTINUE to phase 05. Treating as HALT.
-Please file an issue against oh-my-claudecode-research with the run_id above.
+Please file an issue against oh-my-codex-research with the run_id above.
 ```
 
 Then fall through to the HALT block.
@@ -150,9 +150,9 @@ above is the canonical record of this run; reviews.json + paper.json are durable
 
 ## Step 5 — No git commit
 
-OMCR does **not** commit on behalf of the user from this phase. If `on_iter_end == "git-commit"` was set on the loop primitive (currently never set by this engine), the loop already committed per-iter; phase 05 still does nothing.
+OMXR does **not** commit on behalf of the user from this phase. If `on_iter_end == "git-commit"` was set on the loop primitive (currently never set by this engine), the loop already committed per-iter; phase 05 still does nothing.
 
-Future versions may add a `--commit` flag that triggers a single final commit here with a message like `omcr: iterate-revision <section_name> <verdict> (<iter_count> iter)`. That is a future-version concern.
+Future versions may add a `--commit` flag that triggers a single final commit here with a message like `omxr: iterate-revision <section_name> <verdict> (<iter_count> iter)`. That is a future-version concern.
 
 ## Failure modes
 

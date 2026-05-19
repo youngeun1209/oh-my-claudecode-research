@@ -1,6 +1,6 @@
 # Phase 4 — Bibliography
 
-Initialize the two bibliography files at their **default paths**. `/start-research` may later relocate or rename them based on the user's `Manuscript dir` answer, but at install time the defaults are enough for `@literature-curator` and `verify-citation` to operate.
+Initialize the two bibliography files at their **default paths**. `$start-research` may later relocate or rename them based on the user's `Manuscript dir` answer, but at install time the defaults are enough for `@literature-curator` and `verify-citation` to operate.
 
 ## `paper/references.bib`
 
@@ -28,4 +28,4 @@ The CSV stays in the **project root** (not inside `paper/`) so it does not get p
 
 ## Path overrides
 
-`/start-research` may ask the user to relocate `BibTeX file` or `Summary file` during its interview. If that happens, the start-research flow handles the relocation safely (move, not duplicate, with confirmation).
+`$start-research` may ask the user to relocate `BibTeX file` or `Summary file` during its interview. If that happens, the start-research flow handles the relocation safely (move, not duplicate, with confirmation).

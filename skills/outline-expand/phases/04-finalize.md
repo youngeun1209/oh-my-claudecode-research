@@ -1,6 +1,6 @@
 # Phase 4 — Finalize
 
-User-facing summary after the reduce step lands. Renders the per-section verdicts, the drift count, and pre-filled `/iterate-revision` lines so the user can refine each new draft. Appends the close + summary records to `_run-log.jsonl`. No git commit, no push, no auto-call of any other engine.
+User-facing summary after the reduce step lands. Renders the per-section verdicts, the drift count, and pre-filled `$iterate-revision` lines so the user can refine each new draft. Appends the close + summary records to `_run-log.jsonl`. No git commit, no push, no auto-call of any other engine.
 
 This phase is engine-specific logic — no orchestrate primitives are imported. The orchestrate `loop` primitive was never used by this engine (no iteration), so the close record is emitted directly here, mirroring the loop primitive's format so JSONL readers don't need to special-case `outline-expand`.
 
@@ -39,14 +39,14 @@ Each failure category gets a one-line tally in the user summary.
 `ended_at = <UTC ISO-8601 now>`
 `duration_sec = ended_at - run_started_at` in whole seconds.
 
-Format identically to `/iterate-revision` phase 05:
+Format identically to `$iterate-revision` phase 05:
 - `< 60s` → `"<N>s"`
 - `< 3600s` → `"<Nm <S>s"` (e.g., `2m 34s`)
 - otherwise → `"<H>h <M>m"` (e.g., `1h 04m`)
 
 ## Step 3 — Determine the overall verdict
 
-`/outline-expand` does not use the four-verdict severity rule (this engine has no reviewer dispatch). The verdict surfaced in the user summary follows this simpler table:
+`$outline-expand` does not use the four-verdict severity rule (this engine has no reviewer dispatch). The verdict surfaced in the user summary follows this simpler table:
 
 | Condition | Verdict | Status |
 |---|---|---|
@@ -91,16 +91,16 @@ Then append one of the verdict-specific blocks below.
 All sections drafted. paper.json: <n_drafted> sections set to status="drafted", iter=1.
 
 Suggested next:
-  /iterate-revision <path1>
-  /iterate-revision <path2>
+  $iterate-revision <path1>
+  $iterate-revision <path2>
   ...
-  (one /iterate-revision per drafted section, ordered by section_plan order)
+  (one $iterate-revision per drafted section, ordered by section_plan order)
 
 Review the drift report before iterating — terms flagged there will resurface as
-reviewer issues in /iterate-revision unless the user reconciles them first.
+reviewer issues in $iterate-revision unless the user reconciles them first.
 ```
 
-The `/iterate-revision <path>` lines should be pre-filled with the actual section paths from `write_results` (only entries with `wrote == true`), in the original `section_plan` order.
+The `$iterate-revision <path>` lines should be pre-filled with the actual section paths from `write_results` (only entries with `wrote == true`), in the original `section_plan` order.
 
 ### PARTIAL block
 
@@ -112,10 +112,10 @@ Failed sections (<n_failed>):
   ...
 
 To retry only the failed sections:
-  /outline-expand <outline_path> --sections <comma-separated failed names>
+  $outline-expand <outline_path> --sections <comma-separated failed names>
 
 To refine the sections that did succeed:
-  /iterate-revision <path>
+  $iterate-revision <path>
   ...
 
 The drift report covers the <n_drafted> sections that did succeed.
@@ -133,14 +133,14 @@ Failure breakdown:
 
 Common causes:
 - Plugin manifest unreachable (paper-writer persona file missing). Verify the
-  plugin is installed: ls $CLAUDE_PLUGIN_ROOT/agents/paper-writer.md
+  plugin is installed: ls $CODEX_PLUGIN_ROOT/agents/paper-writer.md
 - PII-scrub hook blocking writes. Check hooks/pii-scrub.sh against your section
   paths.
 - Filesystem permissions on manuscript_root. Verify: ls -ld <manuscript_root>
 
 No paper.json state was changed. Safe to re-run after addressing the cause.
 
-Full log: .claude/omcr-state/_run-log.jsonl (run_id=<run_id>)
+Full log: .omx/state/omxr/_run-log.jsonl (run_id=<run_id>)
 ```
 
 ### Writer-logged terminology decisions footer
@@ -152,7 +152,7 @@ Writer-logged terminology decisions (also in the drift report):
   (in <section>) <term> = <chosen-form>  — <reason>
   ...
 
-Consider adopting these into .claude/agent-memory/paper-writer/nomenclature.md
+Consider adopting these into .omx/omxr/agent-memory/paper-writer/nomenclature.md
 so future map-reduce expansions converge.
 ```
 
@@ -182,7 +182,7 @@ Mirror the orchestrate loop primitive's close-record format (`phase: "end"`), so
 }
 ```
 
-**Verdict mapping for the close record.** Since `/outline-expand`'s three-way verdict (DONE / PARTIAL / BLOCKED) doesn't map cleanly to the orchestrate four-verdict set (DONE / CONTINUE / BLOCKED / HALT), use this mapping:
+**Verdict mapping for the close record.** Since `$outline-expand`'s three-way verdict (DONE / PARTIAL / BLOCKED) doesn't map cleanly to the orchestrate four-verdict set (DONE / CONTINUE / BLOCKED / HALT), use this mapping:
 
 | Engine verdict (step 3) | `_run-log.jsonl` verdict |
 |---|---|
@@ -198,7 +198,7 @@ Mirror the orchestrate loop primitive's close-record format (`phase: "end"`), so
 
 ## Step 6 — Append summary record to `_run-log.jsonl`
 
-Add one more line with `phase: "summary"` so a JSONL reader can grep `phase == "summary"` to get per-run user-facing summaries without parsing the full transcript (matches `/iterate-revision` phase 05 convention):
+Add one more line with `phase: "summary"` so a JSONL reader can grep `phase == "summary"` to get per-run user-facing summaries without parsing the full transcript (matches `$iterate-revision` phase 05 convention):
 
 ```jsonc
 {
@@ -237,11 +237,11 @@ durable.
 
 ## Step 7 — No git commit, no auto-iterate
 
-Mirroring `/iterate-revision` phase 05 step 5: OMCR does **not** commit on the user's behalf from this phase. The drift artifact and section files are unstaged after the run. Users who want them committed run `git add -A && git commit` themselves.
+Mirroring `$iterate-revision` phase 05 step 5: OMXR does **not** commit on the user's behalf from this phase. The drift artifact and section files are unstaged after the run. Users who want them committed run `git add -A && git commit` themselves.
 
-This engine also does **not** auto-invoke `/iterate-revision`. Phase 2 decision §5 (engines are leaves) is binding. The user reads the suggested-next block and runs the engines they want.
+This engine also does **not** auto-invoke `$iterate-revision`. Phase 2 decision §5 (engines are leaves) is binding. The user reads the suggested-next block and runs the engines they want.
 
-A future iteration may add a `--auto-iterate` flag that chains `/iterate-revision` per section — but that decision is owned by Phase 3's `/supervisor-drive`, not by this engine.
+A future iteration may add a `--auto-iterate` flag that chains `$iterate-revision` per section — but that decision is owned by Phase 3's `$supervisor-drive`, not by this engine.
 
 ## Failure modes
 
@@ -258,7 +258,7 @@ A future iteration may add a `--auto-iterate` flag that chains `/iterate-revisio
 - Does **not** invoke any subagent. Pure rendering + log appends.
 - Does **not** mutate `paper.json` or any state file beyond `_run-log.jsonl`. Phase 03 owns the durable writes.
 - Does **not** commit to git or push.
-- Does **not** call `/iterate-revision`, `/sync`, or `/todofig`. Engines are leaves.
+- Does **not** call `$iterate-revision`, `$sync`, or `$todofig`. Engines are leaves.
 - Does **not** retry failed dispatches. The user re-runs with `--sections`.
 - Does **not** auto-merge `terminology_decisions` into `nomenclature.md`. The user reads the suggestion footer and decides.
 - Does **not** delete the drift artifact from a previous run. Phase 03 overwrites it; phase 04 only renders the path.

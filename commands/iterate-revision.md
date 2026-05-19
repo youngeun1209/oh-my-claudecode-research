@@ -2,7 +2,7 @@
 description: Revise one manuscript section against the reviewer team until DONE/BLOCKED/HALT. Writer ↔ reviewer loop driven by the orchestrate primitives.
 ---
 
-# /iterate-revision
+# $iterate-revision
 
 Dispatcher. Read [`skills/iterate-revision/SKILL.md`](../skills/iterate-revision/SKILL.md) and follow it exactly.
 
@@ -11,7 +11,7 @@ Arguments: `$ARGUMENTS`
 ## Signature
 
 ```
-/iterate-revision <section-path> [--max-iter N] [--venue VENUE] [--force] [--allow-tbd]
+$iterate-revision <section-path> [--max-iter N] [--venue VENUE] [--force] [--allow-tbd]
 ```
 
 ## Flags
@@ -26,8 +26,8 @@ Arguments: `$ARGUMENTS`
 ## Examples
 
 ```
-/iterate-revision sections/results.tex
-/iterate-revision sections/intro.tex --max-iter 5 --venue Nature
-/iterate-revision sections/abstract.tex --venue NeurIPS --force
-/iterate-revision sections/discussion.tex --allow-tbd
+$iterate-revision sections/results.tex
+$iterate-revision sections/intro.tex --max-iter 5 --venue Nature
+$iterate-revision sections/abstract.tex --venue NeurIPS --force
+$iterate-revision sections/discussion.tex --allow-tbd
 ```

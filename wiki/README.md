@@ -1,16 +1,16 @@
 # `wiki/` — local browsable documentation
 
-This directory holds the OMCR wiki as plain markdown — browsable directly in the repo or via GitHub.
+This directory holds the OMXR wiki as plain markdown — browsable directly in the repo or via GitHub.
 
 If you prefer the **GitHub Wiki UI** (the dedicated wiki tab on a GitHub repo): clone the wiki's separate git repo (`<repo>.wiki.git`) and copy these files into it.
 
 ```bash
 # One-time setup of the GitHub Wiki (run from outside the main repo):
-git clone https://github.com/youngeun1209/oh-my-claudecode-research.wiki.git
-cd oh-my-claudecode-research.wiki
+git clone https://github.com/youngeun1209/oh-my-codex-research.wiki.git
+cd oh-my-codex-research.wiki
 
 # Copy current wiki content from the main repo:
-cp -r /path/to/oh-my-claudecode-research/wiki/*.md ./
+cp -r /path/to/oh-my-codex-research/wiki/*.md ./
 
 # Commit + push:
 git add . && git commit -m "Sync wiki from main repo" && git push origin master
@@ -26,11 +26,11 @@ Start at [`Home.md`](Home.md) for navigation.
 
 - `Home.md` — Landing + navigation
 - `Getting-Started.md` — Install + first session
-- `Standalone-Usage.md` — OMCR alone, full walkthrough
-- `With-OMC.md` — OMCR + OMC companion install + workflows
+- `Standalone-Usage.md` — OMXR alone, full walkthrough
+- `With-OMX.md` — OMXR + OMX companion install + workflows
 - `Configuration.md` — `## Research stack` block + env vars
-- `OMC-Tool-Reference.md` — 47 OMC MCP tools mapped to research workflow
+- `OMX-Tool-Reference.md` — 47 OMX MCP tools mapped to research workflow
 - `Agents.md` — 6 agents reference
-- `Commands.md` — `/todofig`, `/sync`, `cropfig`, `verify-citation`
+- `Commands.md` — `$todofig`, `$sync`, `cropfig`, `verify-citation`
 - `Hooks.md` — 4 hooks
 - `Specializing.md` — Author a field-specific preset

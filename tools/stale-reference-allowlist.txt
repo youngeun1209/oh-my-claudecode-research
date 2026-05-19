@@ -1,0 +1,5 @@
+# Intentional legacy/provenance references. Each line is a regex matched
+# against `path:line:text` records from tools/check-stale-references.sh.
+^wiki/migration/
+^skills/omxr-setup/.*legacy `\.claude/
+^skills/omxr-setup/SKILL\.md:[0-9]+:If an old research project contains `\.claude/

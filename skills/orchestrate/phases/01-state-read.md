@@ -1,7 +1,7 @@
 # Phase 01 — state-read (primitive)
 
 Read, validate, and (if missing) bootstrap one state JSON file under
-`.claude/omcr-state/` in the user's project. Returns a parsed dict that
+`.omx/state/omxr/` in the user's project. Returns a parsed dict that
 the calling engine can read or mutate.
 
 ## Inputs
@@ -17,27 +17,27 @@ append-only and engines append to it directly via the loop primitive
 ## Resolved path
 
 ```
-.claude/omcr-state/<name>.json
+.omx/state/omxr/<name>.json
 ```
 
 Always relative to the **user's project root** (the current working
-directory of the Claude Code session), never the plugin install path.
+directory of the Codex session), never the plugin install path.
 Flat layout — no `logs/` subdirectory, per Phase 0 decision §1.
 
 ## Behavior
 
 Execute in order:
 
-1. **Compute target path.** `.claude/omcr-state/<name>.json` from the
+1. **Compute target path.** `.omx/state/omxr/<name>.json` from the
    project root.
 
 2. **Bootstrap if missing.** If the file does not exist:
-   - `mkdir -p .claude/omcr-state/` (idempotent).
+   - `mkdir -p .omx/state/omxr/` (idempotent).
    - Copy the empty schema from
      `<plugin_root>/develop/example-state/<name>.json` to the target
-     path. The plugin root is reachable via `$CLAUDE_PLUGIN_ROOT` (set
-     by Claude Code at skill invocation time).
-   - If `$CLAUDE_PLUGIN_ROOT` is not set, fall back to writing the
+     path. The plugin root is reachable via `$CODEX_PLUGIN_ROOT` (set
+     by Codex at skill invocation time).
+   - If `$CODEX_PLUGIN_ROOT` is not set, fall back to writing the
      literal empty schema for that file name (see "Empty schemas"
      below).
    - Set `last_updated` on the bootstrapped file to current UTC ISO-8601
@@ -147,9 +147,9 @@ it must use a write-tmp + rename pattern so an interrupted write never
 leaves a half-written JSON file:
 
 ```
-write   .claude/omcr-state/<name>.json.tmp
+write   .omx/state/omxr/<name>.json.tmp
 fsync
-rename  .claude/omcr-state/<name>.json.tmp → .claude/omcr-state/<name>.json
+rename  .omx/state/omxr/<name>.json.tmp → .omx/state/omxr/<name>.json
 ```
 
 This primitive itself only writes during the bootstrap branch of step 2,
@@ -169,11 +169,11 @@ where the same atomic pattern applies.
 
 - Does NOT migrate between schema versions. Deferred to a future iteration when a
   real `"2"` ships.
-- Does NOT lock the file against concurrent writers. OMCR assumes
+- Does NOT lock the file against concurrent writers. OMXR assumes
   serial execution (Phase 0 decision §4). Phase 3 will revisit.
 - Does NOT validate field-level types beyond the parse + schema_version
   check. Engine phases that depend on specific fields are responsible
   for guarding their own reads.
 - Does NOT auto-fix `[TBD: ...]` placeholders in any field. Engines
-  decide whether to refuse-on-TBD (e.g., `/iterate-revision`) or pass
-  it through (e.g., `/omcr-setup`).
+  decide whether to refuse-on-TBD (e.g., `$iterate-revision`) or pass
+  it through (e.g., `$omxr-setup`).

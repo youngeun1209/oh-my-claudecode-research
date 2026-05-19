@@ -4,7 +4,7 @@ Branches on whether `$OVERLEAF_GIT_URL` was provided.
 
 ## Skeleton contents (used by both branches)
 
-Source: `$CLAUDE_PLUGIN_ROOT/templates/manuscript-skeleton/`. After copying, the layout in `$MANUSCRIPT_DIR/` is:
+Source: `$CODEX_PLUGIN_ROOT/templates/manuscript-skeleton/`. After copying, the layout in `$MANUSCRIPT_DIR/` is:
 
 ```
 <MANUSCRIPT_DIR>/
@@ -23,7 +23,7 @@ If phase 2 produced a rewrite plan, apply it to the **copied** `main.tex` (not t
 ## Branch A — No Overleaf (`$OVERLEAF_GIT_URL` is empty)
 
 1. Create `$MANUSCRIPT_DIR` if missing.
-2. Copy the skeleton from `$CLAUDE_PLUGIN_ROOT/templates/manuscript-skeleton/` into it.
+2. Copy the skeleton from `$CODEX_PLUGIN_ROOT/templates/manuscript-skeleton/` into it.
 3. If phase 2 recorded a rewrite plan, apply it to `<MANUSCRIPT_DIR>/main.tex` and append the "Journal template" section to `<MANUSCRIPT_DIR>/README.md`.
 4. Initialize git if the dir is not already a repo: `git init` in `$MANUSCRIPT_DIR`.
 5. Continue to phase 4.
@@ -42,7 +42,7 @@ Tell the user:
 
 ### B2 — Token handling — non-negotiable
 
-- **NEVER** write the token into `CLAUDE.md`, the project repo, agent memory, this plugin, or any tracked file.
+- **NEVER** write the token into `AGENTS.md`, the project repo, agent memory, this plugin, or any tracked file.
 - **NEVER** echo the full token back to the user. If you must reference it, mask all but the last 4 characters.
 - The token value lives only in (i) the user's session input and (ii) the credential store the user picked. Nowhere else.
 
@@ -109,7 +109,7 @@ If the clone showed an empty remote (no `HEAD branch` line), default `default_br
 
 ### B9 — Copy the skeleton over the (empty) clone
 
-Copy `$CLAUDE_PLUGIN_ROOT/templates/manuscript-skeleton/` into `$MANUSCRIPT_DIR` (which is now a git repo with `origin` pointing at Overleaf). If phase 2 recorded a rewrite plan, apply it to `<MANUSCRIPT_DIR>/main.tex` and append the "Journal template" section to `<MANUSCRIPT_DIR>/README.md`.
+Copy `$CODEX_PLUGIN_ROOT/templates/manuscript-skeleton/` into `$MANUSCRIPT_DIR` (which is now a git repo with `origin` pointing at Overleaf). If phase 2 recorded a rewrite plan, apply it to `<MANUSCRIPT_DIR>/main.tex` and append the "Journal template" section to `<MANUSCRIPT_DIR>/README.md`.
 
 Continue to phase 4.
 

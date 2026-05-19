@@ -11,7 +11,7 @@ Validate the call, resolve state, auto-detect the input format, parse the letter
 
 ## Inputs
 
-From the slash command:
+From the skill:
 - `<review-letter-path>` — positional, required.
 - `--manuscript <root>` — optional, falls back to `paper.json.manuscript_root`.
 - `--draft-only` — optional flag, default false. (Pure pass-through here; phase 03 enforces.)
@@ -23,7 +23,7 @@ Execute in order. Abort on the first failure unless the step says otherwise.
 
 ### 1. Validate `<review-letter-path>`
 
-- Interpret the path relative to the project root (the Claude Code session's working directory).
+- Interpret the path relative to the project root (the Codex session's working directory).
 - Verify the file exists. If not, abort with:
   ```
   respond-reviewer: <review-letter-path> not found.
@@ -55,8 +55,8 @@ Call the primitive at [`../../orchestrate/phases/01-state-read.md`](../../orches
 
 If the bootstrap path was taken (state-read just created the file), warn:
 ```
-respond-reviewer: paper.json was missing — bootstrapped an empty one. Run /omcr-setup
-or /start-research first if you intended to use existing state.
+respond-reviewer: paper.json was missing — bootstrapped an empty one. Run $omxr-setup
+or $start-research first if you intended to use existing state.
 ```
 Then proceed.
 
@@ -68,8 +68,8 @@ Call the same state-read primitive with `name = rebuttals`. **Note:** `rebuttals
 
 If the state-read primitive does not yet recognize `rebuttals` in its allowed set (e.g., the primitive hasn't been updated for this engine yet), fall back to:
 
-- `mkdir -p .claude/omcr-state/` (idempotent).
-- Write `.claude/omcr-state/rebuttals.json` with the literal empty schema above.
+- `mkdir -p .omx/state/omxr/` (idempotent).
+- Write `.omx/state/omxr/rebuttals.json` with the literal empty schema above.
 - Parse it back and proceed.
 
 The fallback uses the atomic write pattern (tmp + rename) per the primitive's "Atomicity" section.
@@ -84,7 +84,7 @@ Resolution order (first non-empty wins):
 If neither resolves to a non-empty string, abort with:
 ```
 respond-reviewer: manuscript_root required. Either pass --manuscript <root>
-or set paper.json.manuscript_root (via /start-research or hand-edit).
+or set paper.json.manuscript_root (via $start-research or hand-edit).
 ```
 
 Record the resolved `manuscript_root`. Phase 03 hands it to per-comment dispatches so the writer / implementer / curator know where the manuscript lives.

@@ -1,6 +1,6 @@
 # Specializing for Your Field
 
-OMCR's 6 core agents are field-neutral. To make them concrete for your domain, author a **preset** under `examples/<field>/`. The shipped example is `examples/neuro-fmri/` (generic neuroimaging — preprocessing, parcellation, connectivity, ISC, statistical conventions). This page walks through authoring your own.
+OMXR's 6 core agents are field-neutral. To make them concrete for your domain, author a **preset** under `examples/<field>/`. The shipped example is `examples/neuro-fmri/` (generic neuroimaging — preprocessing, parcellation, connectivity, ISC, statistical conventions). This page walks through authoring your own.
 
 ## When you need a preset
 
@@ -111,7 +111,7 @@ PRs adding new presets are welcome on the main repo. Quality bar:
 ## Worked example — what `examples/neuro-fmri/` does
 
 The neuro-fmri preset overlays only `analysis-implementer` because:
-- `supervisor`, `paper-writer`, `figure-descriptor`, `reviewer` work as-is with placeholder fills via project CLAUDE.md
+- `supervisor`, `paper-writer`, `figure-descriptor`, `reviewer` work as-is with placeholder fills via project AGENTS.md
 - `analysis-implementer`'s neuro-flavored body adds: nilearn / nibabel / parcellation expertise (Schaefer / Gordon / AAL / HCP-MMP), fMRI preprocessing pitfalls (TR / scrubbing / confound regression), ISC, spin tests, MATLAB-Python interop conventions
 
 It also ships redacted memory skeletons for all 6 agents because each agent in a neuroimaging project tracks a distinctive set of state:
@@ -128,8 +128,8 @@ The pattern transfers to other fields with substitutions: swap "fMRI" for your d
 
 If you're authoring a new **orchestration engine** (not a field preset), the SKILL.md frontmatter has two extra conventions beyond `name` / `description`:
 
-- **`writes: [paper, reviews, citations, figures, rebuttals]`** — list which `.claude/omcr-state/` files this engine mutates. Documentation-only; not runtime-enforced. Greppable for audit: `grep "writes:" skills/*/SKILL.md`. (Phase 0 decision §3 of the orchestration design.)
-- **`cost_estimate_tokens: <int>`** — coarse upper-bound token cost for one typical run of this engine. Used by `/supervisor-drive` as the day-one budget estimate before enough `_run-log.jsonl` history exists for a rolling-median estimate. (Phase 3 decision §6 — combined with × 1.25 padding.)
+- **`writes: [paper, reviews, citations, figures, rebuttals]`** — list which `.omx/state/omxr/` files this engine mutates. Documentation-only; not runtime-enforced. Greppable for audit: `grep "writes:" skills/*/SKILL.md`. (Phase 0 decision §3 of the orchestration design.)
+- **`cost_estimate_tokens: <int>`** — coarse upper-bound token cost for one typical run of this engine. Used by `$supervisor-drive` as the day-one budget estimate before enough `_run-log.jsonl` history exists for a rolling-median estimate. (Phase 3 decision §6 — combined with × 1.25 padding.)
 
 Example from `skills/iterate-revision/SKILL.md`:
 

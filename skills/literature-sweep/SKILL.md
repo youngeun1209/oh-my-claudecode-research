@@ -5,18 +5,18 @@ writes: [citations]
 cost_estimate_tokens: 50000
 ---
 
-# /literature-sweep
+# $literature-sweep
 
-This engine is the parallel-dispatch worked example: the first OMCR engine that fans out across several `@literature-curator` instances in a single message and then re-collects their work. The other Phase 2 engines (`/respond-reviewer`, `/figure-bake`, `/outline-expand`) all reference this skill's phase 03 for the parallel-dispatch pattern.
+This engine is the parallel-dispatch worked example: the first OMXR engine that fans out across several `@literature-curator` instances in a single message and then re-collects their work. The other Phase 2 engines (`$respond-reviewer`, `$figure-bake`, `$outline-expand`) all reference this skill's phase 03 for the parallel-dispatch pattern.
 
-If you are reading this because Claude Code's skill auto-discovery surfaced it: invoke it via `/literature-sweep <topic>`. Do not hand-edit `references.bib`, the summary CSV, or `.claude/omcr-state/citations.json` while a run is in flight.
+If you are reading this because Codex's skill auto-discovery surfaced it: invoke it via `$literature-sweep <topic>`. Do not hand-edit `references.bib`, the summary CSV, or `.omx/state/omxr/citations.json` while a run is in flight.
 
 **When this skill is invoked, immediately execute the workflow below. Do not only restate or summarize these instructions back to the user.**
 
 ## Signature
 
 ```
-/literature-sweep <topic> [--n N] [--depth basic|deep] [--source crossref|openalex|both] [--parallel P]
+$literature-sweep <topic> [--n N] [--depth basic|deep] [--source crossref|openalex|both] [--parallel P]
 ```
 
 | Flag | Default | Purpose |
@@ -28,9 +28,9 @@ If you are reading this because Claude Code's skill auto-discovery surfaced it: 
 
 Examples:
 
-- `/literature-sweep "neural manifolds in motor cortex"` — defaults: 20 entries, basic depth, both sources, sequential.
-- `/literature-sweep "diffusion models for protein design" --n 30 --parallel 4` — 30 entries, four curator instances in parallel.
-- `/literature-sweep "transformer attention sparsity" --depth deep --source crossref` — deeper extraction, CrossRef only, sequential.
+- `$literature-sweep "neural manifolds in motor cortex"` — defaults: 20 entries, basic depth, both sources, sequential.
+- `$literature-sweep "diffusion models for protein design" --n 30 --parallel 4` — 30 entries, four curator instances in parallel.
+- `$literature-sweep "transformer attention sparsity" --depth deep --source crossref` — deeper extraction, CrossRef only, sequential.
 
 ## The pipeline
 
@@ -43,7 +43,7 @@ phase 05 — verify           (verify-citation skill per survivor — HARD GATE)
 phase 06 — finalize         (append to references.bib + CSV; write citations.json.last_sweep; append to _run-log.jsonl)
 ```
 
-Phases 02–05 form the read-then-verify pipeline. Unlike `/iterate-revision`, there is no inner loop — each phase runs once. The parallel concurrency lives entirely in phase 03 and is transparent to phases 04 and 05.
+Phases 02–05 form the read-then-verify pipeline. Unlike `$iterate-revision`, there is no inner loop — each phase runs once. The parallel concurrency lives entirely in phase 03 and is transparent to phases 04 and 05.
 
 ## Phase execution
 
@@ -61,7 +61,7 @@ Execute phases sequentially. For each phase, read the linked file and follow its
 This engine imports the following primitives from `skills/orchestrate/`:
 
 - [`phases/01-state-read.md`](../orchestrate/phases/01-state-read.md) — read `citations.json` in phase 01 (bootstrap if missing) and re-read in phase 06 for the durable `last_sweep` write.
-- [`phases/02-dispatch.md`](../orchestrate/phases/02-dispatch.md) — dispatch `@literature-curator`. Phase 03 uses it in two shapes: a single sequential call per batch when `--parallel 1`, or multiple concurrent calls in one assistant message when `--parallel > 1` (Claude Code Agent-tool parallel invocation).
+- [`phases/02-dispatch.md`](../orchestrate/phases/02-dispatch.md) — dispatch `@literature-curator`. Phase 03 uses it in two shapes: a single sequential call per batch when `--parallel 1`, or multiple concurrent calls in one assistant message when `--parallel > 1` (Codex Agent-tool parallel invocation).
 - [`phases/04-loop.md`](../orchestrate/phases/04-loop.md) — used only for the `_run-log.jsonl` `phase: "start"` + `phase: "end"` records and `run_id` generation. There is **no inner iteration loop in this engine** (one shot, not iterative), so phase 04 of orchestrate is invoked with `max_iter = 1` and a trivial `always-after-n` verdict rule that emits `DONE` immediately. The real engine logic lives in phases 02–06 here, not inside the loop body.
 
 This engine **does not** import `orchestrate/phases/03-evaluate.md` — there is no severity-threshold verdict to compute. The verification gate in phase 05 is a hard pass/fail per entry, not an aggregate verdict over the run.
@@ -85,7 +85,7 @@ Per-entry cost is dominated by:
 - One `verify-citation` call per surviving entry in phase 05 (cheap; a single HTTP roundtrip per source, stdlib-only Python).
 - An optional second curator dispatch per survivor when `--depth deep` (rough cost doubling for the dispatch portion).
 
-With `--n 20 --parallel 1 --depth basic`: ~1 curator dispatch over 60 candidates + 20 verify-citation calls. The frontmatter `cost_estimate_tokens: 50000` is the coarse upper bound for `/supervisor-drive` budget gating (Phase 3 §6); actuals land in `_run-log.jsonl` post-hoc per Phase 0 decision §6.
+With `--n 20 --parallel 1 --depth basic`: ~1 curator dispatch over 60 candidates + 20 verify-citation calls. The frontmatter `cost_estimate_tokens: 50000` is the coarse upper bound for `$supervisor-drive` budget gating (Phase 3 §6); actuals land in `_run-log.jsonl` post-hoc per Phase 0 decision §6.
 
 `--parallel 4` does not multiply token cost — the work is sharded, not duplicated — but it does multiply *concurrent* token throughput, which is the relevant constraint for the runtime's rate limiter.
 
@@ -102,9 +102,9 @@ From [`develop/phase-2-decisions.md`](../../develop/phase-2-decisions.md) §1:
 
 - Does **not** fabricate references. Every entry survives `verify-citation` before being added — by construction, fabricated DOIs cannot pass.
 - Does **not** decide `bucket`, `our_use`, or `cited_sections` columns in the summary CSV. Those are human-curated columns that the `literature-curator` agent leaves blank in a sweep; the user (or a later curator pass keyed to a specific manuscript section) fills them.
-- Does **not** invoke `/iterate-revision`, `/respond-reviewer`, `/figure-bake`, or `/outline-expand`. Engines are leaves (Phase 2 decision §5).
-- Does **not** auto-resolve `[CITE: ...]` placeholders inside the manuscript. That is the standalone `@literature-curator` agent's day-job. `/literature-sweep` is about building a *bibliography*, not patching a specific placeholder.
-- Does **not** commit to git or push to a remote. Run `/sync` afterward if you want a commit-and-push snapshot.
+- Does **not** invoke `$iterate-revision`, `$respond-reviewer`, `$figure-bake`, or `$outline-expand`. Engines are leaves (Phase 2 decision §5).
+- Does **not** auto-resolve `[CITE: ...]` placeholders inside the manuscript. That is the standalone `@literature-curator` agent's day-job. `$literature-sweep` is about building a *bibliography*, not patching a specific placeholder.
+- Does **not** commit to git or push to a remote. Run `$sync` afterward if you want a commit-and-push snapshot.
 - Does **not** re-fetch full PDFs. Abstract-level metadata only. Deeper claim-fit checks need a human (or a dedicated future engine) to read the paper.
 
 ## Re-running policy

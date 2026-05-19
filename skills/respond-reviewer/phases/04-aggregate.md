@@ -65,7 +65,7 @@ We thank the reviewers for their careful reading and constructive feedback. Belo
 we respond to each comment in turn. The reviewer's comment is quoted in italics;
 our response follows.
 
-\textit{This response was assembled by \texttt{/respond-reviewer} (OMCR run id:
+\textit{This response was assembled by \texttt{$respond-reviewer} (OMXR run id:
 \texttt{<run_id>}) from the letter at \texttt{<review_letter_path>}.}
 
 <if draft_only is true:>
@@ -130,7 +130,7 @@ LaTeX escaping rules to apply to user-supplied strings (comment text, response p
 
 - `&` → `\&`
 - `%` → `\%`
-- `$` → `\$` (unless the string is already known math — detect by `$...$` pairs).
+- `$` → `\$` (unless the string is already known math — detect by `$.../` pairs).
 - `#` → `\#`
 - `_` → `\_` (unless inside `\texttt{...}` or a citation key — detect by surrounding context).
 - `{` and `}` → `\{` and `\}` (only when not part of a LaTeX command in the response — the agents may have emitted LaTeX directly).
@@ -153,7 +153,7 @@ We thank the reviewers for their careful reading and constructive feedback. Belo
 we respond to each comment in turn. The reviewer's comment is quoted; our
 response follows.
 
-*This response was assembled by `/respond-reviewer` (OMCR run id: `<run_id>`) from
+*This response was assembled by `$respond-reviewer` (OMXR run id: `<run_id>`) from
 the letter at `<review_letter_path>`.*
 
 <if draft_only is true:>

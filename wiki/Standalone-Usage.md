@@ -1,13 +1,13 @@
-# Standalone Usage (OMCR without OMC)
+# Standalone Usage (OMXR without OMX)
 
-OMCR works fully standalone — no OMC required. This page walks through the canonical workflow with just OMCR installed.
+OMXR works fully standalone — no OMX required. This page walks through the canonical workflow with just OMXR installed.
 
-If you also have OMC installed (or want to install it), see [With OMC](With-OMC.md) for the richer workflow.
+If you also have OMX installed (or want to install it), see [With OMX](With-OMX.md) for the richer workflow.
 
 ## When standalone is enough
 
 - You're early in a project and don't need a literature management database, an experiment-run registry, or a stateful Python REPL.
-- You want the lightest possible install. OMCR is plain markdown + shell — no Node, no MCP, no Python beyond the cropfig skill.
+- You want the lightest possible install. OMXR is plain markdown + shell — no Node, no MCP, no Python beyond the cropfig skill.
 - Your figure/outline workflow is straightforward (deck + outline + 6 agents covers it).
 
 ## What you get standalone
@@ -15,8 +15,8 @@ If you also have OMC installed (or want to install it), see [With OMC](With-OMC.
 | Surface | Behavior |
 |---|---|
 | 6 `@`-mentionable agents | Full personas, English-by-default, configurable language |
-| 4 setup/workflow commands (`/omcr-setup`, `/start-research`, `/todofig`, `/sync`) | Parameterized via `## Research stack` block in your CLAUDE.md |
-| **6 orchestration engines** (`/iterate-revision`, `/literature-sweep`, `/respond-reviewer`, `/figure-bake`, `/outline-expand`, `/supervisor-drive`) | Multi-step workflow drivers with `.claude/omcr-state/` persistence — see [Using-Orchestration](Using-Orchestration.md) |
+| 4 setup/workflow commands (`$omxr-setup`, `$start-research`, `$todofig`, `$sync`) | Parameterized via `## Research stack` block in your AGENTS.md |
+| **6 orchestration engines** (`$iterate-revision`, `$literature-sweep`, `$respond-reviewer`, `$figure-bake`, `$outline-expand`, `$supervisor-drive`) | Multi-step workflow drivers with `.omx/state/omxr/` persistence — see [Using-Orchestration](Using-Orchestration.md) |
 | `cropfig` + `verify-citation` + `manuscript-scaffold` skills | Figure crop pipeline + citation verification + LaTeX scaffold |
 | 4 hooks | PII guard + MEMORY auto-load + citation warning + setup nudge |
 | `templates/MEMORY.template.md` | Canonical schema for per-agent memory |
@@ -32,7 +32,7 @@ Suppose you're working on a paper. Here's a typical day-of-work session.
 @supervisor where are we?
 ```
 
-Supervisor reads `CLAUDE.md` + `.claude/agent-memory/supervisor/MEMORY.md` and reports:
+Supervisor reads `AGENTS.md` + `.omx/omxr/agent-memory/supervisor/MEMORY.md` and reports:
 - Current phase (analysis / writing / revision)
 - Most important unresolved question
 - Concrete next action + which subagent should take it
@@ -68,12 +68,12 @@ You implement the figure in your tool of choice (Keynote, Illustrator, Inkscape)
 ### Gap check
 
 ```
-/todofig
+$todofig
 ```
 
 This compares your captured figure deck against your outline (paths from the `## Research stack` block) and produces a Korean / English TODO with P0/P1/P2 priorities. Save to `${report_output_dir}/`.
 
-For a focused single-figure pass: `/todofig Fig5`.
+For a focused single-figure pass: `$todofig Fig5`.
 
 ### Writing
 
@@ -82,7 +82,7 @@ For a focused single-figure pass: `/todofig Fig5`.
 ```
 
 Paper-writer:
-- Reads CLAUDE.md for the narrative spine
+- Reads AGENTS.md for the narrative spine
 - Reads its own MEMORY.md for nomenclature decisions and hard-won phrasings
 - Drafts the section following the section-by-section standards
 - Flags any claim that needs a citation or `[STAT: ...]` placeholder
@@ -94,7 +94,7 @@ Paper-writer:
 @reviewer review the Introduction draft
 ```
 
-Reviewer applies the target-venue standards (configured in your CLAUDE.md). Returns:
+Reviewer applies the target-venue standards (configured in your AGENTS.md). Returns:
 - Verdict (Ready / Needs revision / Not ready)
 - Major concerns (problem / why it matters / what is required)
 - Minor concerns
@@ -105,31 +105,31 @@ Major concerns flow back to supervisor → analysis-implementer or paper-writer 
 ### End of session
 
 ```
-/sync
+$sync
 ```
 
 Sync:
 - Reconciles each agent's MEMORY.md against current deck and outline (PNGs in `Figure PNG dir`)
 - Reports drifts (no auto-resolution of judgment calls)
 
-(Figure refresh and outline embedding now live in the `cropfig` skill — run `cropfig` separately before `/sync` if you need fresh figures.)
+(Figure refresh and outline embedding now live in the `cropfig` skill — run `cropfig` separately before `$sync` if you need fresh figures.)
 
 Sync is the "save state" command — run before closing the session so the next day picks up where you left off.
 
 ### Want more automation than @-mention?
 
-The session above stays at **Level 1** (manual `@`-mention dispatching). OMCR also ships 6 **orchestration engines** that automate multi-step workflows (a whole section refinement, a literature scan, a rebuttal letter, etc.) and an **autonomous driver** that picks the right engine based on project state.
+The session above stays at **Level 1** (manual `@`-mention dispatching). OMXR also ships 6 **orchestration engines** that automate multi-step workflows (a whole section refinement, a literature scan, a rebuttal letter, etc.) and an **autonomous driver** that picks the right engine based on project state.
 
-See [Using-Orchestration](Using-Orchestration.md) for the Level 2 (engine commands like `/iterate-revision`, `/literature-sweep`) and Level 3 (`/supervisor-drive --auto`) walkthroughs.
+See [Using-Orchestration](Using-Orchestration.md) for the Level 2 (engine commands like `$iterate-revision`, `$literature-sweep`) and Level 3 (`$supervisor-drive --auto`) walkthroughs.
 
 ## Memory pattern in practice
 
-OMCR's memory is just markdown files. Each agent has `.claude/agent-memory/<agent>/MEMORY.md` plus optional topic files (linked from MEMORY.md).
+OMXR's memory is just markdown files. Each agent has `.omx/omxr/agent-memory/<agent>/MEMORY.md` plus optional topic files (linked from MEMORY.md).
 
 ```
 your-project/
-├── CLAUDE.md                 ← your project context
-└── .claude/
+├── AGENTS.md                 ← your project context
+└── .codex/
     └── agent-memory/
         ├── supervisor/
         │   ├── MEMORY.md     ← index + active state
@@ -165,10 +165,10 @@ Things you'll notice as gaps:
 - **No experiment-run registry** — analysis-implementer logs each run in its MEMORY.md or topic files, but there's no cross-run comparison surface. You roll your own (e.g., a CSV of run hashes + parameters + eval scores).
 - **No stateful Python REPL** — analysis-implementer writes Python scripts that you run in your terminal or notebook. No interactive Python kernel in-session.
 - **No automatic citation verification** — `citation-warn` heuristically flags uncited paragraphs but doesn't validate the URLs / cited papers actually exist.
-- **No structured `verifier` agent** — `reviewer` covers manuscript readiness, but you don't get OMC's `verifier` (fresh-evidence completion checks against acceptance criteria).
-- **No causal tracer** — `reviewer` raises objections but doesn't run OMC's tracer (evidence-driven competing-hypotheses ranking).
+- **No structured `verifier` agent** — `reviewer` covers manuscript readiness, but you don't get OMX's `verifier` (fresh-evidence completion checks against acceptance criteria).
+- **No causal tracer** — `reviewer` raises objections but doesn't run OMX's tracer (evidence-driven competing-hypotheses ranking).
 
-If any of these gaps matter to you, install OMC alongside — [With OMC](With-OMC.md).
+If any of these gaps matter to you, install OMX alongside — [With OMX](With-OMX.md).
 
 ## Quick reference
 
@@ -179,6 +179,6 @@ If any of these gaps matter to you, install OMC alongside — [With OMC](With-OM
 | Design a figure | `@figure-descriptor design Fig N — ...` |
 | Draft a section | `@paper-writer draft the [Intro/Methods/Results/Discussion]` |
 | Adversarial review | `@reviewer review the [section / Fig N / full draft]` |
-| Compare deck to outline | `/todofig` (full) or `/todofig FigN` (single) |
-| Save state + reconcile memories | `/sync` |
+| Compare deck to outline | `$todofig` (full) or `$todofig FigN` (single) |
+| Save state + reconcile memories | `$sync` |
 | Deck → cropped figures (vector PDF + outline PNG) | `cropfig` skill (invoked manually or by other commands) |

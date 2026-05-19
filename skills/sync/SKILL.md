@@ -1,6 +1,6 @@
 ---
 name: sync
-description: Reconcile current state (captured figure deck) with final goal (outline document), refresh agent memories with factual drifts, and produce a dated status snapshot. Reads `## Research stack` config from the user's CLAUDE.md (Deck file / Outline file / Figure count / Report language / Sync report dir). Status-only output — never produces a TODO (that is the `todofig` skill's job). Called by the `/sync` slash command but also standalone-invocable.
+description: Reconcile current state (captured figure deck) with final goal (outline document), refresh agent memories with factual drifts, and produce a dated status snapshot. Reads `## Research stack` config from the user's AGENTS.md (Deck file / Outline file / Figure count / Report language / Sync report dir). Status-only output — never produces a TODO (that is the `todofig` skill's job). Called by the `$sync` skill but also standalone-invocable.
 ---
 
 # Sync
@@ -9,13 +9,13 @@ Goal: keep the project's **agent memories** and the team's mental model aligned 
 
 **When this skill is invoked, immediately execute the workflow below. Do not only restate or summarize these instructions back to the user.**
 
-This skill **does not** produce an actionable TODO — that's the `todofig` skill's job (called by `/todofig`). The output is a status snapshot and a list of drifts.
+This skill **does not** produce an actionable TODO — that's the `todofig` skill's job (called by `$todofig`). The output is a status snapshot and a list of drifts.
 
 ---
 
 ## Step 0 — Resolve project configuration
 
-Read the project's `CLAUDE.md` for a `## Research stack` section. Required fields:
+Read the project's `AGENTS.md` for a `## Research stack` section. Required fields:
 
 | Field | Purpose |
 |---|---|
@@ -31,7 +31,7 @@ Optional fields:
 |---|---|---|
 | `Figure PNG dir` | `<dirname(Deck file)>/png/` | Cropped per-slide raster PNGs. This skill reads these to assess current figure state. Populated by the `cropfig` skill. |
 
-If a required field is missing, ask the user once and offer to persist to the `## Research stack` section of `CLAUDE.md`. See [`wiki/Configuration.md`](../../wiki/Configuration.md) for the canonical block format.
+If a required field is missing, ask the user once and offer to persist to the `## Research stack` section of `AGENTS.md`. See [`wiki/Configuration.md`](../../wiki/Configuration.md) for the canonical block format.
 
 Figure refresh and outline embedding are owned by the `cropfig` skill (`export_deck.py` + `crop_figures.py` + `upload_figures.py`), not by this skill. Run `cropfig` separately when you need to refresh the deck.
 
@@ -43,12 +43,12 @@ Figure refresh and outline embedding are owned by the `cropfig` skill (`export_d
 |---|---|
 | What exists right now? | Cropped PNGs in `Figure PNG dir` (produced by `cropfig`) |
 | Where are we heading? | `Outline file` |
-| What has been done and decided? | Agent memories under `.claude/agent-memory/<agent>/MEMORY.md` |
+| What has been done and decided? | Agent memories under `.omx/omxr/agent-memory/<agent>/MEMORY.md` |
 
 When sources disagree:
 - Agent memory vs. cropped PNG → trust the PNG (current state); update the memory.
 - Agent memory vs. outline → update the memory; flag the drift.
-- Outline vs. cropped PNG → note the gap; defer to `/todofig`.
+- Outline vs. cropped PNG → note the gap; defer to `$todofig`.
 - Agent memory references stale paths or filenames → normalize.
 
 ---
@@ -67,7 +67,7 @@ Read PNGs in `Figure PNG dir` (filename order: `figure01.png`, `figure02.png`, �
 
 ### 1.3 Read agent memories
 
-For each agent under `.claude/agent-memory/`:
+For each agent under `.omx/omxr/agent-memory/`:
 - `supervisor/MEMORY.md`
 - `analysis-implementer/MEMORY.md`
 - `paper-writer/MEMORY.md`
@@ -111,7 +111,7 @@ For non-completed items, name the gap in one sentence. Do **not** author multi-s
 
 ### Phase 3.5 — Narrative-spine check (optional)
 
-If the project's `CLAUDE.md` defines a narrative spine (multiple threads with load-bearing figures), explicitly verify each thread is still load-bearing in the current deck. Surface any weakened thread as a 🔴 item in the "Manual review needed" section with one sentence explaining why.
+If the project's `AGENTS.md` defines a narrative spine (multiple threads with load-bearing figures), explicitly verify each thread is still load-bearing in the current deck. Surface any weakened thread as a 🔴 item in the "Manual review needed" section with one sentence explaining why.
 
 If `supervisor/MEMORY.md` flags specific contrasts as non-significant (overclaim risk), check that no current figure or memory has started asserting them as significant. Flag any overclaim.
 
@@ -122,9 +122,9 @@ If `supervisor/MEMORY.md` flags specific contrasts as non-significant (overclaim
 Figure refreshing (deck → per-slide PDF → cropped PDF + low-DPI PNG) and outline embedding (`![Figure N](figures/figureNN.png)` after each result heading) are owned by the `cropfig` skill, not by this skill. To refresh figures alongside a sync:
 
 ```bash
-DECK_FILE=<path> python3 "$CLAUDE_PLUGIN_ROOT"/skills/cropfig/export_deck.py   "$DECK_FILE" "$STAGE"
-DECK_FILE=<path> python3 "$CLAUDE_PLUGIN_ROOT"/skills/cropfig/crop_figures.py  "$STAGE"
-DECK_FILE=<path> python3 "$CLAUDE_PLUGIN_ROOT"/skills/cropfig/upload_figures.py
+DECK_FILE=<path> python3 "$CODEX_PLUGIN_ROOT"/skills/cropfig/export_deck.py   "$DECK_FILE" "$STAGE"
+DECK_FILE=<path> python3 "$CODEX_PLUGIN_ROOT"/skills/cropfig/crop_figures.py  "$STAGE"
+DECK_FILE=<path> python3 "$CODEX_PLUGIN_ROOT"/skills/cropfig/upload_figures.py
 ```
 
 Or invoke the `cropfig` skill directly. This skill should not duplicate that work — if the outline appears out of date and `cropfig` has not been run, surface that as a "Manual review needed" item rather than running embed logic here.
@@ -171,9 +171,9 @@ Deliver in `Report language` with this structure. Keep figure / panel / conditio
 
 ## Phase 6 — Persist
 
-Save the full report to `${Sync report dir}/sync_YYYY-MM-DD.md`. Create the directory if missing (`mkdir -p`). Do **not** overwrite any human-maintained TODO file.
+Save the full report to `${Sync report dir}$sync_YYYY-MM-DD.md`. Create the directory if missing (`mkdir -p`). Do **not** overwrite any human-maintained TODO file.
 
-Optionally update `.claude/agent-memory/sync-coordinator/MEMORY.md` (if the project tracks a sync coordinator memory) with:
+Optionally update `.omx/omxr/agent-memory$sync-coordinator/MEMORY.md` (if the project tracks a sync coordinator memory) with:
 - Sync date
 - One-line summary of what changed since the last sync
 - Current snapshot (N completed / in progress / not started / blocked)

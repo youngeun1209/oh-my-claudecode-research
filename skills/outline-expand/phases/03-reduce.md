@@ -89,8 +89,8 @@ If the `Write` tool errors (PII-scrub hook block, OS error, etc.):
 
 Only when `wrote: true`:
 - `paper_state.sections[r.name].status = "drafted"` (regardless of the prior status — `revising`, `blocked`, `blocked-on-tbd` all collapse to `drafted` after a successful first-draft pass).
-- `paper_state.sections[r.name].iter = 1` (this engine produces iter-1; subsequent `/iterate-revision` runs bump beyond).
-- `paper_state.sections[r.name].last_review_id` is **not** cleared — it remains pointing to the prior review (if any). This is a quirk of the map-reduce shape: the section's prose just changed, so the prior review is stale, but we don't clear the pointer because the user may want to inspect the old review for context. `/iterate-revision`'s phase 02 already handles "no prior review for this iter" gracefully.
+- `paper_state.sections[r.name].iter = 1` (this engine produces iter-1; subsequent `$iterate-revision` runs bump beyond).
+- `paper_state.sections[r.name].last_review_id` is **not** cleared — it remains pointing to the prior review (if any). This is a quirk of the map-reduce shape: the section's prose just changed, so the prior review is stale, but we don't clear the pointer because the user may want to inspect the old review for context. `$iterate-revision`'s phase 02 already handles "no prior review for this iter" gracefully.
 
 Do **not** write `paper.json` back to disk after each section — accumulate the mutations in memory and write once at the end of step 1, to keep the on-disk file consistent (either all-or-nothing visible).
 
@@ -172,12 +172,12 @@ more sections drafted in this run. Read the entries below, decide which form is
 canonical, and either:
 
 - Edit the sections by hand to converge on one form, OR
-- Run /iterate-revision <section-path> per section — the reviewer will catch
+- Run $iterate-revision <section-path> per section — the reviewer will catch
   the same inconsistencies through prose review, OR
-- Update .claude/agent-memory/paper-writer/nomenclature.md so future runs
+- Update .omx/omxr/agent-memory/paper-writer/nomenclature.md so future runs
   anchor on the canonical form.
 
-This file is regenerated on every /outline-expand run. Gitignore it if you
+This file is regenerated on every $outline-expand run. Gitignore it if you
 do not want it tracked.
 ```
 
@@ -206,7 +206,7 @@ If `terminology_decisions` (from phase 02 step 7) is non-empty, append:
 ## Writer-logged terminology decisions
 
 The writers explicitly logged the following decisions during this run. Consider
-adopting them into .claude/agent-memory/paper-writer/nomenclature.md:
+adopting them into .omx/omxr/agent-memory/paper-writer/nomenclature.md:
 
 - (in <section>) <term> = <chosen-form>  — reason: <reason>
 - ...
@@ -244,7 +244,7 @@ Phase 04 uses these to render the user summary and append the `_run-log.jsonl` c
 |---|---|
 | Parent directory of a section path cannot be created | Record write failure for that section; continue. |
 | `Write` tool errors on a section file (e.g., PII-scrub block) | Record write failure for that section; do not abort. |
-| `paper.json` write-back fails | Log error to run log; do not roll back section file writes. State on disk is now "prose updated, paper.json stale" — the user re-running `/sync` or `/outline-expand` reconciles. |
+| `paper.json` write-back fails | Log error to run log; do not roll back section file writes. State on disk is now "prose updated, paper.json stale" — the user re-running `$sync` or `$outline-expand` reconciles. |
 | `terminology-drift.md` write fails | Log warning; do not abort. Phase 04 still surfaces drift count from the in-memory list. |
 | Zero sections succeeded in phase 02 | Phase 03 walks an all-failed `dispatch_results`; writes zero files; `paper_state` is untouched; `terminology-drift.md` contains the no-drift header (no sections to scan). Phase 04 reports the all-fail case. |
 | Section file already contains `\section{...}` framing but framing-detection picks the wrong boundary | Fall back to full-overwrite; log a one-line warning into `write_results[i].framing_warning`. Phase 04 surfaces it. |
@@ -252,9 +252,9 @@ Phase 04 uses these to render the user summary and append the `_run-log.jsonl` c
 ## What this phase does NOT do
 
 - Does **not** invoke any subagent. Pure writes + lint.
-- Does **not** call `/iterate-revision`. The drift artifact is the only output that ties to refinement; the user decides whether to iterate.
+- Does **not** call `$iterate-revision`. The drift artifact is the only output that ties to refinement; the user decides whether to iterate.
 - Does **not** edit `nomenclature.md`. Writer-logged decisions are surfaced in the drift report, not auto-merged.
 - Does **not** commit to git. No git operations from this engine, ever.
-- Does **not** update `last_review_id`. Stale prior reviews are tolerated; the next `/iterate-revision` reviews fresh.
-- Does **not** update `paper_state.figures` or trigger figure work. Figure design is `/figure-bake`'s engine.
+- Does **not** update `last_review_id`. Stale prior reviews are tolerated; the next `$iterate-revision` reviews fresh.
+- Does **not** update `paper_state.figures` or trigger figure work. Figure design is `$figure-bake`'s engine.
 - Does **not** clear failed-write entries from `paper.json` (e.g., revert a status). Failed writes leave `paper_state.sections[name]` exactly as it was before the run.

@@ -1,31 +1,31 @@
 # Commands — reference
 
-OMCR ships **10 slash commands** (all thin dispatchers) and **14 invocable skills**, all parameterized via the [Project context + Research stack blocks](Configuration.md) in your project's `CLAUDE.md`. The 4 setup/workflow commands (`/omcr-setup`, `/start-research`, `/todofig`, `/sync`) are documented in detail below, followed by the 2 standalone skills (`cropfig`, `verify-citation`). The 6 orchestration engines (`/iterate-revision`, `/literature-sweep`, `/respond-reviewer`, `/figure-bake`, `/outline-expand`, `/supervisor-drive`) are summarized at the bottom with links to deeper walkthroughs.
+OMXR ships **10 skills** (all thin dispatchers) and **14 invocable skills**, all parameterized via the [Project context + Research stack blocks](Configuration.md) in your project's `AGENTS.md`. The 4 setup/workflow commands (`$omxr-setup`, `$start-research`, `$todofig`, `$sync`) are documented in detail below, followed by the 2 standalone skills (`cropfig`, `verify-citation`). The 6 orchestration engines (`$iterate-revision`, `$literature-sweep`, `$respond-reviewer`, `$figure-bake`, `$outline-expand`, `$supervisor-drive`) are summarized at the bottom with links to deeper walkthroughs.
 
-## `/omcr-setup`
+## `$omxr-setup`
 
-**Goal:** Install OMCR's infrastructure in a project. **No questions about your research** — that lives in `/start-research`. Safe to re-run.
+**Goal:** Install OMXR's infrastructure in a project. **No questions about your research** — that lives in `$start-research`. Safe to re-run.
 
 **Argument:** none.
 
 **Phases (6):**
 
-1. **State check** — inventory existing `CLAUDE.md` marker blocks, `.claude/agent-memory/`, bibliography files, `.claude/settings.json` (looking for broad wildcards or invalid entries).
-2. **CLAUDE.md scaffold** — insert empty `## Project context` / `## Research stack` / `## Language preference` blocks with `[TBD]` placeholders. Existing blocks are left untouched.
-3. **Agent memory** — `.claude/agent-memory/<agent>/MEMORY.md` from `templates/MEMORY.template.md` for any of the 6 agents missing it. Existing `MEMORY.md` is never overwritten.
+1. **State check** — inventory existing `AGENTS.md` marker blocks, `.omx/omxr/agent-memory/`, `.omx/state/omxr/`, bibliography files, optional native agent templates, and hook/check readiness.
+2. **AGENTS.md scaffold** — insert empty `## Project context` / `## Research stack` / `## Language preference` blocks with `[TBD]` placeholders. Existing blocks are left untouched.
+3. **Agent memory** — `.omx/omxr/agent-memory/<agent>/MEMORY.md` from `templates/MEMORY.template.md` for any of the 6 agents missing it. Existing `MEMORY.md` is never overwritten.
 4. **Bibliography** — create empty `paper/references.bib` (with header comment) and `./references.csv` (with canonical header row) if missing.
-5. **Permissions** — interactive curated allowlist menu for `.claude/settings.json`. Categories (default ON unless noted): read-only git inspection, file search & exploration, edit code/text files, LaTeX build, citation API lookups (CrossRef / OpenAlex / doi.org), Python analysis scripts (⬜ opt-in), figure crop tool. Dangerous categories (git write, file deletion, wildcard `Bash`, unrestricted `curl`) are **never offered** — they always prompt. If a previous `.claude/settings.json` has broad wildcards or invalid entries, offers to narrow with backup to `.claude/settings.json.backup.YYYY-MM-DD`.
-6. **Report** — concise summary; recommends `/start-research` next.
+5. **Hook/check readiness** — classify memory load, setup nudge, PII scrub, and citation warning as native hook, runtime fallback, or explicit check. Preserve existing base OMX/user hook entries.
+6. **Report** — concise summary; recommends `$start-research` next.
 
-[Source: `commands/omcr-setup.md`](../commands/omcr-setup.md), [`skills/omcr-setup/`](../skills/omcr-setup/)
+[Source: `commands/omxr-setup.md`](../commands/omxr-setup.md), [`skills/omxr-setup/`](../skills/omxr-setup/)
 
-### Re-running `/omcr-setup`
+### Re-running `$omxr-setup`
 
-Safe. State-check + skip semantics mean existing user content (filled `CLAUDE.md` fields, written `MEMORY.md`, your `references.bib` / `references.csv`) is never overwritten. The permissions phase asks before replacing broad wildcards. Use re-runs to refresh infrastructure after a plugin update.
+Safe. State-check + skip semantics mean existing user content (filled `AGENTS.md` fields, written `MEMORY.md`, your `references.bib` / `references.csv`) is never overwritten. The hook/check readiness phase reports native, runtime-fallback, or explicit-check status without clobbering user hooks. Use re-runs to refresh infrastructure after a plugin update.
 
-## `/start-research`
+## `$start-research`
 
-**Goal:** Interview-driven first-research-project initialization. Fill the `CLAUDE.md` placeholders that `/omcr-setup` scaffolded — working title, hypothesis, target venue, datasets, narrative spine — optionally apply a domain preset to agent memory, scaffold the LaTeX manuscript directory. Safe to re-run.
+**Goal:** Interview-driven first-research-project initialization. Fill the `AGENTS.md` placeholders that `$omxr-setup` scaffolded — working title, hypothesis, target venue, datasets, narrative spine — optionally apply a domain preset to agent memory, scaffold the LaTeX manuscript directory. Safe to re-run.
 
 **Argument:** `$ARGUMENTS` — optional preset hint:
 - `minimal` / `no-overlay` — skip the preset-overlay prompt entirely
@@ -34,14 +34,14 @@ Safe. State-check + skip semantics mean existing user content (filled `CLAUDE.md
 
 **Phases (7):**
 
-1. **Precheck** — verifies `/omcr-setup` has run (`CLAUDE.md` marker blocks, `.claude/agent-memory/<agent>/`, bibliography files all present). If not, offers to invoke `/omcr-setup` automatically before continuing. User can decline and cancel.
+1. **Precheck** — verifies `$omxr-setup` has run (`AGENTS.md` marker blocks, `.omx/omxr/agent-memory/<agent>/`, bibliography files all present). If not, offers to invoke `$omxr-setup` automatically before continuing. User can decline and cancel.
 2. **Interview** — asks only for fields that are missing or still `[TBD]`. Three policy bands:
    - *Scientific identity* (hypothesis / venue / topic / datasets / narrative spine) — push back **once** with the reason it matters; if user still skips, store as `[TBD: <one-line note>]`. **Never invent.**
    - *Infrastructure* (deck/outline paths, figure count, BibTeX/Summary paths, CrossRef email, Overleaf URL, language) — propose a sensible default; accept silently if user types `[skip]`.
    - *Preset overlay* — apply `neuro-fmri` (or another shipped preset) or stay field-neutral. Skip allowed.
-3. **Fill CLAUDE.md** — write captured answers into the three marker blocks. Existing filled fields are preserved unless the user explicitly overrode them. If `BibTeX file` / `Summary file` paths differ from defaults, files are **moved** (not duplicated) with confirmation.
+3. **Fill AGENTS.md** — write captured answers into the three marker blocks. Existing filled fields are preserved unless the user explicitly overrode them. If `BibTeX file` / `Summary file` paths differ from defaults, files are **moved** (not duplicated) with confirmation.
 4. **Preset overlay (agent memory)** — if a preset was chosen, replace per-agent `MEMORY.md` files **only when byte-identical to the canonical template** (i.e. untouched). Modified memory is never overwritten.
-5. **Venue scope seed (reviewer specialization)** — reads `Target venue` from CLAUDE.md, looks it up in `templates/journal-registry.json` (aims & scope / editorial priorities / typical reviewer concerns). On miss, falls back to a one-shot WebFetch of the venue's author-guidelines page; on either path, the result is shown to the user for confirmation before being written into `.claude/agent-memory/reviewer/MEMORY.md` under `## Venue-specific bar`. The `memory-load` hook then auto-injects this section into every `@reviewer` invocation, so the reviewer reviews at the right venue bar without further setup. Pass `--no-venue-seed` to skip. Skipped when venue is `[TBD]` or the reviewer memory already has a `## Venue-specific bar` section.
+5. **Venue scope seed (reviewer specialization)** — reads `Target venue` from AGENTS.md, looks it up in `templates/journal-registry.json` (aims & scope / editorial priorities / typical reviewer concerns). On miss, falls back to a one-shot WebFetch of the venue's author-guidelines page; on either path, the result is shown to the user for confirmation before being written into `.omx/omxr/agent-memory/reviewer/MEMORY.md` under `## Venue-specific bar`. The `memory-load` hook then auto-injects this section into every `@reviewer` invocation, so the reviewer reviews at the right venue bar without further setup. Pass `--no-venue-seed` to skip. Skipped when venue is `[TBD]` or the reviewer memory already has a `## Venue-specific bar` section.
 6. **Manuscript scaffold** (delegated) — invokes the `manuscript-scaffold` skill with `Manuscript dir`, `Target venue`, `Overleaf git URL`, and `Working title`. The skill runs its own 4 phases: state check → journal template lookup (against `templates/journal-registry.json`) → skeleton copy (with optional Overleaf clone + credential caching) → commit and ask before push.
 7. **Report** — summary block (now includes a Venue scope seed line), TBD follow-up list, next steps. Ends by recommending `@supervisor where are we?`.
 
@@ -62,11 +62,11 @@ For venues not in the registry, three options: keep generic `article`, specify a
 
 If `Overleaf git URL` is set, the `manuscript-scaffold` skill clones the Overleaf project into `Manuscript dir` (requires paid Overleaf plan with Git Integration). Token cached **only** in git's credential helper or `~/.netrc`, scoped to `git.overleaf.com` — never written to any tracked file. Non-empty Overleaf projects stop and ask before clobbering. After scaffold, commits on the default branch **locally** and asks before pushing (default "no").
 
-### Re-running `/start-research`
+### Re-running `$start-research`
 
-Safe. Existing values are surfaced as defaults; modified `MEMORY.md` is never overwritten; the `manuscript-scaffold` skill has its own existing-content guard. To reset an agent's memory, delete the specific `.claude/agent-memory/<agent>/MEMORY.md` and re-run.
+Safe. Existing values are surfaced as defaults; modified `MEMORY.md` is never overwritten; the `manuscript-scaffold` skill has its own existing-content guard. To reset an agent's memory, delete the specific `.omx/omxr/agent-memory/<agent>/MEMORY.md` and re-run.
 
-## `/todofig`
+## `$todofig`
 
 **Goal:** Compare a captured figure deck against an outline document; produce a prioritized TODO of gaps (P0/P1/P2).
 
@@ -86,7 +86,7 @@ Safe. Existing values are surfaced as defaults; modified `MEMORY.md` is never ov
 2. Cross-cutting concerns (missing panels / orphan figures / stale figures / consistency issues)
 3. Prioritized TODO (P0 / P1 / P2 / Later)
 
-**Saved to:** `${Report output dir}/todofig_YYYY-MM-DD.md`
+**Saved to:** `${Report output dir}$todofig_YYYY-MM-DD.md`
 
 **Priorities:**
 - **P0** — blocks a main-text claim, or is an unresolved CRITICAL issue from supervisor memory
@@ -99,7 +99,7 @@ Safe. Existing values are surfaced as defaults; modified `MEMORY.md` is never ov
 ### Example session
 
 ```
-/todofig
+$todofig
 ```
 
 Output:
@@ -129,17 +129,17 @@ Output:
 For a focused single-figure pass:
 
 ```
-/todofig Fig5
+$todofig Fig5
 ```
 
 Skips the cross-cutting section, produces only Fig 5's diff + focused TODO.
 
-## `/sync`
+## `$sync`
 
 **Goal:** Reconcile current state (cropped figures + agent memories) with final goal (outline), refresh agent memories with drifts. Produces a status snapshot — **not a TODO**.
 
 **Inputs (from `## Research stack` block):**
-- All `/todofig` fields, plus:
+- All `$todofig` fields, plus:
 - `Sync report dir` — where to save status reports
 
 **Argument:** `$ARGUMENTS` — optional scope hint:
@@ -155,9 +155,9 @@ Skips the cross-cutting section, produces only Fig 5's diff + focused TODO.
 4. Phase 4 — Report
 5. Phase 5 — Persist report + update sync coordinator memory
 
-(Figure refresh and outline embed live in the `cropfig` skill, not in `/sync`.)
+(Figure refresh and outline embed live in the `cropfig` skill, not in `$sync`.)
 
-**Saved to:** `${Sync report dir}/sync_YYYY-MM-DD.md`
+**Saved to:** `${Sync report dir}$sync_YYYY-MM-DD.md`
 
 **Critical:** Phase 2 is **strictly limited** — no auto-rewriting of agent-authored interpretive content. Sync can only add/refresh sync markers and append drift entries.
 
@@ -169,18 +169,18 @@ Skips the cross-cutting section, produces only Fig 5's diff + focused TODO.
 |---|---|
 | What exists right now? | Cropped PNGs in `Figure PNG dir` (produced by `cropfig`) |
 | Where are we heading? | `Outline file` |
-| What has been done / decided? | `.claude/agent-memory/<agent>/MEMORY.md` |
+| What has been done / decided? | `.omx/omxr/agent-memory/<agent>/MEMORY.md` |
 
 When sources disagree:
 - Memory vs. PNG → trust PNG, update memory
 - Memory vs. outline → update memory, flag drift
-- Outline vs. PNG → flag gap (defer to `/todofig`)
+- Outline vs. PNG → flag gap (defer to `$todofig`)
 - Memory references stale paths → normalize
 
 ### Example session
 
 ```
-/sync
+$sync
 ```
 
 Output:
@@ -211,25 +211,25 @@ Output:
 
 ## Orchestration engines
 
-Six engine commands automate multi-step research workflows. Each engine reads/writes state in `.claude/omcr-state/`, dispatches one or more agent personas via the [`orchestrate`](../skills/orchestrate/SKILL.md) primitive skill, and reports a DONE / CONTINUE / BLOCKED / HALT verdict. Engines are **leaves** — they never call other slash-command engines; cross-engine coordination is the autonomous `/supervisor-drive`'s job.
+Six engine commands automate multi-step research workflows. Each engine reads/writes state in `.omx/state/omxr/`, dispatches one or more agent personas via the [`orchestrate`](../skills/orchestrate/SKILL.md) primitive skill, and reports a DONE / CONTINUE / BLOCKED / HALT verdict. Engines are **leaves** — they never call other skill engines; cross-engine coordination is the autonomous `$supervisor-drive`'s job.
 
 | Engine | Pattern | What it drives |
 |---|---|---|
-| `/iterate-revision <path>` | writer ↔ reviewer loop | Polish one manuscript section until reviewer is satisfied |
-| `/literature-sweep <topic>` | N parallel curators (1–4) | Find + verify N papers; drop into BibTeX + summary CSV (hard verify-gate) |
-| `/respond-reviewer <letter>` | classify & dispatch | Per-comment rebuttal letter; structural comments are human-gated |
-| `/figure-bake <fig-id>` | 3-agent loop | Design → implement → critique loop with `cropfig` integration |
-| `/outline-expand <outline>` | map-reduce | Outline → N parallel section drafts + terminology-drift lint |
-| `/supervisor-drive [--auto]` | autonomous driver | Bottleneck-ranker dispatches the right engine; 6 safety gates |
+| `$iterate-revision <path>` | writer ↔ reviewer loop | Polish one manuscript section until reviewer is satisfied |
+| `$literature-sweep <topic>` | N parallel curators (1–4) | Find + verify N papers; drop into BibTeX + summary CSV (hard verify-gate) |
+| `$respond-reviewer <letter>` | classify & dispatch | Per-comment rebuttal letter; structural comments are human-gated |
+| `$figure-bake <fig-id>` | 3-agent loop | Design → implement → critique loop with `cropfig` integration |
+| `$outline-expand <outline>` | map-reduce | Outline → N parallel section drafts + terminology-drift lint |
+| `$supervisor-drive [--auto]` | autonomous driver | Bottleneck-ranker dispatches the right engine; 6 safety gates |
 
 **Full daily-workflow walkthrough:** [Using-Orchestration](Using-Orchestration.md)
 **Autonomous mode deep dive:** [Autonomous-Drive](Autonomous-Drive.md) (6 safety gates, priority rules, modes)
 **Internal mechanics (state store + 4 primitives):** [Orchestration-Model](Orchestration-Model.md)
-**Composition with OMC (5 worked recipes):** [Orchestration-Comparison](Orchestration-Comparison.md) and [With-OMC](With-OMC.md)
+**Composition with OMX (5 worked recipes):** [Orchestration-Comparison](Orchestration-Comparison.md) and [With-OMX](With-OMX.md)
 
 Source files: [`commands/iterate-revision.md`](../commands/iterate-revision.md), [`commands/literature-sweep.md`](../commands/literature-sweep.md), [`commands/respond-reviewer.md`](../commands/respond-reviewer.md), [`commands/figure-bake.md`](../commands/figure-bake.md), [`commands/outline-expand.md`](../commands/outline-expand.md), [`commands/supervisor-drive.md`](../commands/supervisor-drive.md). Each engine's skill lives at `skills/<name>/` with phase files documenting per-step behavior.
 
-## `cropfig` (skill, not a slash command)
+## `cropfig` (skill, not a skill)
 
 **Goal:** Three-step pipeline from a `.key` / `.pptx` deck to manuscript + outline. Produces vector PDFs (for `\includegraphics` in the .tex) and outline-grade PNGs (for `![Figure N](...)` in the outline.md) — both derived from the same cropped artifact so they cannot drift.
 
@@ -259,20 +259,20 @@ export DECK_FILE=decks/main.pptx
 
 # Func 1 — deck → per-slide vector PDFs (staging dir is ephemeral)
 STAGE=$(mktemp -d)
-python3 ~/.claude/plugins/oh-my-claudecode-research/skills/cropfig/export_deck.py "$DECK_FILE" "$STAGE"
+python3 ~/.codex/plugins/oh-my-codex-research/skills/cropfig/export_deck.py "$DECK_FILE" "$STAGE"
 
 # Func 2 — crop each PDF, emit cropped PDF + outline PNG next to the deck
-python3 ~/.claude/plugins/oh-my-claudecode-research/skills/cropfig/crop_figures.py "$STAGE"
+python3 ~/.codex/plugins/oh-my-codex-research/skills/cropfig/crop_figures.py "$STAGE"
 rm -rf "$STAGE"
 
 # Func 3 — copy artifacts into the manuscript + outline trees
 MANUSCRIPT_DIR=paper OUTLINE_FILE=outline.md \
-  python3 ~/.claude/plugins/oh-my-claudecode-research/skills/cropfig/upload_figures.py
+  python3 ~/.codex/plugins/oh-my-codex-research/skills/cropfig/upload_figures.py
 ```
 
 `crop_figures.py` accepts optional positional output dirs (`<staging> <pdf_out> <png_out>`); `upload_figures.py` reads from `<dirname($DECK_FILE)>/pdf` and `<dirname($DECK_FILE)>/png` and copies into the manuscript + outline trees. Func 3 is idempotent — re-running replaces the outline embed links rather than duplicating them.
 
-## `verify-citation` (skill, not a slash command)
+## `verify-citation` (skill, not a skill)
 
 **Goal:** Verify that an academic citation exists and that its metadata matches what is claimed for it. Hits CrossRef for canonical metadata, OpenAlex for the abstract, and optionally writes the verdict into the project's literature summary table (`references.csv` by default) without clobbering human-curated columns.
 

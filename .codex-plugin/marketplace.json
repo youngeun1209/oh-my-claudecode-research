@@ -1,0 +1,31 @@
+{
+  "name": "omxr",
+  "description": "Research-edition workflows for OpenAI Codex CLI and oh-my-codex: paper writing, literature sweeps, figure baking, reviewer rebuttals, and research project state.",
+  "owner": {
+    "name": "Young-Eun Lee"
+  },
+  "plugins": [
+    {
+      "name": "oh-my-codex-research",
+      "description": "Research-team workflows for OpenAI Codex CLI and oh-my-codex. Ships six research agent templates plus Codex skills for academic paper workflows.",
+      "version": "0.1.2",
+      "author": {
+        "name": "Young-Eun Lee"
+      },
+      "source": "./",
+      "category": "research",
+      "homepage": "https://github.com/youngeun1209/oh-my-codex-research",
+      "license": "MIT",
+      "tags": [
+        "codex",
+        "oh-my-codex",
+        "research",
+        "academic",
+        "paper-writing",
+        "agents",
+        "orchestration"
+      ]
+    }
+  ],
+  "version": "0.1.2"
+}

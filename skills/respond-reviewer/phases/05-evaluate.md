@@ -36,7 +36,7 @@ For each comment below, decide one verdict:
               not just acknowledges it.
 
   deferred  — the response is reasonable but points to a follow-up the user must
-              run (e.g., /figure-bake, manual --allow-tbd clearance, a structural
+              run (e.g., $figure-bake, manual --allow-tbd clearance, a structural
               decision the supervisor must make). The work is NOT complete; the
               user will see this and continue manually. Comments labeled
               `structural` in phase 02 do NOT appear in this list — they are

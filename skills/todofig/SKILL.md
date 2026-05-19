@@ -1,6 +1,6 @@
 ---
 name: todofig
-description: Compare a captured-figure deck against an outline document and produce a prioritized TODO of gaps (P0/P1/P2). Reads `## Research stack` config from the user's CLAUDE.md (Deck file / Outline file / Figure count / Result pattern / Report language / Report output dir). Accepts an optional figure identifier in `$ARGUMENTS` (e.g. "Fig4") to restrict the analysis to a single figure. Called by the `/todofig` slash command but also standalone-invocable.
+description: Compare a captured-figure deck against an outline document and produce a prioritized TODO of gaps (P0/P1/P2). Reads `## Research stack` config from the user's AGENTS.md (Deck file / Outline file / Figure count / Result pattern / Report language / Report output dir). Accepts an optional figure identifier in `$ARGUMENTS` (e.g. "Fig4") to restrict the analysis to a single figure. Called by the `$todofig` skill but also standalone-invocable.
 ---
 
 # Figure ↔ Outline Gap Analysis
@@ -9,13 +9,13 @@ Goal: compare what an exported figure deck **currently contains** against what a
 
 **When this skill is invoked, immediately execute the workflow below. Do not only restate or summarize these instructions back to the user.**
 
-This skill is **status + gaps + prioritized actions**. For a status-only snapshot (no TODO), use the `sync` skill (called by `/sync`).
+This skill is **status + gaps + prioritized actions**. For a status-only snapshot (no TODO), use the `sync` skill (called by `$sync`).
 
 ---
 
 ## Step 0 — Resolve project configuration
 
-Read the project's `CLAUDE.md` for a `## Research stack` section. Required fields:
+Read the project's `AGENTS.md` for a `## Research stack` section. Required fields:
 
 | Field | Purpose | Example |
 |---|---|---|
@@ -24,7 +24,7 @@ Read the project's `CLAUDE.md` for a `## Research stack` section. Required field
 | `Figure count` | Total figures expected | `8` |
 | `Result pattern` | Regex to find result/figure blocks | `^### Result (\d+)` |
 | `Report language` | Output language | `English` |
-| `Report output dir` | Where to save the TODO report | `./todofig_reports/` |
+| `Report output dir` | Where to save the TODO report | `.$todofig_reports/` |
 
 Optional field:
 
@@ -32,7 +32,7 @@ Optional field:
 |---|---|---|
 | `Figure PNG dir` | `<dirname(Deck file)>/png/` | Where the cropped per-slide PNGs live. This skill reads these to inspect figure state. Populated by the `cropfig` skill. |
 
-If any required field is missing, **ask the user once** for the missing values, then **offer to write them** into the project's `CLAUDE.md` as a `## Research stack` section. See [`wiki/Configuration.md`](../../wiki/Configuration.md) for the canonical block format.
+If any required field is missing, **ask the user once** for the missing values, then **offer to write them** into the project's `AGENTS.md` as a `## Research stack` section. See [`wiki/Configuration.md`](../../wiki/Configuration.md) for the canonical block format.
 
 Figure refresh is owned by the `cropfig` skill, not this skill. Run `cropfig` separately if the PNG dir is stale or empty.
 
@@ -49,7 +49,7 @@ Read `Outline file` in full. For every block matching `Result pattern`, extract:
 
 ### Step 1.5 — Pull supervisor's unresolved CRITICAL issues (optional)
 
-If `.claude/agent-memory/supervisor/MEMORY.md` exists, read it for unresolved CRITICAL issues. Each unresolved CRITICAL issue that blocks a figure or a main-text claim auto-injects as a P0 item in Step 5, even if the figure looks superficially complete.
+If `.omx/omxr/agent-memory/supervisor/MEMORY.md` exists, read it for unresolved CRITICAL issues. Each unresolved CRITICAL issue that blocks a figure or a main-text claim auto-injects as a P0 item in Step 5, even if the figure looks superficially complete.
 
 ---
 
@@ -68,7 +68,7 @@ For every figure, note:
 
 ### Visual-language checklist (when applicable)
 
-If `.claude/agent-memory/figure-descriptor/color-system.md` exists, load it and check every figure against:
+If `.omx/omxr/agent-memory/figure-descriptor/color-system.md` exists, load it and check every figure against:
 - **Palette conformance** — do condition colors match the locked hex codes? Flag any inline-invented color.
 - **Plot-type conformance** — does the outline-prescribed plot type match what's shown?
 - **Typography** — axis labels, panel labels, tick labels at the venue's print-size thresholds
@@ -149,7 +149,7 @@ Priority rules:
 
 ## Step 5 — Persist the report
 
-Save the full report to `${Report output dir}/todofig_YYYY-MM-DD.md`. Create the directory if it doesn't exist (`mkdir -p`). Do **not** overwrite any human-maintained TODO file (e.g., a project-level `TODO.md`).
+Save the full report to `${Report output dir}$todofig_YYYY-MM-DD.md`. Create the directory if it doesn't exist (`mkdir -p`). Do **not** overwrite any human-maintained TODO file (e.g., a project-level `TODO.md`).
 
 ---
 
