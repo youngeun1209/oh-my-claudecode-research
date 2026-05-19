@@ -38,7 +38,7 @@ For each source in `sources`, issue one search query using WebFetch. URL shapes:
 https://api.crossref.org/works?query=<URL-encoded topic>&rows=<per_source_budget>&select=DOI,title,author,issued,container-title,abstract,type
 ```
 
-Optional polite-pool header: `User-Agent: omxr-literature-sweep/0.2 (mailto:<CITATION_VERIFY_EMAIL>)`. Email source: env var `CITATION_VERIFY_EMAIL`, else AGENTS.md `## Research stack` field `CrossRef email`, else omit the parenthetical. Unset is acceptable; CrossRef still answers, just at the public rate.
+Optional polite-pool header: `User-Agent: omcr-literature-sweep/0.2 (mailto:<CITATION_VERIFY_EMAIL>)`. Email source: env var `CITATION_VERIFY_EMAIL`, else CLAUDE.md `## Research stack` field `CrossRef email`, else omit the parenthetical. Unset is acceptable; CrossRef still answers, just at the public rate.
 
 Parse the JSON response. The candidate list is at `message.items`. Per item:
 

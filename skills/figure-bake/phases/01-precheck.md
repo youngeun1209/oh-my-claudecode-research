@@ -1,6 +1,6 @@
 ---
 name: figure-bake-precheck
-description: Phase 1 of $figure-bake. Resolve the fig-id in figures.json (create entry if missing), apply the three-layer `data_root` resolution, validate the data path on disk, and prime the engine state for phase 02.
+description: Phase 1 of /figure-bake. Resolve the fig-id in figures.json (create entry if missing), apply the three-layer `data_root` resolution, validate the data path on disk, and prime the engine state for phase 02.
 ---
 
 # Phase 1 — Precheck
@@ -12,7 +12,7 @@ Validate the call, resolve state, resolve the dataset root, and decide whether t
 
 ## Inputs
 
-From the skill:
+From the slash command:
 - `<fig-id>` — positional, required (e.g., `fig1`, `fig-overview`, `panel-2b`).
 - `--max-iter N` — optional, default `3`.
 - `--data <path>` — optional, CLI override of `data_root`.
@@ -39,8 +39,8 @@ Call the primitive at [`../../orchestrate/phases/01-state-read.md`](../../orches
 
 If the bootstrap path was taken (state-read just created the file), warn:
 ```
-figure-bake: paper.json was missing — bootstrapped an empty one. Run $omxr-setup
-or $start-research first if you intended to use existing state.
+figure-bake: paper.json was missing — bootstrapped an empty one. Run /omcr-setup
+or /start-research first if you intended to use existing state.
 ```
 Then proceed. The only fields phase 01 reads from `paper.json` are `manuscript_root` (for the default `vector_path`) and `title` (passed to the descriptor brief in phase 02). Neither is required to be non-null; defaults apply where the field is null.
 
@@ -90,11 +90,11 @@ Write the entry back into `figures_state.figures[<fig-id>]` and persist `figures
 Apply the resolution order from Phase 2 decision §3:
 
 1. **CLI `--data <path>`** — if non-empty, use as-is.
-2. **Env `CODEX_RESEARCH_DATA_ROOT`** — read the environment variable. If non-empty, use as-is.
-3. **AGENTS.md `## Research stack` block, field `data_root`** — read the user's project `AGENTS.md` from the project root. Scan for a `## Research stack` heading and a `data_root:` (or `Data root:`) line inside that block. If non-empty, use as-is.
+2. **Env `CLAUDE_RESEARCH_DATA_ROOT`** — read the environment variable. If non-empty, use as-is.
+3. **CLAUDE.md `## Research stack` block, field `data_root`** — read the user's project `CLAUDE.md` from the project root. Scan for a `## Research stack` heading and a `data_root:` (or `Data root:`) line inside that block. If non-empty, use as-is.
 4. **Hardcoded fallback `./data/`** — relative to the project root.
 
-Note the resolution layer that won (for logging). Expand `~` and resolve to an absolute path. Record both the source layer (`cli` / `env` / `agents.md` / `default`) and the absolute path.
+Note the resolution layer that won (for logging). Expand `~` and resolve to an absolute path. Record both the source layer (`cli` / `env` / `claude.md` / `default`) and the absolute path.
 
 ### 6. Validate `data_root` exists on disk
 
@@ -112,8 +112,8 @@ Stat the resolved path:
 
   Resolution layers checked, in order:
     1. CLI --data            → <value or "(not set)">
-    2. env CODEX_RESEARCH_DATA_ROOT → <value or "(not set)">
-    3. AGENTS.md ## Research stack data_root → <value or "(not set)">
+    2. env CLAUDE_RESEARCH_DATA_ROOT → <value or "(not set)">
+    3. CLAUDE.md ## Research stack data_root → <value or "(not set)">
     4. default               → ./data/
 
   Set one of the above to an existing directory, then re-run.
@@ -180,8 +180,8 @@ Pass forward to phase 02:
 | `<fig-id>` invalid chars / length | Abort with the allowed-charset hint. |
 | `paper.json` or `figures.json` parse error | Aborted upstream by the orchestrate state-read primitive. Surface its message. |
 | `--data` path missing | Abort listing all four resolution layers' values. |
-| `CODEX_RESEARCH_DATA_ROOT` env path missing | Same abort — env miss is treated identically to the CLI miss. |
-| AGENTS.md `data_root` missing | Same abort. |
+| `CLAUDE_RESEARCH_DATA_ROOT` env path missing | Same abort — env miss is treated identically to the CLI miss. |
+| CLAUDE.md `data_root` missing | Same abort. |
 | Default `./data/` missing | Same abort — the user has no config and no `./data/` dir; they need to do at least one thing. |
 | `data_root` exists but is a file, not a directory | Abort with the file-vs-dir distinction. |
 | `mkdir -p <parent of vector_path>` fails | Abort. The implementer needs to be able to write the PDF. |
@@ -190,7 +190,7 @@ Pass forward to phase 02:
 ## What this phase does NOT do
 
 - Does **not** invoke any subagent. Zero dispatches in phase 01.
-- Does **not** read the `## Research stack` block for anything other than `data_root`. Other fields the engine cares about (max_iter overrides, etc.) are read by the skill dispatcher if at all; phase 01 only owns the `data_root` resolution.
+- Does **not** read the `## Research stack` block for anything other than `data_root`. Other fields the engine cares about (max_iter overrides, etc.) are read by the slash-command dispatcher if at all; phase 01 only owns the `data_root` resolution.
 - Does **not** validate that `<vector_path>` already contains a usable PDF. The implementer (phase 03) is responsible for writing it. A pre-existing PDF at the path is ignored — it will be overwritten on the next implement dispatch.
 - Does **not** invoke `cropfig`. That happens at the end of phase 03 after the implementer succeeds.
 - Does **not** read the descriptor / implementer / reviewer persona files — that's the dispatch primitive's job in phases 02 / 03 / 04.

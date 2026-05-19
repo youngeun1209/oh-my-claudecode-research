@@ -1,6 +1,6 @@
 # Agents — reference
 
-OMXR ships 6 agents under `agents/`. Each is a single markdown file with YAML frontmatter (loaded into Codex's `@`-mention picker) plus a structured prose body.
+OMCR ships 6 agents under `agents/`. Each is a single markdown file with YAML frontmatter (loaded into Claude Code's `@`-mention picker) plus a structured prose body.
 
 ## `@supervisor`
 
@@ -12,13 +12,13 @@ OMXR ships 6 agents under `agents/`. Each is a single markdown file with YAML fr
 - "How should we frame [X] in the paper?"
 - "A reviewer might argue [Y] — how do we respond?"
 
-**Reads:** project AGENTS.md (`## Project context`, `## Research stack`), `.omx/omxr/agent-memory/supervisor/MEMORY.md` + linked topic files.
+**Reads:** project CLAUDE.md (`## Project context`, `## Research stack`), `.claude/agent-memory/supervisor/MEMORY.md` + linked topic files.
 
 **Writes:** updates to `supervisor/MEMORY.md` (hypothesis log, literature anchor list, settled framing decisions, venue strategy, project status).
 
 **Delegates to:** `@analysis-implementer`, `@paper-writer`, `@figure-descriptor`, `@reviewer`.
 
-**Read-only orchestration role:** `@supervisor` is **advisory** with respect to autonomous orchestration — `@`-mention it to read state, summarize progress, and suggest the next move. It does NOT itself drive engines automatically. To actually drive engines without per-step prompting, use [`$supervisor-drive`](Autonomous-Drive.md) (the skill). The split keeps the agent's job simple (advise) and the skill's job explicit (act). When asked "what happened recently?", `@supervisor` interprets `.omx/state/omxr/_run-log.jsonl` plus the state files.
+**Read-only orchestration role:** `@supervisor` is **advisory** with respect to autonomous orchestration — `@`-mention it to read state, summarize progress, and suggest the next move. It does NOT itself drive engines automatically. To actually drive engines without per-step prompting, use [`/supervisor-drive`](Autonomous-Drive.md) (the skill). The split keeps the agent's job simple (advise) and the skill's job explicit (act). When asked "what happened recently?", `@supervisor` interprets `.claude/omcr-state/_run-log.jsonl` plus the state files.
 
 **Model:** `opus` (color: red, memory: project).
 
@@ -33,7 +33,7 @@ OMXR ships 6 agents under `agents/`. Each is a single markdown file with YAML fr
 - "The [output] is giving weird edge cases — diagnose"
 - "Train a model to predict [outcome] from [features]"
 
-**Reads:** project AGENTS.md, `analysis-implementer/MEMORY.md` (pipeline state, hyperparameter conventions, exclusion criteria, bug log).
+**Reads:** project CLAUDE.md, `analysis-implementer/MEMORY.md` (pipeline state, hyperparameter conventions, exclusion criteria, bug log).
 
 **Writes:** modular Python (or other-language) code; intermediate outputs to disk; sanity-check plots; run logs. Updates `analysis-implementer/MEMORY.md` when a new parameter choice / exclusion rule is settled.
 
@@ -53,7 +53,7 @@ OMXR ships 6 agents under `agents/`. Each is a single markdown file with YAML fr
 - "Write a 150-word abstract for [target venue]"
 - "Draft a rebuttal to Reviewer 2's concern about [X]"
 
-**Reads:** project AGENTS.md (narrative spine, target venue, language preference), `paper-writer/MEMORY.md` (section status, locked nomenclature, hard-won phrasings, reviewer-response log).
+**Reads:** project CLAUDE.md (narrative spine, target venue, language preference), `paper-writer/MEMORY.md` (section status, locked nomenclature, hard-won phrasings, reviewer-response log).
 
 **Writes:** manuscript sections; updates `paper-writer/MEMORY.md` with section-status changes and any newly-locked phrasings or nomenclature.
 
@@ -73,7 +73,7 @@ OMXR ships 6 agents under `agents/`. Each is a single markdown file with YAML fr
 - "Reviewer says Fig 3 is confusing — diagnose and propose redesign"
 - "What color palette should we use across all figures?"
 
-**Reads:** project AGENTS.md, `figure-descriptor/MEMORY.md` + linked `color-system.md` (locked palette and plot-type conventions).
+**Reads:** project CLAUDE.md, `figure-descriptor/MEMORY.md` + linked `color-system.md` (locked palette and plot-type conventions).
 
 **Writes:** per-figure design briefs (panel structure, layout, color encoding, caption text, implementation notes); updates `figure-descriptor/MEMORY.md` with approved figure designs and color-system entries.
 
@@ -93,9 +93,9 @@ OMXR ships 6 agents under `agents/`. Each is a single markdown file with YAML fr
 - "Stress-test our methodology — what would a reviewer attack?"
 - "Do a full pre-submission review"
 
-**Reads:** project AGENTS.md (target venue, central hypothesis), `reviewer/MEMORY.md` (open major concerns, resolved concerns, project-specific attack vectors, **`## Venue-specific bar`** seeded by `$start-research` phase 5 from `templates/journal-registry.json` or a one-shot WebFetch of the venue's author guidelines).
+**Reads:** project CLAUDE.md (target venue, central hypothesis), `reviewer/MEMORY.md` (open major concerns, resolved concerns, project-specific attack vectors, **`## Venue-specific bar`** seeded by `/start-research` phase 5 from `templates/journal-registry.json` or a one-shot WebFetch of the venue's author guidelines).
 
-**Writes:** structured reviews (verdict, major/minor concerns, optional suggestions) in formal peer-review format; updates `reviewer/MEMORY.md` with concern status changes. Does not modify the `## Venue-specific bar` section — that block is owned by `$start-research`; refresh by deleting it and re-running.
+**Writes:** structured reviews (verdict, major/minor concerns, optional suggestions) in formal peer-review format; updates `reviewer/MEMORY.md` with concern status changes. Does not modify the `## Venue-specific bar` section — that block is owned by `/start-research`; refresh by deleting it and re-running.
 
 **Does NOT:** resolve concerns. Resolution belongs to `@supervisor`, `@analysis-implementer`, or `@paper-writer`.
 
@@ -114,7 +114,7 @@ OMXR ships 6 agents under `agents/`. Each is a single markdown file with YAML fr
 - "Audit our BibTeX — are any entries fabricated or wrong?"
 - "Build the related-work bibliography for the Introduction"
 
-**Reads:** project AGENTS.md (BibTeX file path, summary-table path, citekey convention), `literature-curator/MEMORY.md` (anchor list, failed searches, preferred sources), the BibTeX file and the summary table themselves.
+**Reads:** project CLAUDE.md (BibTeX file path, summary-table path, citekey convention), `literature-curator/MEMORY.md` (anchor list, failed searches, preferred sources), the BibTeX file and the summary table themselves.
 
 **Writes:** appends to / updates `references.bib` and `references.csv` (or the configured paths) in lockstep; runs the `verify-citation` skill on every new entry; updates `literature-curator/MEMORY.md` with anchor-list and audit status.
 
@@ -147,7 +147,7 @@ OMXR ships 6 agents under `agents/`. Each is a single markdown file with YAML fr
 
 ## Frontmatter contract
 
-All 6 agents follow this YAML frontmatter shape (mirrors upstream `oh-my-codex/agents/executor.md`):
+All 6 agents follow this YAML frontmatter shape (mirrors upstream `oh-my-claudecode/agents/executor.md`):
 
 ```yaml
 ---
@@ -161,7 +161,7 @@ memory: project | none
 
 ## Domain specialization
 
-To use OMXR for a specific field, you can either:
+To use OMCR for a specific field, you can either:
 
 1. **Edit the core agent files** in `agents/` to add field-specific content (loses portability — your edits diverge from upstream).
 2. **Overlay a preset** from `examples/<field>/` (recommended — keeps core upgradable).
@@ -170,7 +170,7 @@ Currently shipped preset: `examples/neuro-fmri/` (generic neuro-fMRI flavor for 
 
 ## See also
 
-- [Commands](Commands.md) — `$todofig` and `$sync` workflows
+- [Commands](Commands.md) — `/todofig` and `/sync` workflows
 - [Hooks](Hooks.md) — `memory-load` auto-loads each agent's MEMORY.md on session start
-- [Configuration](Configuration.md) — project AGENTS.md schema the agents read
+- [Configuration](Configuration.md) — project CLAUDE.md schema the agents read
 - [Specializing](Specializing.md) — authoring field-specific presets

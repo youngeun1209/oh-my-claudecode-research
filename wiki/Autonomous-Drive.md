@@ -1,14 +1,14 @@
-# Autonomous drive — `$supervisor-drive`
+# Autonomous drive — `/supervisor-drive`
 
-OMXR's autonomous orchestrator. Given the current project state, the supervisor surveys the 5 state files, applies a hardcoded bottleneck-ranker, dispatches the right engine, re-evaluates state from scratch, and loops — without per-step user prompting in `--auto` mode. The safety posture is conservative on purpose: 6 safety gates fire **even in `--auto`**, and after any halt the next invocation requires an explicit `--resume <run-id>` or `--fresh` flag.
+OMCR's autonomous orchestrator. Given the current project state, the supervisor surveys the 5 state files, applies a hardcoded bottleneck-ranker, dispatches the right engine, re-evaluates state from scratch, and loops — without per-step user prompting in `--auto` mode. The safety posture is conservative on purpose: 6 safety gates fire **even in `--auto`**, and after any halt the next invocation requires an explicit `--resume <run-id>` or `--fresh` flag.
 
-If you have not yet read [Orchestration model](Orchestration-Model.md), do that first. This page assumes you understand engines-are-leaves and the 5 state files. Phase 3 of OMXR's roadmap is the spec backing this page; see [`develop/phase-3-autonomous-supervisor.md`](../develop/phase-3-autonomous-supervisor.md) and [`develop/phase-3-decisions.md`](../develop/phase-3-decisions.md) for the design source.
+If you have not yet read [Orchestration model](Orchestration-Model.md), do that first. This page assumes you understand engines-are-leaves and the 5 state files. Phase 3 of OMCR's roadmap is the spec backing this page; see [`develop/phase-3-autonomous-supervisor.md`](../develop/phase-3-autonomous-supervisor.md) and [`develop/phase-3-decisions.md`](../develop/phase-3-decisions.md) for the design source.
 
 ## What it does
 
-`$supervisor-drive` is the **only** OMXR engine allowed to chain other engines, and it does so without violating engines-are-leaves: the supervisor re-reads all state from disk between every dispatch, so the priority ranker — not the prior engine — picks the next move. There are 3 modes (interactive, auto, plan-only), 6 safety gates, 8 priority rules in the ranker, and 6 termination conditions. The whole point is that everything is **bounded**: `--max-iter` caps engine invocations, `--budget-tokens` caps cumulative cost, every dispatch is gate-checked, and every halt writes durable state so the user can resume after addressing whatever stopped the drive.
+`/supervisor-drive` is the **only** OMCR engine allowed to chain other engines, and it does so without violating engines-are-leaves: the supervisor re-reads all state from disk between every dispatch, so the priority ranker — not the prior engine — picks the next move. There are 3 modes (interactive, auto, plan-only), 6 safety gates, 8 priority rules in the ranker, and 6 termination conditions. The whole point is that everything is **bounded**: `--max-iter` caps engine invocations, `--budget-tokens` caps cumulative cost, every dispatch is gate-checked, and every halt writes durable state so the user can resume after addressing whatever stopped the drive.
 
-The other OMXR engines (`$iterate-revision`, `$literature-sweep`, `$respond-reviewer`, `$figure-bake`, `$outline-expand`) are still leaves — they don't know `$supervisor-drive` exists. The supervisor invokes them the same way the user would.
+The other OMCR engines (`/iterate-revision`, `/literature-sweep`, `/respond-reviewer`, `/figure-bake`, `/outline-expand`) are still leaves — they don't know `/supervisor-drive` exists. The supervisor invokes them the same way the user would.
 
 ## The 3 modes
 
@@ -22,7 +22,7 @@ After every state survey, the supervisor prints its plan and waits for the user.
 - `halt` — exit cleanly.
 
 ```
-$ $supervisor-drive
+$ /supervisor-drive
 
 [iter 1/5] survey
   paper:      2/5 sections approved, 1 drafted, 2 empty
@@ -32,8 +32,8 @@ $ $supervisor-drive
   prior:      (first iter)
 
 [iter 1/5] plan
-  next:    $literature-sweep "frontoparietal working memory"
-  reason:  3 [CITE:] placeholders in manuscript. Dispatching $literature-sweep.
+  next:    /literature-sweep "frontoparietal working memory"
+  reason:  3 [CITE:] placeholders in manuscript. Dispatching /literature-sweep.
   priority: 3
   alts:    0 alternative(s)
 
@@ -46,17 +46,17 @@ Respond (yes / pick <n> / no / halt):
 The supervisor skips confirmation. The loop runs until any of the termination conditions fires. Safety gates still demand explicit confirmation phrases — autonomous mode does not silently change the hypothesis, add a citation, or commit budget you didn't approve.
 
 ```
-$ $supervisor-drive --auto --max-iter 5 --budget-tokens 80000
+$ /supervisor-drive --auto --max-iter 5 --budget-tokens 80000
 
 [iter 1/5] survey  paper: 2/5 approved, 1 drafted, 2 empty | citations: 8 verified, 3 placeholders | figures: 1/3 | rebuttals: 0
-[iter 1/5] plan    next: $literature-sweep "frontoparietal working memory" (priority 3)
-auto: dispatching $literature-sweep — safety-gate check in phase 04
+[iter 1/5] plan    next: /literature-sweep "frontoparietal working memory" (priority 3)
+auto: dispatching /literature-sweep — safety-gate check in phase 04
 
 GATE: NewCitation
-  Engine:   $literature-sweep
+  Engine:   /literature-sweep
   Trigger:  literature-sweep first dispatch in drive
 
-OMXR will not silently add references. Confirm by typing the exact phrase:
+OMCR will not silently add references. Confirm by typing the exact phrase:
 
   confirm-new-citation
 
@@ -70,19 +70,19 @@ Autonomous mode pauses here. The user types the gate's confirmation phrase, the 
 State-survey + action-plan + report, no dispatch. Prints the next action and a projection of the next 3 actions. Use this to preview an `--auto` run before committing to it.
 
 ```
-$ $supervisor-drive --plan-only
+$ /supervisor-drive --plan-only
 
 plan-only:
   Next action:
-    engine:   $literature-sweep
+    engine:   /literature-sweep
     args:     { "topic": "frontoparietal working memory" }
     reason:   3 [CITE:] placeholders + 0 pending citations.json.queue entries
     priority: 3
 
   Projected next 3 actions (if next_action returned DONE):
-    iter 2: $iterate-revision sections/discussion.tex (priority 5)
-    iter 3: $iterate-revision sections/methods.tex (priority 5)
-    iter 4: $figure-bake fig3 (priority 7)
+    iter 2: /iterate-revision sections/discussion.tex (priority 5)
+    iter 3: /iterate-revision sections/methods.tex (priority 5)
+    iter 4: /figure-bake fig3 (priority 7)
 
   Cost projection:
     iter 1: 50000 × 1.25 = 62500 tokens
@@ -101,7 +101,7 @@ Every dispatch passes through 6 pre-dispatch gates. **Every gate is confirm-requ
 | # | Gate | Trigger | Confirmation phrase | Notes |
 |---|---|---|---|---|
 | 1 | **HypothesisChange** | Brief or args mention modifying `paper.json.hypothesis`. | `confirm-hypothesis-change` | Research integrity. Autonomous mode does not shift the central claim. |
-| 2 | **NewCitation** | Engine intends to add a `references.bib` entry not already in `citations.json.verified`. | `confirm-new-citation` | `$literature-sweep`'s own hard verify-gate covers most fabrication risk; this gate catches engine-author leaks. Fires once per drive for `$literature-sweep`, per dispatch for `$respond-reviewer` citation comments. |
+| 2 | **NewCitation** | Engine intends to add a `references.bib` entry not already in `citations.json.verified`. | `confirm-new-citation` | `/literature-sweep`'s own hard verify-gate covers most fabrication risk; this gate catches engine-author leaks. Fires once per drive for `/literature-sweep`, per dispatch for `/respond-reviewer` citation comments. |
 | 3 | **NewExperiment** | Brief contains `"design a new experiment"`, `"collect more data"`, `"run a new analysis"`, `"acquire"`, etc. | `confirm-new-experiment` | Real-world action, not a model output. False positives are acceptable. |
 | 4 | **StructuralRewrite** | Brief contains `"restructure"`, `"reframe"`, `"change conclusion"`, `"pivot"`, `"flip the framing"`, etc. | `confirm-structural-rewrite` | Scope-change risk; needs human ownership. |
 | 5 | **BudgetExceeded** | `cumulative + projected × 1.25 > budget_tokens`. | `confirm-budget` | Pre-dispatch check. See cost model below. |
@@ -113,17 +113,17 @@ The full implementation lives in [`skills/supervisor-drive/phases/04-engine-invo
 
 ## The hardcoded priority rules
 
-The bottleneck-ranker. Phase 02 of the skill applies these in order; first match wins. Hardcoded currently per Phase 3 decision §5 — no AGENTS.md-driven override.
+The bottleneck-ranker. Phase 02 of the skill applies these in order; first match wins. Hardcoded currently per Phase 3 decision §5 — no CLAUDE.md-driven override.
 
 | # | Trigger | Engine / response |
 |---|---|---|
-| 1 | Any section `status: blocked` | **HALT.** Human action required (a prior `$iterate-revision` returned BLOCKED with a critical issue). |
+| 1 | Any section `status: blocked` | **HALT.** Human action required (a prior `/iterate-revision` returned BLOCKED with a critical issue). |
 | 2 | Any section `status: blocked-on-tbd` | **HALT.** Resolve `[TBD: ...]` markers or re-invoke with `--allow-tbd`. |
-| 3 | `[CITE: ...]` placeholders in manuscript OR `citations.json.queue` has `pending` entries | `$literature-sweep <topic>` |
-| 4 | Empty sections (`status: empty`) | `$outline-expand <outline-path>` if outline exists; else `$iterate-revision <section>` single-section |
-| 5 | Drafted-but-unreviewed (`status: drafted`) | `$iterate-revision <section>` |
-| 6 | Pending rebuttals (`rebuttals.json` has entries with HALT verdict or per-comment `deferred` / `disputed`) | `$respond-reviewer <letter>` |
-| 7 | Figures with brief-vs-impl divergence | `$figure-bake <fig-id>` |
+| 3 | `[CITE: ...]` placeholders in manuscript OR `citations.json.queue` has `pending` entries | `/literature-sweep <topic>` |
+| 4 | Empty sections (`status: empty`) | `/outline-expand <outline-path>` if outline exists; else `/iterate-revision <section>` single-section |
+| 5 | Drafted-but-unreviewed (`status: drafted`) | `/iterate-revision <section>` |
+| 6 | Pending rebuttals (`rebuttals.json` has entries with HALT verdict or per-comment `deferred` / `disputed`) | `/respond-reviewer <letter>` |
+| 7 | Figures with brief-vs-impl divergence | `/figure-bake <fig-id>` |
 | 8 | All approved + figures done + citations verified + rebuttals resolved | `submission_ready = true`. **EXIT DONE.** |
 
 Two practical notes:
@@ -136,17 +136,17 @@ If you disagree with the ranking for a specific run, two escape hatches exist:
 - `--interactive` — the user picks an `alternative` each step.
 - `--plan-only` — inspect the plan, then stop and run the engine you actually want manually.
 
-User-configurable priority overrides are a future backlog item. OMXR ships with hardcoded rules so the future design has a clean baseline.
+User-configurable priority overrides are a future backlog item. OMCR ships with hardcoded rules so the future design has a clean baseline.
 
 ## `--resume <run-id>` and `--fresh`
 
-Per Phase 3 decision §1 (locked, user ACK strict): after any halt, the next `$supervisor-drive` invocation does **not** auto-resume. It prints a one-screen halt-summary and exits unless the user explicitly picks one of:
+Per Phase 3 decision §1 (locked, user ACK strict): after any halt, the next `/supervisor-drive` invocation does **not** auto-resume. It prints a one-screen halt-summary and exits unless the user explicitly picks one of:
 
 - `--resume <run-id>` — continue the prior trajectory. Records `resumed_from: <run-id>` in the new run's start entry for clean audit.
 - `--fresh` — start a new drive from current state, ignoring the prior halt.
 
 ```
-$ $supervisor-drive
+$ /supervisor-drive
 
 supervisor-drive: prior drive halted. Choose how to proceed.
 
@@ -154,14 +154,14 @@ Most recent halt:
   run_id:       a1b2c3d4-0001-...
   started:      2026-05-11T14:00:00Z
   halt verdict: HALT
-  last engine:  $iterate-revision sections/methods.tex
+  last engine:  /iterate-revision sections/methods.tex
   last args:    section_path=sections/methods.tex venue=NeurIPS
   reason:       1 major issue remaining, iter 3/3
-  last commit:  e4f5g6h omxr supervisor-drive: iterate-revision sections/methods.tex verdict=HALT run=a1b2c3d4-0001-
+  last commit:  e4f5g6h omcr supervisor-drive: iterate-revision sections/methods.tex verdict=HALT run=a1b2c3d4-0001-
 
 Resume options:
-  $supervisor-drive --resume a1b2c3d4-0001-...     # continue the same trajectory
-  $supervisor-drive --fresh                          # start a new drive from current state
+  /supervisor-drive --resume a1b2c3d4-0001-...     # continue the same trajectory
+  /supervisor-drive --fresh                          # start a new drive from current state
 ```
 
 Auto-resume is a foot-gun: the user may have manually edited a section, switched branches, hand-run an engine between drives, or forgotten the prior drive existed. Explicit resume costs one flag and forces conscious "yes, continue."
@@ -182,20 +182,20 @@ This is distinct from the orchestrate `loop` primitive's post-hoc `budget_tokens
 
 Default `--budget-tokens` is `50000`. Typical full-drive runs estimate at ~80000 tokens (see the supervisor's own `cost_estimate_tokens: 80000` frontmatter). Bump the budget if your drives keep tripping the gate — but a tripped gate is sometimes the right signal that the project's scope is wider than the cap.
 
-## Composability with OMX's `/autopilot` and `/ralph`
+## Composability with OMC's `/autopilot` and `/ralph`
 
-OMXR's `$supervisor-drive` is research-paper-shaped: its priority ranker knows about sections, citations, figures, rebuttals. OMX's `/autopilot` and `/ralph` (from upstream `oh-my-codex`) are general-purpose autonomous loops with broader scope (code, infra, general agents). The two compose well:
+OMCR's `/supervisor-drive` is research-paper-shaped: its priority ranker knows about sections, citations, figures, rebuttals. OMC's `/autopilot` and `/ralph` (from upstream `oh-my-claudecode`) are general-purpose autonomous loops with broader scope (code, infra, general agents). The two compose well:
 
 - Use `/autopilot` for project-level orchestration that spans more than just paper-writing (e.g. "set up the repo + run the analysis + draft the paper").
-- Use `$supervisor-drive` for the paper-writing portion specifically, with OMXR's domain-aware safety gates.
+- Use `/supervisor-drive` for the paper-writing portion specifically, with OMCR's domain-aware safety gates.
 
-The recommended pattern: a top-level `/autopilot` invocation that, when it reaches the manuscript phase, dispatches `$supervisor-drive --auto --budget-tokens <X>` as a single bounded sub-task. The supervisor's `--auto` then runs to either DONE or HALT, and `/autopilot` continues with whatever comes next.
+The recommended pattern: a top-level `/autopilot` invocation that, when it reaches the manuscript phase, dispatches `/supervisor-drive --auto --budget-tokens <X>` as a single bounded sub-task. The supervisor's `--auto` then runs to either DONE or HALT, and `/autopilot` continues with whatever comes next.
 
-See [With OMX](With-OMX.md) for concrete recipes once the OMX companion install is in place.
+See [With OMC](With-OMC.md) for concrete recipes once the OMC companion install is in place.
 
 ## The engine-leaves invariant — restated
 
-`$supervisor-drive` is the only OMXR engine allowed to chain others. Even it does so by re-evaluating state from scratch between every step (Phase 3 decision §3). The five Phase 1 / Phase 2 engines never call each other and never call the supervisor.
+`/supervisor-drive` is the only OMCR engine allowed to chain others. Even it does so by re-evaluating state from scratch between every step (Phase 3 decision §3). The five Phase 1 / Phase 2 engines never call each other and never call the supervisor.
 
 This makes the loop fully described by `loop { survey → plan → confirm → dispatch → checkpoint → iterate }` with no special cases:
 
@@ -216,27 +216,27 @@ Parallel dispatch multiplies every Phase 3 risk by N:
 - "Halt" gets ambiguous when one of three parallel engines errored.
 - `_run-log.jsonl` needs a new schema for grouped runs.
 
-Each is a future-iteration problem. Single-target also keeps the example-session traces readable. Researchers iterating on a paper rarely need true parallelism — sequential runs are bounded by user attention anyway. Users who want parallelism today can run two Codex sessions side-by-side at their own risk.
+Each is a future-iteration problem. Single-target also keeps the example-session traces readable. Researchers iterating on a paper rarely need true parallelism — sequential runs are bounded by user attention anyway. Users who want parallelism today can run two Claude Code sessions side-by-side at their own risk.
 
 ## What the supervisor does NOT do
 
 - Does not retry on engine exception. Halt-on-exception, no retry — `run_error.json` is written and the drive halts. The user inspects and re-invokes with `--fresh`.
 - Does not call personas directly. Only engines. (Personas are inside engines.)
 - Does not override safety gates in `--auto`. Every gate is confirm-required.
-- Does not push to a remote. Per-engine commits are local. Run `$sync` afterward to push.
+- Does not push to a remote. Per-engine commits are local. Run `/sync` afterward to push.
 - Does not rewrite `main.tex`, `references.bib`, or any non-state file directly. All edits go through engines.
 - Does not modify other engines' SKILL.md or phase files at runtime. Engine logic is static markdown.
 - Does not auto-submit a paper when `submission_ready = true`. Submission is the user's call.
 
 ## See also
 
-- [`commands/supervisor-drive.md`](../commands/supervisor-drive.md) — the skill (thin dispatcher).
+- [`commands/supervisor-drive.md`](../commands/supervisor-drive.md) — the slash command (thin dispatcher).
 - [`skills/supervisor-drive/SKILL.md`](../skills/supervisor-drive/SKILL.md) — the engine skill body.
 - [`skills/supervisor-drive/phases/`](../skills/supervisor-drive/phases/) — the 8 phase files (00-resume-check, 01-state-survey, 02-action-plan, 03-confirm-or-auto, 04-engine-invoke, 05-checkpoint, 06-iterate-or-finalize, 07-report).
 - [`agents/supervisor.md`](../agents/supervisor.md) — the advisory persona (read-only).
 - [Orchestration model](Orchestration-Model.md) — state store, 4 primitives, engines-are-leaves invariant.
-- [Agents](Agents.md) — `@supervisor` and the other 5 OMXR agents.
-- [Commands](Commands.md) — `$iterate-revision`, `$literature-sweep`, `$respond-reviewer`, `$figure-bake`, `$outline-expand` (the engines the supervisor dispatches).
+- [Agents](Agents.md) — `@supervisor` and the other 5 OMCR agents.
+- [Commands](Commands.md) — `/iterate-revision`, `/literature-sweep`, `/respond-reviewer`, `/figure-bake`, `/outline-expand` (the engines the supervisor dispatches).
 - [Configuration](Configuration.md) — the `## Research stack` block and env vars.
 - [`develop/phase-3-autonomous-supervisor.md`](../develop/phase-3-autonomous-supervisor.md) — full design spec.
 - [`develop/phase-3-decisions.md`](../develop/phase-3-decisions.md) — locked decisions §1–§6.

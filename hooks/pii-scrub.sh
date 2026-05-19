@@ -1,29 +1,29 @@
 #!/usr/bin/env bash
 # pii-scrub.sh — PreToolUse:Write|Edit blocker.
 #
-# Reads a JSON tool-call payload from stdin (Codex hook format) and
+# Reads a JSON tool-call payload from stdin (Claude Code hook format) and
 # blocks the call with exit 2 if the staged file content matches any pattern
 # in the project's scrub-pattern list. Pass-through (exit 0) otherwise.
 #
 # Pattern lookup order:
-#   1. .omx/omxr/scrub-patterns.txt        (project-local override; wins)
-#   2. $CODEX_PLUGIN_ROOT/hooks/default-scrub-patterns.txt  (shipped defaults)
+#   1. .claude/scrub-patterns.txt        (project-local override; wins)
+#   2. $CLAUDE_PLUGIN_ROOT/hooks/default-scrub-patterns.txt  (shipped defaults)
 #
-# Disable per-project: set CODEX_RESEARCH_DISABLE_PII_SCRUB=1 in the
-# Codex hook environment, project shell environment, or explicit check runner.
+# Disable per-project: set CLAUDE_RESEARCH_DISABLE_PII_SCRUB=1 in the
+# project's .claude/settings.json env block, or unset before running.
 #
 # Pattern file format: one extended-regex per line; lines starting with '#'
 # and blank lines are ignored.
 
 set -u
 
-if [[ "${CODEX_RESEARCH_DISABLE_PII_SCRUB:-0}" == "1" ]]; then
+if [[ "${CLAUDE_RESEARCH_DISABLE_PII_SCRUB:-0}" == "1" ]]; then
   exit 0
 fi
 
 # Locate pattern file (project override → shipped default).
-project_patterns=".omx/omxr/scrub-patterns.txt"
-plugin_root="${CODEX_PLUGIN_ROOT:-$(cd "$(dirname "$0")/.." && pwd)}"
+project_patterns=".claude/scrub-patterns.txt"
+plugin_root="${CLAUDE_PLUGIN_ROOT:-$(cd "$(dirname "$0")/.." && pwd)}"
 default_patterns="$plugin_root/hooks/default-scrub-patterns.txt"
 
 if [[ -r "$project_patterns" ]]; then
@@ -81,7 +81,7 @@ if (( ${#hits[@]} > 0 )); then
     echo "  - $p" >&2
   done
   echo "" >&2
-  echo "If this is a false positive, edit your project's .omx/omxr/scrub-patterns.txt to refine the patterns, or set CODEX_RESEARCH_DISABLE_PII_SCRUB=1 to bypass entirely." >&2
+  echo "If this is a false positive, edit your project's .claude/scrub-patterns.txt to refine the patterns, or set CLAUDE_RESEARCH_DISABLE_PII_SCRUB=1 to bypass entirely." >&2
   echo "Patterns loaded from: $patterns_file" >&2
   exit 2
 fi

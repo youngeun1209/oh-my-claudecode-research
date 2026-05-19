@@ -1,11 +1,11 @@
 ---
 name: figure-bake-critique
-description: Phase 4 of $figure-bake. Dispatch @reviewer to read the rendered figure (PNG preferred, PDF fallback) and return a structured JSON list of severity-tagged issues. Append the critique to figures.json.figures[<fig-id>].critiques.
+description: Phase 4 of /figure-bake. Dispatch @reviewer to read the rendered figure (PNG preferred, PDF fallback) and return a structured JSON list of severity-tagged issues. Append the critique to figures.json.figures[<fig-id>].critiques.
 ---
 
 # Phase 4 — Critique
 
-Invoke `@reviewer` to critique the figure that phase 03 just rendered. The reviewer must **Read** the rendered artifact (Codex is multimodal — Read on a PNG or PDF surfaces the visual content to the model). Parse the reviewer's response into a structured `issues` list with the same severity taxonomy as `$iterate-revision` (`critical | major | minor | nit`), then append the iter's critique to `figures.json.figures[<fig-id>].critiques`.
+Invoke `@reviewer` to critique the figure that phase 03 just rendered. The reviewer must **Read** the rendered artifact (Claude Code is multimodal — Read on a PNG or PDF surfaces the visual content to the model). Parse the reviewer's response into a structured `issues` list with the same severity taxonomy as `/iterate-revision` (`critical | major | minor | nit`), then append the iter's critique to `figures.json.figures[<fig-id>].critiques`.
 
 This phase is the second half of the loop body (after design + implement). Phase 05 reads the `issues` list to decide the verdict.
 
@@ -57,9 +57,9 @@ If `implementer_status` is `"failed"` or `"no-brief"`:
 
 Two cases:
 
-1. **`render_png_path` is non-null AND the file exists on disk.** The reviewer reads the PNG directly. Most efficient — Codex Read on PNG surfaces the image multimodally with low token weight. This is the normal happy path (cropfig succeeded in phase 03).
+1. **`render_png_path` is non-null AND the file exists on disk.** The reviewer reads the PNG directly. Most efficient — Claude Code Read on PNG surfaces the image multimodally with low token weight. This is the normal happy path (cropfig succeeded in phase 03).
 
-2. **`render_png_path` is null or missing.** Fall back to reading the PDF at `render_pdf_path`. Codex Read on PDF also surfaces the page content multimodally, but at higher token weight. This branch happens when cropfig failed in phase 03 step 6.
+2. **`render_png_path` is null or missing.** Fall back to reading the PDF at `render_pdf_path`. Claude Code Read on PDF also surfaces the page content multimodally, but at higher token weight. This branch happens when cropfig failed in phase 03 step 6.
 
 Verify the chosen path exists and is non-empty (size > 1 KB). If both are missing / empty, treat as `implementer_status == "failed"` per step 1 (this should be caught upstream by phase 03's verification; the guard is cheap).
 
@@ -67,7 +67,7 @@ Record `reader_path` = the chosen path. The reviewer brief tells the reviewer ex
 
 ## Step 3 — Build the reviewer brief
 
-Venue-specific strictness is conveyed in one line, like `$iterate-revision` phase 03 does. Build the `task_brief`:
+Venue-specific strictness is conveyed in one line, like `/iterate-revision` phase 03 does. Build the `task_brief`:
 
 ```
 You are reviewing figure "<fig_id>" rendered for the manuscript as a peer reviewer
@@ -173,7 +173,7 @@ The dispatch primitive will try to parse a JSON array out of the agent response 
 
 ## Step 5 — Normalize the issues list
 
-Apply in order (mirrors `$iterate-revision/phases/03-review.md` step 4):
+Apply in order (mirrors `/iterate-revision/phases/03-review.md` step 4):
 
 1. **Parse-success case.** If `parsed` is a non-null list:
    - Drop any entry that isn't an object with at least a `severity` field.
@@ -252,7 +252,7 @@ Pass forward to phase 05:
 - Does **not** mutate `entry.brief_status` or `entry.impl_status`. Phase 05 owns those based on the verdict.
 - Does **not** invent severities. Only the four-level enum is allowed; the reviewer brief enforces it; step 5 coerces unknown values to `major`.
 - Does **not** retry on parse failure. One dispatch per iter. Bad parses become `major` issues; the next iter re-critiques.
-- Does **not** show the reviewer prior iterations' critiques. The reviewer reads the figure fresh every iter, to prevent "you already fixed this" bias (same constraint as `$iterate-revision` phase 03).
+- Does **not** show the reviewer prior iterations' critiques. The reviewer reads the figure fresh every iter, to prevent "you already fixed this" bias (same constraint as `/iterate-revision` phase 03).
 - Does **not** auto-resolve a render that looks broken by re-rendering. Re-render is the implementer's job in the next iter (CONTINUE) or the user's job before re-running (BLOCKED).
 - Does **not** modify `_run-log.jsonl`. The loop primitive owns that file.
 - Does **not** call `cropfig`. Phase 03 owns the crop pass; phase 04 only reads what's already on disk.

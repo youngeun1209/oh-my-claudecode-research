@@ -95,7 +95,7 @@ final_reason:  "engine <engine> returned BLOCKED: <engine_reason>"
 
 Phase 07 will include the engine's `reason` verbatim plus a one-line "how to recover" hint based on the engine name.
 
-Subtle distinction: a BLOCKED return is treated as a halt at the supervisor level. The user re-invokes after addressing the blocker. This is consistent with the per-engine BLOCKED semantics — `$iterate-revision` BLOCKED means "human action required," and the supervisor honors that.
+Subtle distinction: a BLOCKED return is treated as a halt at the supervisor level. The user re-invokes after addressing the blocker. This is consistent with the per-engine BLOCKED semantics — `/iterate-revision` BLOCKED means "human action required," and the supervisor honors that.
 
 ### 7. User interrupted at phase boundary → HALT
 

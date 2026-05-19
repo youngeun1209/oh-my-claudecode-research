@@ -2,7 +2,7 @@
 
 > **Skeleton only.** Manuscript drafts, exact phrasings, and reviewer-comment
 > text have been stripped. Copy into your own project's
-> `.omx/omxr/agent-memory/paper-writer/MEMORY.md` and fill in.
+> `.claude/agent-memory/paper-writer/MEMORY.md` and fill in.
 
 **Last synced:** [YYYY-MM-DD]
 

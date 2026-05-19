@@ -5,18 +5,18 @@ writes: [rebuttals, reviews, paper]
 cost_estimate_tokens: 60000
 ---
 
-# $respond-reviewer
+# /respond-reviewer
 
-This engine runs the classify-and-dispatch orchestration shape: one reviewer letter in, N labelled comments out, each routed to the specialist that should answer it, then re-evaluated by `@supervisor` before being assembled into a single rebuttal letter. It is the proof that OMXR can hand-off between specialists under supervisor control — Phase 2's harder counterpart to `$iterate-revision`'s single-loop pattern.
+This engine runs the classify-and-dispatch orchestration shape: one reviewer letter in, N labelled comments out, each routed to the specialist that should answer it, then re-evaluated by `@supervisor` before being assembled into a single rebuttal letter. It is the proof that OMCR can hand-off between specialists under supervisor control — Phase 2's harder counterpart to `/iterate-revision`'s single-loop pattern.
 
-If you are reading this because Codex's skill auto-discovery surfaced it: invoke it via `$respond-reviewer <review-letter-path>`. Do not edit the manuscript, `rebuttals.json`, or `.omx/state/omxr/` by hand while a run is in flight.
+If you are reading this because Claude Code's skill auto-discovery surfaced it: invoke it via `/respond-reviewer <review-letter-path>`. Do not edit the manuscript, `rebuttals.json`, or `.claude/omcr-state/` by hand while a run is in flight.
 
 **When this skill is invoked, immediately execute the workflow below. Do not only restate or summarize these instructions back to the user.**
 
 ## Signature
 
 ```
-$respond-reviewer <review-letter-path> [--manuscript <root>] [--draft-only] [--format md|latex]
+/respond-reviewer <review-letter-path> [--manuscript <root>] [--draft-only] [--format md|latex]
 ```
 
 | Flag | Default | Purpose |
@@ -26,10 +26,10 @@ $respond-reviewer <review-letter-path> [--manuscript <root>] [--draft-only] [--f
 | `--format` | `latex` | Output format for the assembled rebuttal letter. `latex` → `rebuttal-letter.tex`; `md` → `rebuttal-letter.md`. **Input** format is auto-detected from the letter extension (Phase 2 decision §2). |
 
 Examples:
-- `$respond-reviewer reviews/r1-comments.md` — defaults; auto-detect MD input, write LaTeX out.
-- `$respond-reviewer reviews/r1-comments.tex --manuscript paper/` — LaTeX in, LaTeX out, explicit manuscript root.
-- `$respond-reviewer reviews/r2-comments.md --draft-only` — read + classify + draft responses, but do not touch the manuscript.
-- `$respond-reviewer reviews/r1-comments.txt --format md` — markdown out for a journal that submits rebuttals through a web form.
+- `/respond-reviewer reviews/r1-comments.md` — defaults; auto-detect MD input, write LaTeX out.
+- `/respond-reviewer reviews/r1-comments.tex --manuscript paper/` — LaTeX in, LaTeX out, explicit manuscript root.
+- `/respond-reviewer reviews/r2-comments.md --draft-only` — read + classify + draft responses, but do not touch the manuscript.
+- `/respond-reviewer reviews/r1-comments.txt --format md` — markdown out for a journal that submits rebuttals through a web form.
 
 ## The dispatch shape
 
@@ -44,7 +44,7 @@ phase 06 — finalize            (write the letter to disk, append rebuttals.jso
 
 Phases 01 and 02 are **inspect** phases (one supervisor dispatch in 02). Phase 03 is the **fan-out** phase — one dispatch per non-structural comment. Phases 04, 05, 06 are **synthesis + record** — the supervisor revisits only the assembled letter, not every comment.
 
-Unlike `$iterate-revision`, there is no loop body here — `$respond-reviewer` is a one-shot pipeline. The "iteration" is per-comment, but each comment is dispatched once. If a per-comment response is weak, phase 05 marks it `deferred` or `disputed` in `rebuttals.json` for the user to address; the engine does not auto-re-dispatch.
+Unlike `/iterate-revision`, there is no loop body here — `/respond-reviewer` is a one-shot pipeline. The "iteration" is per-comment, but each comment is dispatched once. If a per-comment response is weak, phase 05 marks it `deferred` or `disputed` in `rebuttals.json` for the user to address; the engine does not auto-re-dispatch.
 
 ## Phase execution
 
@@ -65,7 +65,7 @@ This engine imports the following primitives from `skills/orchestrate/`:
 
 - [`phases/01-state-read.md`](../orchestrate/phases/01-state-read.md) — read `paper.json` (phase 01 of this engine, for manuscript context + section paths) and `reviews.json` (phase 03 of this engine, for any prior review history on the affected section). Also reads the new `rebuttals.json` state file.
 - [`phases/02-dispatch.md`](../orchestrate/phases/02-dispatch.md) — dispatch `@supervisor` (phases 02 and 05), `@paper-writer` (phase 03 for `prose` / `clarification` labels), `@analysis-implementer` (phase 03 for `analysis` labels), `@literature-curator` (phase 03 for `citation` labels). Each dispatch is one Agent-tool invocation with the persona body inlined.
-- [`phases/03-evaluate.md`](../orchestrate/phases/03-evaluate.md) — used in phase 05 to apply an `engine-supplied` verdict rule per comment (one of `addressed | deferred | disputed`). The orchestrate primitive's `severity-threshold` family does not fit the per-comment shape — `$respond-reviewer` uses the escape hatch and computes the verdict in phase 05 itself.
+- [`phases/03-evaluate.md`](../orchestrate/phases/03-evaluate.md) — used in phase 05 to apply an `engine-supplied` verdict rule per comment (one of `addressed | deferred | disputed`). The orchestrate primitive's `severity-threshold` family does not fit the per-comment shape — `/respond-reviewer` uses the escape hatch and computes the verdict in phase 05 itself.
 - [`phases/04-loop.md`](../orchestrate/phases/04-loop.md) — **not** the iteration driver for this engine (there is no loop). Phase 06 still uses the primitive's `_run-log.jsonl` append pattern for the start + end + summary records. The loop primitive's `max_iter` machinery is effectively `max_iter = 1` here.
 
 This engine **does not** invent its own state-read, dispatch, or log-append mechanics. If you find yourself replicating that logic inside a phase file, you're solving the wrong problem — fix the primitive, do not fork it.
@@ -103,13 +103,13 @@ If `@supervisor` is uncertain between `structural` and another label, it must de
 
 ## Engines are leaves — figure redraws route to `@analysis-implementer`
 
-Per Phase 2 decision §5, `$respond-reviewer` may not invoke another engine. If a comment requests a figure redraw:
+Per Phase 2 decision §5, `/respond-reviewer` may not invoke another engine. If a comment requests a figure redraw:
 
 1. Phase 02 labels it `analysis` (not `structural`, not its own label).
-2. Phase 03 dispatches `@analysis-implementer` with the figure ID in the brief. The implementer may produce a partial response — e.g., "the figure needs `$figure-bake fig3` to redraw" — but does not run the redraw itself.
-3. Phase 06 appends `suggested_next_steps: ["$figure-bake <fig-id>"]` to that comment's entry in `rebuttals.json` and surfaces it in the final summary.
+2. Phase 03 dispatches `@analysis-implementer` with the figure ID in the brief. The implementer may produce a partial response — e.g., "the figure needs `/figure-bake fig3` to redraw" — but does not run the redraw itself.
+3. Phase 06 appends `suggested_next_steps: ["/figure-bake <fig-id>"]` to that comment's entry in `rebuttals.json` and surfaces it in the final summary.
 
-The user (not the engine) decides whether to run `$figure-bake`. This matches the `structural → user-attention` posture: actions with downstream cost get a human ACK.
+The user (not the engine) decides whether to run `/figure-bake`. This matches the `structural → user-attention` posture: actions with downstream cost get a human ACK.
 
 ## Verdict semantics
 
@@ -118,7 +118,7 @@ Per-comment verdicts (set in phase 05, written to `rebuttals.json.rebuttals[*].c
 | Verdict | Meaning |
 |---|---|
 | `addressed` | The per-comment dispatch produced a response that materially answers the reviewer's concern, and the supervisor confirms the response matches the actions taken. |
-| `deferred` | The dispatch produced a response, but it points to a follow-up the user must run (e.g., `$figure-bake`, manual `--allow-tbd` clearance, structural decision). Recorded so the user can see what is pending. |
+| `deferred` | The dispatch produced a response, but it points to a follow-up the user must run (e.g., `/figure-bake`, manual `--allow-tbd` clearance, structural decision). Recorded so the user can see what is pending. |
 | `disputed` | The supervisor flagged a weak or misleading response (e.g., "we have added X" without X actually being present in the manuscript). The user must rewrite or reject the response. |
 
 There is no `BLOCKED` verdict at the **per-comment** level — that is a run-level state. Run-level verdicts (one of `DONE | BLOCKED | HALT`) are computed by phase 06 from the comment-level distribution:
@@ -129,11 +129,11 @@ There is no `BLOCKED` verdict at the **per-comment** level — that is a run-lev
 | Any `disputed`, OR at least one `structural` flagged | `HALT` (user attention required) |
 | Dispatch error mid-run | `BLOCKED` (partial state preserved) |
 
-`CONTINUE` never appears — `$respond-reviewer` is single-pass.
+`CONTINUE` never appears — `/respond-reviewer` is single-pass.
 
 ## Cost model
 
-Each run dispatches: 1 supervisor (classify) + N specialists (one per non-structural comment) + 1 supervisor (re-evaluate) = `2 + N` Agent-tool calls. For a typical 10-comment letter with ~7 non-structural comments, that's 9 dispatches. With `cost_estimate_tokens: 60000` as the frontmatter upper bound, the engine accommodates letters up to ~15 dispatches without overrunning the `$supervisor-drive` budget gate.
+Each run dispatches: 1 supervisor (classify) + N specialists (one per non-structural comment) + 1 supervisor (re-evaluate) = `2 + N` Agent-tool calls. For a typical 10-comment letter with ~7 non-structural comments, that's 9 dispatches. With `cost_estimate_tokens: 60000` as the frontmatter upper bound, the engine accommodates letters up to ~15 dispatches without overrunning the `/supervisor-drive` budget gate.
 
 The `cost_estimate_tokens` frontmatter field is a coarse constant for Phase 3 autonomous-mode scheduling (Phase 3 §6 — rolling-median actuals add the empirical correction on top). Actuals land in `_run-log.jsonl` post-hoc per Phase 0 decision §6.
 
@@ -141,7 +141,7 @@ Per-comment dispatch is dominated by the persona body inline (each agent body is
 
 ## What this engine does NOT do
 
-- Does **not** invoke another engine. Engines are leaves (Phase 2 decision §5). Figure-redraw comments are routed to `@analysis-implementer` with a `suggested_next_steps` hint pointing at `$figure-bake` — the user runs it, not the engine.
+- Does **not** invoke another engine. Engines are leaves (Phase 2 decision §5). Figure-redraw comments are routed to `@analysis-implementer` with a `suggested_next_steps` hint pointing at `/figure-bake` — the user runs it, not the engine.
 - Does **not** auto-dispatch `structural` comments. Always surfaced to user attention (the ethical gate).
 - Does **not** loop. One comment, one dispatch, one verdict. If the response is `disputed` in phase 05, the user re-runs the engine after deciding what to fix — the engine does not auto-retry weak responses.
 - Does **not** commit to git between dispatches. There is no `on_iter_end` hook here. If `--draft-only` is set, the engine never edits manuscript files at all.
@@ -160,6 +160,6 @@ Per-comment dispatch is dominated by the persona body inline (each agent body is
 - [`../orchestrate/SKILL.md`](../orchestrate/SKILL.md) — the 4 primitives this engine composes.
 - [`../../wiki/Orchestration-Model.md`](../../wiki/Orchestration-Model.md) — public pattern doc.
 - [`../../develop/example-state/README.md`](../../develop/example-state/README.md) — full `rebuttals.json` schema reference + populated example.
-- [`../../develop/phase-2-additional-engines.md`](../../develop/phase-2-additional-engines.md) — design doc for this engine ("Engine 3 — `$respond-reviewer`").
+- [`../../develop/phase-2-additional-engines.md`](../../develop/phase-2-additional-engines.md) — design doc for this engine ("Engine 3 — `/respond-reviewer`").
 - [`../../develop/phase-2-decisions.md`](../../develop/phase-2-decisions.md) — locked decisions §2 (LaTeX out, `--format md`) and §5 (engines are leaves).
 - [`../iterate-revision/SKILL.md`](../iterate-revision/SKILL.md) — pattern reference. Voice and structure of this skill mirror that engine.

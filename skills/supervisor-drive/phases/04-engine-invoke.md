@@ -36,11 +36,11 @@ Execute in order. Skip steps if `plan.next_action.engine == null` (verdict alrea
 
 The `plan.next_action` already has `engine` (kebab-case skill name) and `args` (dict). Build:
 
-- `engine_skill_invocation` — `/<engine>` literal (e.g., `$iterate-revision`).
-- `task_brief` — the engine's skill invocation as a single string, e.g. `$iterate-revision sections/methods.tex --venue NeurIPS`. This is what the gate scanners pattern-match against.
+- `engine_slash_command` — `/<engine>` literal (e.g., `/iterate-revision`).
+- `task_brief` — the engine's slash-command invocation as a single string, e.g. `/iterate-revision sections/methods.tex --venue NeurIPS`. This is what the gate scanners pattern-match against.
 - `dispatch_target` — for logging: the engine name + the first positional arg.
 
-Engines accept arguments via their skill — supervisor-drive does not need to inline persona bodies (that's the engine's job through the dispatch primitive). What this skill **invokes** is the engine itself, by reading its SKILL.md and executing the workflow it documents.
+Engines accept arguments via their slash command — supervisor-drive does not need to inline persona bodies (that's the engine's job through the dispatch primitive). What this skill **invokes** is the engine itself, by reading its SKILL.md and executing the workflow it documents.
 
 ### 2. Gate 1 — HypothesisChange
 
@@ -76,10 +76,10 @@ This gate is confirm-required in **every** mode including `--auto`. Autonomous m
 Triggers when the engine's args / brief indicate adding a citation key to `references.bib`. Heuristic match:
 
 - Engine is `respond-reviewer` AND any per-comment label was `citation`.
-- Engine is `literature-sweep` (always — the entire engine adds citations). For this engine, the gate is **modified**: it fires once per drive, not once per dispatch. If the supervisor has already dispatched `$literature-sweep` once in this drive and the user confirmed, subsequent `$literature-sweep` dispatches do not re-trip the gate.
+- Engine is `literature-sweep` (always — the entire engine adds citations). For this engine, the gate is **modified**: it fires once per drive, not once per dispatch. If the supervisor has already dispatched `/literature-sweep` once in this drive and the user confirmed, subsequent `/literature-sweep` dispatches do not re-trip the gate.
 - Brief contains: `"add citation"`, `"add reference"`, `"new citekey"`, `"insert references.bib"`.
 
-For each candidate citekey discoverable from the args (the engine's own verification — `$literature-sweep`'s phase 05 hard-gate — covers most safety here, but the supervisor gate is the engine-author-leak catch):
+For each candidate citekey discoverable from the args (the engine's own verification — `/literature-sweep`'s phase 05 hard-gate — covers most safety here, but the supervisor gate is the engine-author-leak catch):
 
 - If the citekey is already in `current_picture.citations.queue` with `status: "verified"` OR in `citations_state.verified[*].key`: the gate **does not trip** for that citekey.
 - If the citekey is novel: trip the gate.
@@ -91,7 +91,7 @@ GATE: NewCitation
   Engine:   <engine> <args>
   Trigger:  <reason — "literature-sweep first dispatch in drive" or specific citekey>
 
-OMXR will not silently add references. Confirm by typing the exact phrase:
+OMCR will not silently add references. Confirm by typing the exact phrase:
 
   confirm-new-citation
 
@@ -124,7 +124,7 @@ GATE: NewExperiment
   Trigger:  <quoted match>
 
 This brief implies a real-world action (data collection, new experiment).
-OMXR engines are not authorized to commit you to real-world work.
+OMCR engines are not authorized to commit you to real-world work.
 Confirm by typing:
 
   confirm-new-experiment
@@ -215,7 +215,7 @@ Per Phase 3 §5, the supervisor cannot proceed past a critical-severity
 issue. This needs structural action (new analysis, more data, or reframing).
 
 Halting drive. State saved.
-  Full review: .omx/state/omxr/reviews.json (run_id=<R>)
+  Full review: .claude/omcr-state/reviews.json (run_id=<R>)
 ```
 
 Jump directly to phase 07 with `verdict: "BLOCKED"` and `reason: "CriticalIssue gate (no override): <issue text>"`.
@@ -242,7 +242,7 @@ If all gates passed (or were confirmed):
    }
    ```
 
-2. Invoke the engine. Read the engine's SKILL.md and execute the workflow it documents, passing `args` as the engine's CLI arguments. This is the same as the user typing the engine's skill — the engine runs its own phases, dispatches its own personas via the orchestrate primitives, and returns its own verdict.
+2. Invoke the engine. Read the engine's SKILL.md and execute the workflow it documents, passing `args` as the engine's CLI arguments. This is the same as the user typing the engine's slash command — the engine runs its own phases, dispatches its own personas via the orchestrate primitives, and returns its own verdict.
 
 3. Capture the engine's return: `{ verdict, reason, iter_count, tokens_used, run_id_engine }`. The engine has its own `run_id` (it called the orchestrate `loop` primitive); record it alongside the supervisor's `run_id` so the two run logs are joinable.
 
@@ -278,7 +278,7 @@ Hand off to phase 05 (checkpoint).
 
 If the engine threw any error (not a BLOCKED verdict — actual exception: missing file, parse error, tool failure, network drop, malformed state):
 
-1. Write `.omx/state/omxr/run_error.json` (atomic write — tmp + rename):
+1. Write `.claude/omcr-state/run_error.json` (atomic write — tmp + rename):
 
    ```jsonc
    {
@@ -305,7 +305,7 @@ If the engine threw any error (not a BLOCKED verdict — actual exception: missi
      "dispatched_engine": "<engine>",
      "exception_type":    "<type>",
      "exception_excerpt": "<first 200 chars of exception_text>",
-     "error_file":        ".omx/state/omxr/run_error.json",
+     "error_file":        ".claude/omcr-state/run_error.json",
      "occurred_at":       "<UTC ISO-8601 now>"
    }
    ```

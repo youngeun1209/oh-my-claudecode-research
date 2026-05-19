@@ -4,7 +4,7 @@ If `$TARGET_VENUE` is empty / not provided, skip this phase entirely. Record `jo
 
 ## Match the venue against the bundled registry
 
-Read `$CODEX_PLUGIN_ROOT/templates/journal-registry.json`.
+Read `$CLAUDE_PLUGIN_ROOT/templates/journal-registry.json`.
 
 **Matching policy — strict:**
 - **Case-insensitive exact** match against each entry's name OR any string in its `aliases` list.
@@ -20,7 +20,7 @@ Target venue "<user input>" matched: <registry name>
   LaTeX class:             <ctan_package>
   documentclass line:      <documentclass>
   Submission guidelines:   <submission_guidelines_url>
-  Registry verified on:    <verified_on>  ← OMXR snapshot, may be stale; verify against the publisher guidelines above before submission.
+  Registry verified on:    <verified_on>  ← OMCR snapshot, may be stale; verify against the publisher guidelines above before submission.
 
 Apply this class to main.tex and bibstyle to the \bibliographystyle line? (y/N)
 ```
@@ -60,6 +60,6 @@ Print the registry's `not_in_registry_response` (the three-option fallback) and 
 
 ## Hard rules — applies regardless of branch above
 
-- **Never** bundle a `.cls` file into the OMXR plugin repo. Anything fetched in (c) lands in the user's `MANUSCRIPT_DIR`.
+- **Never** bundle a `.cls` file into the OMCR plugin repo. Anything fetched in (c) lands in the user's `MANUSCRIPT_DIR`.
 - **Never** fetch anything without (i) explicit user-supplied `https://` URL AND (ii) shown SHA256 AND (iii) explicit user OK.
 - **Never** fuzzy-match the venue. A close-but-not-exact match is a miss — fall through to the fallback prompt.

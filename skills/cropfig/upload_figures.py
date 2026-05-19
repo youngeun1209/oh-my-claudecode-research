@@ -14,7 +14,7 @@ Func 3 of the cropfig pipeline. Reads from `<deck_parent>/pdf/` and
     `^### Result (\\d+)`). Idempotent — repeated runs replace the existing
     link with the same content rather than duplicating.
 
-Configuration (precedence: env var > AGENTS.md Research stack > built-in):
+Configuration (precedence: env var > CLAUDE.md Research stack > built-in):
     DECK_FILE         (required)  path to deck — used to locate pdf/ and png/
     MANUSCRIPT_DIR    `paper/`    destination for cropped PDFs
     OUTLINE_FILE      `outline.md`  outline markdown file

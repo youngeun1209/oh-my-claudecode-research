@@ -4,7 +4,7 @@ Entry guard. Detects any halted prior drive in `_run-log.jsonl` and refuses to p
 
 ## Inputs
 
-From the skill:
+From the slash command:
 
 - `--auto` / `--interactive` / `--plan-only` — mode (mutually exclusive). Default `--interactive` if none passed.
 - `--max-iter N` — default `5`.
@@ -38,7 +38,7 @@ Record the resolved mode as `mode ∈ {interactive, auto, plan-only}` for forwar
 
 ### 2. Read `_run-log.jsonl`
 
-Open `.omx/state/omxr/_run-log.jsonl` for reading.
+Open `.claude/omcr-state/_run-log.jsonl` for reading.
 
 - **File missing** → no prior drives exist. Skip to step 6 (initialize new drive). Note in the run-start log: `first_drive_in_project: true`.
 - **File present but empty** → same as missing. Skip to step 6.
@@ -58,7 +58,7 @@ A drive is **halted** if either of:
 - The `phase: "start"` record exists with run_id R, but no matching `phase: "supervisor-drive-final"` record for R is present.
 - The `phase: "supervisor-drive-final"` record exists for R but `verdict ∈ {HALT, BLOCKED}`.
 
-A drive is **errored** if `.omx/state/omxr/run_error.json` exists and its `run_id` matches a recent (non-clean) drive in `_run-log.jsonl`.
+A drive is **errored** if `.claude/omcr-state/run_error.json` exists and its `run_id` matches a recent (non-clean) drive in `_run-log.jsonl`.
 
 Build a list of recent drives (last 5) with their `run_id`, `started`, `verdict` (or `(open)` if no final record), and the engine name from the last per-iter summary record for that drive. Most recent first.
 
@@ -84,7 +84,7 @@ Apply in order:
   <pretty-printed contents of run_error.json>
 
   Re-invoke:
-    $supervisor-drive --fresh [other flags]
+    /supervisor-drive --fresh [other flags]
   ```
 
   `--resume <run-id>` is **rejected** for errored drives. The user must inspect the error first.
@@ -118,8 +118,8 @@ A halted drive exists, no `run_error.json`.
     last commit:  <git log -1 --format='%h %s' or "(no commits in this drive)">
 
   Resume options:
-    $supervisor-drive --resume <run-id>     # continue the same trajectory
-    $supervisor-drive --fresh               # start a new drive from current state
+    /supervisor-drive --resume <run-id>     # continue the same trajectory
+    /supervisor-drive --fresh               # start a new drive from current state
 
   See develop/phase-3-decisions.md §1 for why this requires an explicit flag.
   ```

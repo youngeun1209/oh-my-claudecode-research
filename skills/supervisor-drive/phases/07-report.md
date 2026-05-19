@@ -24,7 +24,7 @@ From phase 06 (normal halt path), phase 04 (exception path, skipping phase 05), 
 ### 1. Compute initial vs final state diff
 
 - Re-read all 5 state files (via the state-read primitive — one call per file).
-- Reconstruct the initial state from the first `phase: "start"` record's surrounding state snapshot if available. If no snapshot was captured (OMXR does not snapshot — the diff is computed against the engines' before-and-after writes recorded in `_run-log.jsonl`), use the `_run-log.jsonl` per-iter records to infer the changes.
+- Reconstruct the initial state from the first `phase: "start"` record's surrounding state snapshot if available. If no snapshot was captured (OMCR does not snapshot — the diff is computed against the engines' before-and-after writes recorded in `_run-log.jsonl`), use the `_run-log.jsonl` per-iter records to infer the changes.
 - Build the diff:
 
   ```
@@ -47,10 +47,10 @@ From `_run-log.jsonl` filtered to `phase: "iter-summary"` AND `run_id == <superv
 
 ```
 Engine invocations:
-  iter 1: $iterate-revision sections/methods.tex      verdict=DONE   tokens=18400  commit=a1b2c3d
-  iter 2: $iterate-revision sections/discussion.tex   verdict=DONE   tokens=24600  commit=e4f5g6h
-  iter 3: $literature-sweep "neural manifolds"        verdict=DONE   tokens=42100  commit=i7j8k9l
-  iter 4: $figure-bake fig3                            verdict=HALT   tokens=14500  commit=m0n1o2p
+  iter 1: /iterate-revision sections/methods.tex      verdict=DONE   tokens=18400  commit=a1b2c3d
+  iter 2: /iterate-revision sections/discussion.tex   verdict=DONE   tokens=24600  commit=e4f5g6h
+  iter 3: /literature-sweep "neural manifolds"        verdict=DONE   tokens=42100  commit=i7j8k9l
+  iter 4: /figure-bake fig3                            verdict=HALT   tokens=14500  commit=m0n1o2p
 ```
 
 For exception-path drives, the last row shows `verdict=ERROR` instead.
@@ -84,7 +84,7 @@ addressed.
 Suggested next:
   Review changes:    git log --grep="run=<supervisor run_id>"
   Build manuscript:  cd <manuscript_root> && latexmk -pdf main.tex   (if LaTeX)
-  Push to remote:    $sync                                            (snapshot + optional push)
+  Push to remote:    /sync                                            (snapshot + optional push)
   Push to Overleaf:  use manuscript-scaffold's push flow
 
 The supervisor will not auto-submit. You own the submission.
@@ -113,11 +113,11 @@ About to dispatch when halt fired:
   trigger:    <which termination condition / gate fired>
 
 State is durable. Resume with:
-  $supervisor-drive --resume <supervisor run_id>     # continue the same trajectory
-  $supervisor-drive --fresh                          # start over from current state
+  /supervisor-drive --resume <supervisor run_id>     # continue the same trajectory
+  /supervisor-drive --fresh                          # start over from current state
 
 For the budget-related halts (conditions 3 / 4), bump the cap:
-  $supervisor-drive --auto --budget-tokens <2× current> --resume <supervisor run_id>
+  /supervisor-drive --auto --budget-tokens <2× current> --resume <supervisor run_id>
 ```
 
 The "what's left" projection uses the same simulator from phase 03's plan-only branch — project the next 3 actions by simulating successful completions of the current plan.
@@ -141,11 +141,11 @@ Error details:
   exception_type:  <type>
   exception_text:  <first 500 chars>
   occurred_at:     <ts>
-  error_file:      .omx/state/omxr/run_error.json
+  error_file:      .claude/omcr-state/run_error.json
 
 Per Phase 3 §2, --resume <run-id> is REJECTED for errored drives. After
 addressing the underlying cause, use:
-  $supervisor-drive --fresh [other flags]
+  /supervisor-drive --fresh [other flags]
 
 If the error is reproducible, please file an issue with the contents of
 run_error.json.
@@ -175,8 +175,8 @@ Cost projection (if you ran --auto with this plan):
   total:   <sum> tokens (vs --budget-tokens <budget>)
 
 Re-run without --plan-only to dispatch:
-  $supervisor-drive            (interactive — recommended)
-  $supervisor-drive --auto     (autonomous — safety gates still apply)
+  /supervisor-drive            (interactive — recommended)
+  /supervisor-drive --auto     (autonomous — safety gates still apply)
 ```
 
 ### 5. Append the canonical close to `_run-log.jsonl`
@@ -231,8 +231,8 @@ Reserved for future per-phase hooks (e.g., webhook integration as a future addit
 
 - Does **not** dispatch any engine.
 - Does **not** make a final git commit. Phase 05 already committed after each engine; the final report is read-only.
-- Does **not** push to a remote. Local state only — pushing is the user's call (or `$sync`'s).
+- Does **not** push to a remote. Local state only — pushing is the user's call (or `/sync`'s).
 - Does **not** clear `run_error.json` on the exception path. The file stays until the user inspects and re-invokes with `--fresh`.
-- Does **not** propose user-visible "what-to-do-next" for `DONE` beyond the bullets above. Submission lives outside OMXR's scope.
+- Does **not** propose user-visible "what-to-do-next" for `DONE` beyond the bullets above. Submission lives outside OMCR's scope.
 - Does **not** suggest a specific value for `--budget-tokens` on resume. The "2× current" hint in the HALT block is a rough rule; the user picks.
 - Does **not** suppress its output in `--auto` mode. The final report is the one place autonomous mode always speaks — without it the user has no idea what happened.

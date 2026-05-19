@@ -26,7 +26,7 @@ If the branch does not exist locally yet (empty-clone case), create it with `git
 
 ```bash
 git -C "$MANUSCRIPT_DIR" add .
-git -C "$MANUSCRIPT_DIR" commit -m "Scaffold manuscript via oh-my-codex-research $omxr-setup
+git -C "$MANUSCRIPT_DIR" commit -m "Scaffold manuscript via oh-my-claudecode-research /omcr-setup
 
 - main.tex with section includes
 - sections/{abstract,introduction,methods,results,discussion}.tex stubs
@@ -93,4 +93,4 @@ push_status:          <pushed | deferred | failed | no remote>
 deferred_push_cmd:    <exact git command, only if deferred / failed>
 ```
 
-The caller (e.g. `$omxr-setup` Step 6) merges these into its end-of-run report.
+The caller (e.g. `/omcr-setup` Step 6) merges these into its end-of-run report.

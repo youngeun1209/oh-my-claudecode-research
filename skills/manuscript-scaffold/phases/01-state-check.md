@@ -15,7 +15,7 @@ Inspect `$MANUSCRIPT_DIR` and decide how to proceed.
 - **(b) Re-run later** — end the skill here. Report `stopped at phase 1 — user will clear and re-run`.
 - **(c) Skip entirely** — end the skill here. Report `stopped at phase 1 — user declined manuscript scaffolding`.
 
-The caller (e.g. `$omxr-setup`) decides whether to proceed with the remaining steps without manuscript scaffolding. Do not silently continue past a stop.
+The caller (e.g. `/omcr-setup`) decides whether to proceed with the remaining steps without manuscript scaffolding. Do not silently continue past a stop.
 
 ## Reporting from this phase
 

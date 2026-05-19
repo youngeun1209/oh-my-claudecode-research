@@ -1,13 +1,13 @@
 ---
 name: figure-bake-finalize
-description: Phase 6 of $figure-bake. Render the user-facing run summary, suggest an embedding follow-up (typically $sync), and append a phase:"summary" line to _run-log.jsonl. No git commit, no push.
+description: Phase 6 of /figure-bake. Render the user-facing run summary, suggest an embedding follow-up (typically /sync), and append a phase:"summary" line to _run-log.jsonl. No git commit, no push.
 ---
 
 # Phase 6 — Finalize
 
-User-facing summary after the loop exits. Pulls the loop primitive's return value plus the latest `figures.json.figures[<fig-id>]` state, renders a readable block to the Codex transcript, and appends one summary line to `_run-log.jsonl` (in addition to the start + end records the orchestrate loop primitive already wrote). No git commit, no push — those stay out by default.
+User-facing summary after the loop exits. Pulls the loop primitive's return value plus the latest `figures.json.figures[<fig-id>]` state, renders a readable block to the Claude Code transcript, and appends one summary line to `_run-log.jsonl` (in addition to the start + end records the orchestrate loop primitive already wrote). No git commit, no push — those stay out by default.
 
-This phase mirrors `$iterate-revision/phases/05-finalize.md` in structure; the only differences are the state file (`figures.json` here vs. `paper.json + reviews.json` there) and the "suggested next" hints (figure-flavored, not section-flavored).
+This phase mirrors `/iterate-revision/phases/05-finalize.md` in structure; the only differences are the state file (`figures.json` here vs. `paper.json + reviews.json` there) and the "suggested next" hints (figure-flavored, not section-flavored).
 
 ## Inputs (from the loop primitive)
 
@@ -84,14 +84,14 @@ Then append one of these verdict-specific blocks:
 Figure approved. figures.json: figures[<fig_id>] all-approved.
 
 Suggested next:
-  $sync                          (embed the figure into the outline + commit a snapshot)
-  $figure-bake <next fig-id>     (bake another figure)
-  $iterate-revision <relevant section>
+  /sync                          (embed the figure into the outline + commit a snapshot)
+  /figure-bake <next fig-id>     (bake another figure)
+  /iterate-revision <relevant section>
                                  (now that the figure is settled, iterate on the
                                   Results / Methods section it appears in)
 ```
 
-The `$sync` hint is the manuscript-embedding follow-up — `$sync` uses cropfig func 3 internally, which is idempotent against the outline.md image-link block, so re-running it after each figure converges naturally. If `entry.cropped_png_path` is null (cropfig failed), surface a one-liner reminding the user to re-run `$figure-bake <fig_id>` (or fix the cropfig issue manually) before `$sync` will have a PNG to embed.
+The `/sync` hint is the manuscript-embedding follow-up — `/sync` uses cropfig func 3 internally, which is idempotent against the outline.md image-link block, so re-running it after each figure converges naturally. If `entry.cropped_png_path` is null (cropfig failed), surface a one-liner reminding the user to re-run `/figure-bake <fig_id>` (or fix the cropfig issue manually) before `/sync` will have a PNG to embed.
 
 ### BLOCKED
 
@@ -105,17 +105,17 @@ Critical issue (verbatim from the reviewer):
 
 <if the first critical's location starts with "brief:">
 The reviewer flagged this as a brief-level problem. brief_status has been set back
-to "drafted"; the next $figure-bake <fig_id> run will re-dispatch @figure-descriptor
+to "drafted"; the next /figure-bake <fig_id> run will re-dispatch @figure-descriptor
 to revise the design before the implementer renders again.
 <else>
-The reviewer flagged this at the rendering level. The next $figure-bake <fig_id> run
+The reviewer flagged this at the rendering level. The next /figure-bake <fig_id> run
 will reuse the approved brief; @analysis-implementer needs to fix the render to
 address the critical issue.
 </if>
 
-Full critique trail: .omx/state/omxr/figures.json (figures[<fig_id>].critiques)
+Full critique trail: .claude/omcr-state/figures.json (figures[<fig_id>].critiques)
 After addressing, re-run:
-  $figure-bake <fig_id>
+  /figure-bake <fig_id>
 ```
 
 If there are multiple critical issues, list all of them (one per bullet line) before the "After addressing" hint.
@@ -131,13 +131,13 @@ full critique trail. The figure made progress (each iter cleared some issues); t
 budget ran out.
 
 Options:
-  $figure-bake <fig_id> --max-iter <iter_count + 2>
+  /figure-bake <fig_id> --max-iter <iter_count + 2>
                                   (bump the cap and continue — note each iter is
                                   expensive because it re-runs the implementer)
   Address the remaining major issues by hand-editing the renderer at
-  <entry.script_path>, then re-run $figure-bake <fig_id>.
+  <entry.script_path>, then re-run /figure-bake <fig_id>.
 
-Full critique trail: .omx/state/omxr/figures.json (figures[<fig_id>].critiques)
+Full critique trail: .claude/omcr-state/figures.json (figures[<fig_id>].critiques)
 ```
 
 ### Fallthrough — `CONTINUE` (should not happen)
@@ -145,7 +145,7 @@ Full critique trail: .omx/state/omxr/figures.json (figures[<fig_id>].critiques)
 If phase 06 sees `verdict == CONTINUE`, render:
 ```
 Engine bug: loop returned CONTINUE to phase 06. Treating as HALT.
-Please file an issue against oh-my-codex-research with the run_id above.
+Please file an issue against oh-my-claudecode-research with the run_id above.
 ```
 
 Then fall through to the HALT block.
@@ -192,11 +192,11 @@ is the canonical record of this run; figures.json is durable.
 
 ## Step 6 — No git commit, no push
 
-OMXR does **not** commit on behalf of the user from this phase. If `on_iter_end == "git-commit"` was set on the loop primitive (currently never set by this engine), the loop already committed per-iter; phase 06 still does nothing extra.
+OMCR does **not** commit on behalf of the user from this phase. If `on_iter_end == "git-commit"` was set on the loop primitive (currently never set by this engine), the loop already committed per-iter; phase 06 still does nothing extra.
 
-Embedding the figure into the manuscript is the user's call — phase 06's DONE block suggests `$sync`, which uses `cropfig` func 3 to insert `![Figure N](figures/<fig_id>.png)` links into the outline at each result heading. That side-effect-bearing step deserves user confirmation, not automation here.
+Embedding the figure into the manuscript is the user's call — phase 06's DONE block suggests `/sync`, which uses `cropfig` func 3 to insert `![Figure N](figures/<fig_id>.png)` links into the outline at each result heading. That side-effect-bearing step deserves user confirmation, not automation here.
 
-Future versions may add a `--commit` flag that triggers a single final commit here with a message like `omxr: figure-bake <fig_id> <verdict> (<iter_count> iter)`. That is a future-version concern.
+Future versions may add a `--commit` flag that triggers a single final commit here with a message like `omcr: figure-bake <fig_id> <verdict> (<iter_count> iter)`. That is a future-version concern.
 
 ## Failure modes
 
@@ -206,7 +206,7 @@ Future versions may add a `--commit` flag that triggers a single final commit he
 | Phase 05 didn't write `figures.json.figures[<fig-id>]` status fields | The summary's status reference is informational only; if state and summary disagree, the user reading the summary should trust `figures.json` on disk. |
 | `figures.json` re-read in step 3 fails | Render the summary with whatever the in-memory `figures_state` had at hand-off from phase 05. Log a warning. |
 | `_run-log.jsonl` append fails | Log a warning; do not abort. |
-| `entry.cropped_png_path` null AND verdict is DONE | Render the DONE block with the cropfig-failed hint about re-running before `$sync`. |
+| `entry.cropped_png_path` null AND verdict is DONE | Render the DONE block with the cropfig-failed hint about re-running before `/sync`. |
 | First critical issue's `text` empty (malformed reviewer output that still parsed) | Render `"(no description)"` and append `Location: <location>` only. |
 
 ## What this phase does NOT do
@@ -215,8 +215,8 @@ Future versions may add a `--commit` flag that triggers a single final commit he
 - Does **not** mutate `figures.json`. Phase 05 already did the durable writes.
 - Does **not** commit to git by default.
 - Does **not** push to Overleaf. Manuscript-scaffold owns push flows; figure-bake is loop-internal.
-- Does **not** auto-invoke `$sync` to embed the figure. The DONE block *suggests* it; the user runs it explicitly.
+- Does **not** auto-invoke `/sync` to embed the figure. The DONE block *suggests* it; the user runs it explicitly.
 - Does **not** auto-invoke `cropfig` again. Phase 03 already did. If `cropfig_status` was `failed`, the DONE block surfaces it and the user re-runs the engine (or the cropfig skill directly) to retry.
 - Does **not** retry on log-append failure.
 - Does **not** decide DONE vs HALT. Phase 05 already did.
-- Does **not** invoke any other skill. Even the "Suggested next" hints are text, not auto-dispatched (Phase 2 decision §5).
+- Does **not** invoke any other slash command. Even the "Suggested next" hints are text, not auto-dispatched (Phase 2 decision §5).

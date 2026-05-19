@@ -1,6 +1,6 @@
-# Phase 3 — Fill AGENTS.md
+# Phase 3 — Fill CLAUDE.md
 
-Write the fields gathered in phase 2 into the project's `AGENTS.md`, replacing `[TBD]` placeholders inside the three marker blocks. Preserve everything else in the file.
+Write the fields gathered in phase 2 into the project's `CLAUDE.md`, replacing `[TBD]` placeholders inside the three marker blocks. Preserve everything else in the file.
 
 Use this canonical layout for the three blocks — substitute interview answers for `<...>` and leave `[TBD: <reason>]` for fields the user genuinely skipped.
 
@@ -22,7 +22,7 @@ Use this canonical layout for the three blocks — substitute interview answers 
   5. *Implication:* <... or [TBD]>
 - **Preset overlay:** <name or none>
 
-## Research stack (used by $todofig, $sync, $start-research, and the verify-citation + cropfig skills)
+## Research stack (used by /todofig, /sync, /start-research, and the verify-citation + cropfig skills)
 
 - **Deck file:** <path to .key or .pptx>
 - **Outline file:** <path>
@@ -47,10 +47,10 @@ Use this canonical layout for the three blocks — substitute interview answers 
 
 - **Block exists, fields all `[TBD]`** → safe to fully replace with new content.
 - **Block exists, some fields already filled** → only update fields where phase 2 captured a new value. Leave previously-filled fields alone unless the user explicitly chose to override during phase 2.
-- **Block missing** → this shouldn't happen post-`$omxr-setup`, but if it does, insert the full filled-in block.
+- **Block missing** → this shouldn't happen post-`/omcr-setup`, but if it does, insert the full filled-in block.
 
-Show the resulting block(s) to the user before writing, and confirm. After confirmation, write `AGENTS.md` and report the diff so the user can see exactly what changed.
+Show the resulting block(s) to the user before writing, and confirm. After confirmation, write `CLAUDE.md` and report the diff so the user can see exactly what changed.
 
 ## Path relocations
 
-If the user's `BibTeX file` or `Summary file` answer differs from the defaults (`paper/references.bib`, `./references.csv`) that `$omxr-setup` created, **move** the existing file to the new path (don't duplicate). Show the move and confirm before executing. If a file at the new path already exists, stop and ask the user.
+If the user's `BibTeX file` or `Summary file` answer differs from the defaults (`paper/references.bib`, `./references.csv`) that `/omcr-setup` created, **move** the existing file to the new path (don't duplicate). Show the move and confirm before executing. If a file at the new path already exists, stop and ask the user.

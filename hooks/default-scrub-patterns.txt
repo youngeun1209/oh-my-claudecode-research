@@ -1,8 +1,8 @@
-# Default PII / sensitive-content patterns for oh-my-codex-research.
+# Default PII / sensitive-content patterns for oh-my-claudecode-research.
 # Each non-blank, non-comment line is an extended regex (POSIX ERE).
 # pii-scrub.sh blocks any Write|Edit whose staged content matches.
 #
-# Override per-project by creating .omx/omxr/scrub-patterns.txt at the project
+# Override per-project by creating .claude/scrub-patterns.txt at the project
 # root — that file wins entirely (defaults are NOT merged).
 #
 # Tune carefully: a too-strict pattern blocks legitimate writes;
@@ -16,7 +16,7 @@
 \b[0-9]{3}-[0-9]{2}-[0-9]{4}\b
 
 # Generic 6-digit "subject ID" — common in HCP-style datasets. False-positive
-# risk is real (any 6-digit number triggers); refine in .omx/omxr/scrub-patterns.txt
+# risk is real (any 6-digit number triggers); refine in .claude/scrub-patterns.txt
 # if your project legitimately writes 6-digit numbers.
 \bsubject[-_ ]?[0-9]{6}\b
 

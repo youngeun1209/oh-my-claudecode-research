@@ -38,7 +38,7 @@ data and applies it. Two rule families are supported currently:
 ### Rule family A — `severity-threshold` (most engines)
 
 For engines whose dispatch output is a list of `issues` with `severity`
-fields (`$iterate-revision`, `$respond-reviewer`, `$figure-bake`
+fields (`/iterate-revision`, `/respond-reviewer`, `/figure-bake`
 critique pass).
 
 ```jsonc

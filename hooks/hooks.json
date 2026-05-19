@@ -7,7 +7,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "bash \"$CODEX_PLUGIN_ROOT\"/hooks/pii-scrub.sh",
+            "command": "bash \"$CLAUDE_PLUGIN_ROOT\"/hooks/pii-scrub.sh",
             "timeout": 5
           }
         ]
@@ -19,12 +19,12 @@
         "hooks": [
           {
             "type": "command",
-            "command": "bash \"$CODEX_PLUGIN_ROOT\"/hooks/memory-load.sh",
+            "command": "bash \"$CLAUDE_PLUGIN_ROOT\"/hooks/memory-load.sh",
             "timeout": 5
           },
           {
             "type": "command",
-            "command": "bash \"$CODEX_PLUGIN_ROOT\"/hooks/setup-nudge.sh",
+            "command": "bash \"$CLAUDE_PLUGIN_ROOT\"/hooks/setup-nudge.sh",
             "timeout": 5
           }
         ]
@@ -36,7 +36,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "bash \"$CODEX_PLUGIN_ROOT\"/hooks/citation-warn.sh",
+            "command": "bash \"$CLAUDE_PLUGIN_ROOT\"/hooks/citation-warn.sh",
             "timeout": 5
           }
         ]

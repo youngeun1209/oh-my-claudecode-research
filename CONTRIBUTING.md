@@ -1,6 +1,6 @@
-# Contributing to oh-my-codex-research
+# Contributing to oh-my-claudecode-research
 
-This is a small repo with a focused scope: 6 research-team agents, 10 slash commands, 14 skills, 4 lightweight hooks, and field-specific example presets. Contributions that fit that scope are welcome. Contributions that expand it (npm publishing, build pipelines, domain-specific helpers in the core, etc.) probably belong in upstream [`oh-my-codex`](https://github.com/Yeachan-Heo/oh-my-codex) instead.
+This is a small repo with a focused scope: 6 research-team agents, 10 slash commands, 14 skills, 4 lightweight hooks, and field-specific example presets. Contributions that fit that scope are welcome. Contributions that expand it (npm publishing, build pipelines, domain-specific helpers in the core, etc.) probably belong in upstream [`oh-my-claudecode`](https://github.com/Yeachan-Heo/oh-my-claudecode) instead.
 
 ## How to propose a new agent
 
@@ -71,7 +71,7 @@ argument-hint: [optional positional or scope hint]
 ---
 ```
 
-Mirror the upstream `oh-my-codex` shapes when in doubt. Examples to model: [`oh-my-codex/agents/executor.md`](https://github.com/Yeachan-Heo/oh-my-codex/blob/main/agents/executor.md), [`oh-my-codex/skills/autopilot/skill.md`](https://github.com/Yeachan-Heo/oh-my-codex/blob/main/skills/autopilot/skill.md).
+Mirror the upstream `oh-my-claudecode` shapes when in doubt. Examples to model: [`oh-my-claudecode/agents/executor.md`](https://github.com/Yeachan-Heo/oh-my-claudecode/blob/main/agents/executor.md), [`oh-my-claudecode/skills/autopilot/skill.md`](https://github.com/Yeachan-Heo/oh-my-claudecode/blob/main/skills/autopilot/skill.md).
 
 ## MEMORY.md schema contract
 
@@ -90,21 +90,21 @@ The repo's PII baseline (enforced via `hooks/default-scrub-patterns.txt` + manua
 
 - **Never commit** to any tracked file outside `LICENSE`: real subject IDs, email addresses, advisor names, institution names, target-journal names, absolute paths on a contributor's machine.
 - Domain-specific worked content (atlases, hyperparameters, dataset references) is allowed only under `examples/<field>/`.
-- The `examples/<field>/` directories are intended for **generic field-specific content** (e.g., fMRI preprocessing conventions, statistical norms) — *not* a single user's particular pipeline, hyperparameters, dataset, or hypothesis. Project-specific methodology belongs in **users' own** project `.codex/agents/` overlays, not in shipped presets.
+- The `examples/<field>/` directories are intended for **generic field-specific content** (e.g., fMRI preprocessing conventions, statistical norms) — *not* a single user's particular pipeline, hyperparameters, dataset, or hypothesis. Project-specific methodology belongs in **users' own** project `.claude/agents/` overlays, not in shipped presets.
 
 When in doubt, run an audit. Build the regex from the project's actual sensitive strings (institution / lab / advisor names, real subject-ID format, email pattern) and grep:
 
 ```bash
 # Replace <YOUR_INSTITUTION>, <YOUR_LAB>, etc. with your project's actual sensitive strings.
 rg -i '<YOUR_INSTITUTION>|<YOUR_LAB>|<ADVISOR_NAME>|<EMAIL_PATTERN>|<SUBJECT_ID_FORMAT>' \
-   agents/ templates/ hooks/ README.md AGENTS.md CONTRIBUTING.md
+   agents/ templates/ hooks/ README.md CLAUDE.md CONTRIBUTING.md
 ```
 
 This should return zero hits.
 
 ## Commit conventions
 
-Follow the upstream `oh-my-codex` git-trailer convention when commits warrant the extra context: `Constraint:`, `Rejected:`, `Directive:`, `Confidence:`, `Scope-risk:`, `Not-tested:`. See upstream `oh-my-codex/AGENTS.md` for the full description. Trailers are optional for trivial commits.
+Follow the upstream `oh-my-claudecode` git-trailer convention when commits warrant the extra context: `Constraint:`, `Rejected:`, `Directive:`, `Confidence:`, `Scope-risk:`, `Not-tested:`. See upstream `oh-my-claudecode/CLAUDE.md` for the full description. Trailers are optional for trivial commits.
 
 For larger changes, prefer one PR per logical change (one new preset, one new hook, one new agent) over bundled PRs.
 
@@ -112,7 +112,7 @@ For larger changes, prefer one PR per logical change (one new preset, one new ho
 
 There's no formal test suite. Smoke checks before opening a PR:
 
-1. **Plugin loads.** Clone into a scratch dir, run Codex with the plugin, confirm `@`-mention picker shows all expected agents and that hooks register.
+1. **Plugin loads.** Clone into a scratch dir, run Claude Code with the plugin, confirm `@`-mention picker shows all expected agents and that hooks register.
 2. **Hooks behave.** Run the smoke commands at the bottom of [`hooks/README.md`](hooks/README.md) and confirm exit codes match the documented contract.
 3. **PII audit clean.** `rg` command above returns zero hits in non-example tracked files.
 4. **Agents respond sensibly.** `@supervisor` with "what's this project about?" should default to asking the user for the central hypothesis, not assuming a domain.
@@ -123,7 +123,7 @@ There's no formal test suite. Smoke checks before opening a PR:
 - npm publishing.
 - Marketplace listing.
 - An MCP server.
-- General-purpose orchestration agents (those belong in upstream OMX).
+- General-purpose orchestration agents (those belong in upstream OMC).
 - Heavy harness extensions (statusline, keyword auto-trigger) — see the future backlog discussion in the project plan.
 
 PRs that move toward any of these will be redirected.

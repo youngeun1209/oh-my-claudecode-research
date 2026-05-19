@@ -27,12 +27,12 @@ For each entry in `survivors`, invoke the verify-citation skill via the Bash too
 Command shape:
 
 ```bash
-python3 "$CODEX_PLUGIN_ROOT"/skills/verify-citation/verify_citation.py \
+python3 "$CLAUDE_PLUGIN_ROOT"/skills/verify-citation/verify_citation.py \
     --doi "<lowercase DOI>" \
     --json
 ```
 
-If `CITATION_VERIFY_EMAIL` resolves (env var or AGENTS.md `## Research stack` field `CrossRef email`), set it in the environment for the subprocess — verify-citation reads it for the polite-pool header.
+If `CITATION_VERIFY_EMAIL` resolves (env var or CLAUDE.md `## Research stack` field `CrossRef email`), set it in the environment for the subprocess — verify-citation reads it for the polite-pool header.
 
 Concurrency: the calls are CPU-light but each is one or two HTTP roundtrips. Issue them **sequentially** even when the engine was launched with `--parallel > 1` — the `--parallel` flag governs the **curator dispatches in phase 03**, not the verify calls in phase 05. Verify is fast (a single shell-out per entry) and the runtime overhead of parallelizing here would not noticeably improve wall-clock time while it would multiply the risk of CrossRef / OpenAlex rate-limiting.
 
@@ -104,7 +104,7 @@ Network error, timeout, or the verifier script crashed. The entry could not be c
 - Build a rejection reason from the script's `notes` field:
   ```
   NOT_VERIFIED (network): <reason from verify-citation notes>
-  Re-run $literature-sweep when the network is back, or pass --source <other> if
+  Re-run /literature-sweep when the network is back, or pass --source <other> if
   one API is specifically unreachable.
   ```
 - Append to `rejected_entries`.
@@ -130,7 +130,7 @@ If the verifier crashes on every entry (e.g., the script file is missing or Pyth
 
 ```
 literature-sweep: verify-citation is non-functional on this machine (<reason>).
-All <K> survivors recorded as NOT_VERIFIED. Fix the verifier (run $omxr-setup
+All <K> survivors recorded as NOT_VERIFIED. Fix the verifier (run /omcr-setup
 to re-check infrastructure) and re-run.
 ```
 
@@ -151,7 +151,7 @@ Pass forward to phase 06:
 | Condition | Behavior |
 |---|---|
 | Empty `survivors` | Skip dispatch. Empty `verified_entries` and `rejected_entries`. Phase 06 reports the cause from earlier `notes`. |
-| verify-citation script missing at `$CODEX_PLUGIN_ROOT/skills/verify-citation/verify_citation.py` | All survivors classified as `NOT_VERIFIED` with reason `"verify-citation script not found at plugin root"`. Add one engine-level note. Continue. |
+| verify-citation script missing at `$CLAUDE_PLUGIN_ROOT/skills/verify-citation/verify_citation.py` | All survivors classified as `NOT_VERIFIED` with reason `"verify-citation script not found at plugin root"`. Add one engine-level note. Continue. |
 | verify-citation timeout for one entry | That entry classified `NOT_VERIFIED`. Continue with the rest. |
 | verify-citation timeout for many entries (rate-limited) | Each classified `NOT_VERIFIED`. Record one engine-level note suggesting `CITATION_VERIFY_EMAIL` (polite pool) or a re-run later. |
 | Malformed JSON from verify-citation | Treat the entry as `NOT_VERIFIED` with reason `"verify-citation output not parseable as JSON"`. Continue. |

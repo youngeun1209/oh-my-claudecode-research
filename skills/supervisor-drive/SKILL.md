@@ -1,22 +1,22 @@
 ---
 name: supervisor-drive
-description: Autonomous OMXR orchestrator. Surveys state across the 5 OMXR state files (paper, reviews, citations, figures, rebuttals), picks the highest-priority engine from a hardcoded bottleneck-ranker, runs it through one of the 5 OMXR engines, then re-evaluates state from scratch and loops. Three modes — interactive (default), auto, plan-only. Six safety gates (HypothesisChange, NewCitation, NewExperiment, StructuralRewrite, BudgetExceeded, CriticalIssue) fire even in --auto. Single-target only currently. Halt-on-exception, no retry. Resume after halt is strict — requires explicit --resume <run-id> or --fresh.
+description: Autonomous OMCR orchestrator. Surveys state across the 5 OMCR state files (paper, reviews, citations, figures, rebuttals), picks the highest-priority engine from a hardcoded bottleneck-ranker, runs it through one of the 5 OMCR engines, then re-evaluates state from scratch and loops. Three modes — interactive (default), auto, plan-only. Six safety gates (HypothesisChange, NewCitation, NewExperiment, StructuralRewrite, BudgetExceeded, CriticalIssue) fire even in --auto. Single-target only currently. Halt-on-exception, no retry. Resume after halt is strict — requires explicit --resume <run-id> or --fresh.
 writes: [paper, reviews, citations, figures, rebuttals]
 cost_estimate_tokens: 80000
 ---
 
-# $supervisor-drive
+# /supervisor-drive
 
-This engine sits at the top of OMXR's orchestration tree. Unlike the five Phase 1 / Phase 2 engines (`$iterate-revision`, `$literature-sweep`, `$respond-reviewer`, `$figure-bake`, `$outline-expand`), `$supervisor-drive` does not itself dispatch personas. Instead it dispatches **other engines** — and only the supervisor is allowed to do that. The whole point of this skill is to be the one place where engine sequencing lives so the engines themselves can stay simple leaves.
+This engine sits at the top of OMCR's orchestration tree. Unlike the five Phase 1 / Phase 2 engines (`/iterate-revision`, `/literature-sweep`, `/respond-reviewer`, `/figure-bake`, `/outline-expand`), `/supervisor-drive` does not itself dispatch personas. Instead it dispatches **other engines** — and only the supervisor is allowed to do that. The whole point of this skill is to be the one place where engine sequencing lives so the engines themselves can stay simple leaves.
 
-If you are reading this because Codex's skill auto-discovery surfaced it: invoke it via `$supervisor-drive` (the skill — defaults to `--interactive`). Do not edit `.omx/state/omxr/` by hand while a drive is in flight.
+If you are reading this because Claude Code's skill auto-discovery surfaced it: invoke it via `/supervisor-drive` (the slash command — defaults to `--interactive`). Do not edit `.claude/omcr-state/` by hand while a drive is in flight.
 
 **When this skill is invoked, immediately execute the workflow below. Do not only restate or summarize these instructions back to the user.**
 
 ## Signature
 
 ```
-$supervisor-drive [--auto] [--interactive] [--plan-only]
+/supervisor-drive [--auto] [--interactive] [--plan-only]
                   [--max-iter N] [--budget-tokens N] [--budget-time MIN]
                   [--resume <run-id>] [--fresh] [--no-commit]
 ```
@@ -102,17 +102,17 @@ This engine reads, but does not directly invoke, the four orchestrate primitives
 
 ### Engine compositions
 
-The supervisor dispatches engines as if invoking their skills. Each engine returns a verdict (`DONE | BLOCKED | HALT` — `CONTINUE` is engine-internal). The supervisor uses the verdict + the freshly re-read state to plan the next iter.
+The supervisor dispatches engines as if invoking their slash commands. Each engine returns a verdict (`DONE | BLOCKED | HALT` — `CONTINUE` is engine-internal). The supervisor uses the verdict + the freshly re-read state to plan the next iter.
 
-| Engine | Skill | When the ranker picks it |
+| Engine | Slash command | When the ranker picks it |
 |---|---|---|
-| [`../iterate-revision/SKILL.md`](../iterate-revision/SKILL.md) | `$iterate-revision <section-path>` | Priorities 4, 5 — unwritten sections (no outline) or drafted-but-unreviewed sections. |
-| [`../literature-sweep/SKILL.md`](../literature-sweep/SKILL.md) | `$literature-sweep <topic>` | Priority 3 — citations queue has pending entries or text has `[CITE: ...]` placeholders. |
-| [`../respond-reviewer/SKILL.md`](../respond-reviewer/SKILL.md) | `$respond-reviewer <letter>` | Priority 6 — `rebuttals.json` has unresolved entries. |
-| [`../figure-bake/SKILL.md`](../figure-bake/SKILL.md) | `$figure-bake <fig-id>` | Priority 7 — figures with brief-vs-impl status divergence. |
-| [`../outline-expand/SKILL.md`](../outline-expand/SKILL.md) | `$outline-expand <outline-path>` | Priority 4 — unwritten sections **and** an outline exists. |
+| [`../iterate-revision/SKILL.md`](../iterate-revision/SKILL.md) | `/iterate-revision <section-path>` | Priorities 4, 5 — unwritten sections (no outline) or drafted-but-unreviewed sections. |
+| [`../literature-sweep/SKILL.md`](../literature-sweep/SKILL.md) | `/literature-sweep <topic>` | Priority 3 — citations queue has pending entries or text has `[CITE: ...]` placeholders. |
+| [`../respond-reviewer/SKILL.md`](../respond-reviewer/SKILL.md) | `/respond-reviewer <letter>` | Priority 6 — `rebuttals.json` has unresolved entries. |
+| [`../figure-bake/SKILL.md`](../figure-bake/SKILL.md) | `/figure-bake <fig-id>` | Priority 7 — figures with brief-vs-impl status divergence. |
+| [`../outline-expand/SKILL.md`](../outline-expand/SKILL.md) | `/outline-expand <outline-path>` | Priority 4 — unwritten sections **and** an outline exists. |
 
-The supervisor never bypasses an engine's own precheck phase. If `$iterate-revision`'s phase 01 sees `[TBD: ...]` markers, it sets the section to `blocked-on-tbd` and exits with BLOCKED; the supervisor sees BLOCKED on return and lets the priority ranker handle it on the next iter (priority 2 — halts with `blocked-on-tbd` advisory).
+The supervisor never bypasses an engine's own precheck phase. If `/iterate-revision`'s phase 01 sees `[TBD: ...]` markers, it sets the section to `blocked-on-tbd` and exits with BLOCKED; the supervisor sees BLOCKED on return and lets the priority ranker handle it on the next iter (priority 2 — halts with `blocked-on-tbd` advisory).
 
 ## The bottleneck-ranker — hardcoded priority rules
 
@@ -122,14 +122,14 @@ Phase 02 applies these rules in order. The **first match wins** — no weighted 
 |---|---|---|
 | 1 | Any section `status: blocked` | **HALT** with bottleneck report. Human action required. |
 | 2 | Any section `status: blocked-on-tbd` | **HALT** asking user to resolve TBDs or pass `--allow-tbd` to the engine on the next manual invocation. |
-| 3 | Critical citations missing (manuscript text has `[CITE: ...]` placeholders OR `citations.json.queue` has `pending` entries) | `$literature-sweep <topic>` (or `@literature-curator` per phase 02 step 3). |
-| 4 | Unwritten sections (`status: empty`) | `$outline-expand <outline-path>` if an outline exists; else `$iterate-revision <section-path>` single-section. |
-| 5 | Drafted-but-unreviewed sections (`status: drafted`) | `$iterate-revision <section-path>`. |
-| 6 | Pending reviewer rebuttals (`rebuttals.json` has entries with run-level `HALT` OR per-comment `deferred` / `disputed`) | `$respond-reviewer <letter>`. |
-| 7 | Figures with brief-vs-impl divergence (`figures.json` entry where `brief_status == approved` but `impl_status != approved`, or `critique_status == done` and the latest verdict was BLOCKED/HALT) | `$figure-bake <fig-id>`. |
+| 3 | Critical citations missing (manuscript text has `[CITE: ...]` placeholders OR `citations.json.queue` has `pending` entries) | `/literature-sweep <topic>` (or `@literature-curator` per phase 02 step 3). |
+| 4 | Unwritten sections (`status: empty`) | `/outline-expand <outline-path>` if an outline exists; else `/iterate-revision <section-path>` single-section. |
+| 5 | Drafted-but-unreviewed sections (`status: drafted`) | `/iterate-revision <section-path>`. |
+| 6 | Pending reviewer rebuttals (`rebuttals.json` has entries with run-level `HALT` OR per-comment `deferred` / `disputed`) | `/respond-reviewer <letter>`. |
+| 7 | Figures with brief-vs-impl divergence (`figures.json` entry where `brief_status == approved` but `impl_status != approved`, or `critique_status == done` and the latest verdict was BLOCKED/HALT) | `/figure-bake <fig-id>`. |
 | 8 | All approved + all figures done + all citations verified | `submission_ready = true`. **EXIT DONE.** |
 
-Priority rules are **hardcoded** currently per Phase 3 §5. No `AGENTS.md`-driven override, no JSON knob, no flag. Users who disagree on a specific run use `--interactive` (pick an alternative) or `--plan-only` (inspect and stop).
+Priority rules are **hardcoded** currently per Phase 3 §5. No `CLAUDE.md`-driven override, no JSON knob, no flag. Users who disagree on a specific run use `--interactive` (pick an alternative) or `--plan-only` (inspect and stop).
 
 ## The 6 safety gates
 
@@ -138,7 +138,7 @@ Every dispatch is guarded by 6 pre-dispatch gates. **Every gate is confirm-requi
 | # | Gate | Trigger | Confirmation phrase | Notes |
 |---|---|---|---|---|
 | 1 | **HypothesisChange** | Engine args or task brief mentions any change to `paper.json.hypothesis`. | `confirm-hypothesis-change` | Research integrity — the supervisor must not silently shift the central claim. |
-| 2 | **NewCitation** | Engine intends to add a `references.bib` entry that is not already in `citations.json.verified` queue. | `confirm-new-citation` | Prevents hallucinated references. `$literature-sweep`'s hard verify-gate covers most cases; this gate catches engine-author leaks. |
+| 2 | **NewCitation** | Engine intends to add a `references.bib` entry that is not already in `citations.json.verified` queue. | `confirm-new-citation` | Prevents hallucinated references. `/literature-sweep`'s hard verify-gate covers most cases; this gate catches engine-author leaks. |
 | 3 | **NewExperiment** | Brief contains keywords: `"design a new experiment"`, `"collect more data"`, `"run a new analysis"`, `"acquire"`. | `confirm-new-experiment` | Real-world action, not a model output. |
 | 4 | **StructuralRewrite** | Brief contains keywords: `"restructure"`, `"reframe"`, `"change conclusion"`, `"pivot"`, `"flip the framing"`. | `confirm-structural-rewrite` | Likely needs human ownership; scope-change risk. |
 | 5 | **BudgetExceeded** | `cumulative_tokens_used + projected_cost > budget_tokens`. Projected cost = engine's `cost_estimate_tokens` × 1.25, OR rolling median of last 5 same-engine entries in `_run-log.jsonl` × 1.25 if N≥5. | `confirm-budget` | Fires before dispatch, not after. Cost containment per Phase 3 §6. |
@@ -164,7 +164,7 @@ This makes the loop fully described by `loop { survey → plan → confirm → d
 
 ### Explicit-resume invariant
 
-Per Phase 3 §1. After any halt, the next `$supervisor-drive` invocation does not auto-resume. Phase 00 surveys `_run-log.jsonl`, detects any prior run without a clean `verdict: "DONE"` close, and exits non-zero with a one-screen summary unless the user passes `--resume <run-id>` or `--fresh`. Resumed runs record `resumed_from: <run-id>` in their start entry for audit.
+Per Phase 3 §1. After any halt, the next `/supervisor-drive` invocation does not auto-resume. Phase 00 surveys `_run-log.jsonl`, detects any prior run without a clean `verdict: "DONE"` close, and exits non-zero with a one-screen summary unless the user passes `--resume <run-id>` or `--fresh`. Resumed runs record `resumed_from: <run-id>` in their start entry for audit.
 
 ### Halt-on-exception invariant
 
@@ -172,7 +172,7 @@ Per Phase 3 §2. Engine exceptions (not BLOCKED — actual errors: missing file,
 
 ## Cost model
 
-`cost_estimate_tokens: 80000` is the frontmatter declaration for a typical full drive run (≈4 engine dispatches × ~20k tokens each, with overhead). It is a coarse upper-bound for nested invocations of this skill (e.g., a meta-orchestrator that called `$supervisor-drive` itself).
+`cost_estimate_tokens: 80000` is the frontmatter declaration for a typical full drive run (≈4 engine dispatches × ~20k tokens each, with overhead). It is a coarse upper-bound for nested invocations of this skill (e.g., a meta-orchestrator that called `/supervisor-drive` itself).
 
 Within a drive, phase 04 estimates per-engine cost using:
 
@@ -188,14 +188,14 @@ After every engine completes (phase 05), unless `--no-commit` was passed:
 
 ```
 git add -A
-git commit -m "omxr supervisor-drive: <engine> <args> verdict=<v> run=<run-id>"
+git commit -m "omcr supervisor-drive: <engine> <args> verdict=<v> run=<run-id>"
 ```
 
 The commit message includes the engine name, the first 60 chars of the args, the engine's returned verdict (`DONE | BLOCKED | HALT`), and the supervisor's `run_id`. This is the same `run_id` the `_run-log.jsonl` start / end records use, so commit-history and run-log are joinable.
 
 If the commit fails (e.g. nothing to commit — engine was read-only, or `--draft-only` mode), phase 05 logs a warning and continues. It does not abort the drive.
 
-Per-engine commits are **on by default** for supervisor-drive (unlike `$iterate-revision` which is off-by-default). Reason: autonomous mode without commits = chaos to roll back if it goes wrong. Users who want quiet history pass `--no-commit`.
+Per-engine commits are **on by default** for supervisor-drive (unlike `/iterate-revision` which is off-by-default). Reason: autonomous mode without commits = chaos to roll back if it goes wrong. Users who want quiet history pass `--no-commit`.
 
 ## State files this engine reads / writes
 
@@ -209,7 +209,7 @@ Per-engine commits are **on by default** for supervisor-drive (unlike `$iterate-
 | `_run-log.jsonl` | append | Start + end + per-iter summary + final report records. |
 | `run_error.json` | conditional write | Only on engine exception (Phase 3 §2). One per halt. Sibling of `_run-log.jsonl`. |
 
-The supervisor **declares `writes: [paper, reviews, citations, figures, rebuttals]`** because the engines it dispatches collectively mutate all 5. This is the broadest `writes:` declaration in OMXR — and the only engine that touches every state file — by design. Reviewers grepping `writes:` see at a glance that supervisor-drive is the one place every state file is in scope.
+The supervisor **declares `writes: [paper, reviews, citations, figures, rebuttals]`** because the engines it dispatches collectively mutate all 5. This is the broadest `writes:` declaration in OMCR — and the only engine that touches every state file — by design. Reviewers grepping `writes:` see at a glance that supervisor-drive is the one place every state file is in scope.
 
 ## What this engine does NOT do
 
@@ -218,8 +218,8 @@ The supervisor **declares `writes: [paper, reviews, citations, figures, rebuttal
 - Does **not** retry on engine exception. Halt-on-exception, no retry (Phase 3 §2).
 - Does **not** auto-resume after a halt. Explicit `--resume <run-id>` or `--fresh` required (Phase 3 §1).
 - Does **not** override safety gates in `--auto` mode. Every gate is confirm-required; autonomous mode pauses at the gate.
-- Does **not** read a `AGENTS.md` priority-override block. Hardcoded ranker currently (Phase 3 §5).
-- Does **not** push to a remote. Per-engine commits are local. Run `$sync` afterward to push.
+- Does **not** read a `CLAUDE.md` priority-override block. Hardcoded ranker currently (Phase 3 §5).
+- Does **not** push to a remote. Per-engine commits are local. Run `/sync` afterward to push.
 - Does **not** rewrite `main.tex`, `references.bib`, or any non-state file directly. All file edits are mediated through the engine the supervisor invoked.
 - Does **not** modify other engines' SKILL.md or phase files at runtime. Engine logic is static markdown; the supervisor reads it.
 
@@ -239,8 +239,8 @@ The supervisor **declares `writes: [paper, reviews, citations, figures, rebuttal
 - [`../respond-reviewer/SKILL.md`](../respond-reviewer/SKILL.md) — Phase 2 engine, dispatched on rebuttals.
 - [`../figure-bake/SKILL.md`](../figure-bake/SKILL.md) — Phase 2 engine, dispatched on figure divergence.
 - [`../outline-expand/SKILL.md`](../outline-expand/SKILL.md) — Phase 2 engine, dispatched on empty sections with an outline.
-- [`../../agents/supervisor.md`](../../agents/supervisor.md) — the advisory persona that pairs with this skill. `@supervisor` is read-only; `$supervisor-drive` is the executor.
-- [`../../wiki/Autonomous-Drive.md`](../../wiki/Autonomous-Drive.md) — public deep dive on modes, gates, ranker, cost model, and OMX composability.
+- [`../../agents/supervisor.md`](../../agents/supervisor.md) — the advisory persona that pairs with this skill. `@supervisor` is read-only; `/supervisor-drive` is the executor.
+- [`../../wiki/Autonomous-Drive.md`](../../wiki/Autonomous-Drive.md) — public deep dive on modes, gates, ranker, cost model, and OMC composability.
 - [`../../wiki/Orchestration-Model.md`](../../wiki/Orchestration-Model.md) — state store + engines-are-leaves invariant.
 - [`../../develop/phase-3-autonomous-supervisor.md`](../../develop/phase-3-autonomous-supervisor.md) — design spec.
 - [`../../develop/phase-3-decisions.md`](../../develop/phase-3-decisions.md) — locked decisions §1–§6.

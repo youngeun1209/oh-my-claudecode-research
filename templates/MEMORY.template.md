@@ -47,7 +47,7 @@
 ## Linked topic files
 <!--
   Detail that doesn't fit in 200 lines. Each topic file lives next to
-  this MEMORY.md (e.g., `.omx/omxr/agent-memory/<agent>/<topic>.md`).
+  this MEMORY.md (e.g., `.claude/agent-memory/<agent>/<topic>.md`).
   Link them here so the agent knows where to look.
 -->
 
@@ -55,7 +55,7 @@
 - `<topic-2>.md` — [one-line description]
 
 ## Drifts flagged at last sync
-<!-- Auto-populated by $sync-style commands. Leave empty if not running such a command. -->
+<!-- Auto-populated by /sync-style commands. Leave empty if not running such a command. -->
 
 - [Drift 1]
 

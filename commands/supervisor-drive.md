@@ -1,13 +1,13 @@
 ---
-description: Autonomous orchestrator — survey state, pick the right OMXR engine, run it, re-evaluate, loop. Interactive by default. Safety-gated. Supports --auto, --plan-only, --resume, and budget caps.
+description: Autonomous orchestrator — survey state, pick the right OMCR engine, run it, re-evaluate, loop. Interactive by default. Safety-gated. Supports --auto, --plan-only, --resume, and budget caps.
 argument-hint: [--auto | --interactive | --plan-only] [--max-iter N] [--budget-tokens N] [--budget-time MIN] [--resume <run-id>] [--fresh] [--no-commit]
 ---
 
-# $supervisor-drive
+# /supervisor-drive
 
-Thin dispatcher — the full autonomous orchestration workflow lives in the `supervisor-drive` skill so the skill surface stays small and the workflow can also be invoked outside `$supervisor-drive`.
+Thin dispatcher — the full autonomous orchestration workflow lives in the `supervisor-drive` skill so the slash-command surface stays small and the workflow can also be invoked outside `/supervisor-drive`.
 
-This is OMXR's most-watched feature: an orchestrator that, given the current project state, picks the right engine, runs it, re-evaluates state, and loops — without per-step user prompting in `--auto` mode. **Safety is the priority** — every dispatch is guarded by 6 confirmation gates that fire even in `--auto`.
+This is OMCR's most-watched feature: an orchestrator that, given the current project state, picks the right engine, runs it, re-evaluates state, and loops — without per-step user prompting in `--auto` mode. **Safety is the priority** — every dispatch is guarded by 6 confirmation gates that fire even in `--auto`.
 
 ## Dispatch
 
@@ -18,12 +18,12 @@ This is OMXR's most-watched feature: an orchestrator that, given the current pro
    $ARGUMENTS
    ```
 
-If the file is not directly readable from the current working directory, locate it under the active `CODEX_PLUGIN_ROOT` and continue.
+If the file is not directly readable from the current working directory, locate it under the active `CLAUDE_PLUGIN_ROOT` and continue.
 
 ## Signature
 
 ```
-$supervisor-drive [--auto] [--interactive] [--plan-only]
+/supervisor-drive [--auto] [--interactive] [--plan-only]
                   [--max-iter N] [--budget-tokens N] [--budget-time MIN]
                   [--resume <run-id>] [--fresh] [--no-commit]
 ```
@@ -47,7 +47,7 @@ $supervisor-drive [--auto] [--interactive] [--plan-only]
 ### Interactive mode (default)
 
 ```
-$supervisor-drive
+/supervisor-drive
 ```
 
 The skill surveys state, prints the next planned action, and waits for `yes / pick <alt-num> / no / halt`. Repeats after every engine completes. This is the safe default — every dispatch is user-acked.
@@ -55,7 +55,7 @@ The skill surveys state, prints the next planned action, and waits for `yes / pi
 ### Autonomous mode
 
 ```
-$supervisor-drive --auto --max-iter 5 --budget-tokens 80000
+/supervisor-drive --auto --max-iter 5 --budget-tokens 80000
 ```
 
 Runs without per-step confirmation, bounded by `--max-iter` and `--budget-tokens`. Halts cleanly on:
@@ -68,18 +68,18 @@ Runs without per-step confirmation, bounded by `--max-iter` and `--budget-tokens
 ### Plan-only mode
 
 ```
-$supervisor-drive --plan-only
+/supervisor-drive --plan-only
 ```
 
 Prints the next-action plan and projected next 3 actions. Dispatches nothing. Use to preview an `--auto` run before committing to it.
 
 ### Resuming a halted run
 
-If a prior drive halted (engine returned BLOCKED, safety gate tripped, or user-interrupted), the next `$supervisor-drive` invocation prints a halt-summary and exits unless you pass one of:
+If a prior drive halted (engine returned BLOCKED, safety gate tripped, or user-interrupted), the next `/supervisor-drive` invocation prints a halt-summary and exits unless you pass one of:
 
 ```
-$supervisor-drive --resume a1b2c3d4-0001-...   # continue the same trajectory
-$supervisor-drive --fresh                       # start a new drive, ignore the prior halt
+/supervisor-drive --resume a1b2c3d4-0001-...   # continue the same trajectory
+/supervisor-drive --fresh                       # start a new drive, ignore the prior halt
 ```
 
 This is strict on purpose — see Phase 3 §1 in [`develop/phase-3-decisions.md`](../develop/phase-3-decisions.md). Auto-resume is a foot-gun under common scenarios (manual edits, branch switches, hand-run engines between drives).
@@ -93,9 +93,9 @@ This is strict on purpose — see Phase 3 §1 in [`develop/phase-3-decisions.md`
 
 - Does **not** call engines directly. Engines are leaves; only the supervisor-drive skill chains them, and even then by re-evaluating state from scratch between every step (Phase 3 §3).
 - Does **not** dispatch multiple engines in parallel. Single-target only currently (Phase 3 §4). Parallel batch is a future backlog item.
-- Does **not** override the bottleneck-ranker via AGENTS.md. Hardcoded currently (Phase 3 §5). Escape hatches: `--interactive` (pick an alternative each step) and `--plan-only` (inspect without running).
+- Does **not** override the bottleneck-ranker via CLAUDE.md. Hardcoded currently (Phase 3 §5). Escape hatches: `--interactive` (pick an alternative each step) and `--plan-only` (inspect without running).
 - Does **not** retry engine exceptions. Halt-on-exception, no retry (Phase 3 §2). A `run_error.json` is written next to `_run-log.jsonl` and the loop jumps to the final report.
-- Does **not** push to a remote. Per-engine commits are local. If you want to push afterward, run `$sync` or use the manuscript-scaffold push flow.
+- Does **not** push to a remote. Per-engine commits are local. If you want to push afterward, run `/sync` or use the manuscript-scaffold push flow.
 
 ## See also
 

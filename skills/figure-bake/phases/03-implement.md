@@ -1,6 +1,6 @@
 ---
 name: figure-bake-implement
-description: Phase 3 of $figure-bake. Dispatch @analysis-implementer with the brief + data_root to render a vector PDF at figures.json.figures[<fig-id>].vector_path, then auto-invoke the cropfig skill so manuscript + outline artifacts land in one pass.
+description: Phase 3 of /figure-bake. Dispatch @analysis-implementer with the brief + data_root to render a vector PDF at figures.json.figures[<fig-id>].vector_path, then auto-invoke the cropfig skill so manuscript + outline artifacts land in one pass.
 ---
 
 # Phase 3 — Implement
@@ -195,9 +195,9 @@ Concretely:
 3. Set the cropfig environment variables for this invocation:
    - `DECK_FILE` — set to `<parent of vector_path>/<fig_id>.pdf` (a notional deck path; cropfig's func 2/3 derive output dirs from this).
    - `MANUSCRIPT_DIR` — set to `<paper_state.manuscript_root>`.
-   - `OUTLINE_FILE` — set to the user's outline path from AGENTS.md `## Research stack` `outline_file` if available, else skip the func 3b outline embed (cropfig's SKILL handles a missing outline gracefully).
+   - `OUTLINE_FILE` — set to the user's outline path from CLAUDE.md `## Research stack` `outline_file` if available, else skip the func 3b outline embed (cropfig's SKILL handles a missing outline gracefully).
 4. Run cropfig's `crop_figures.py` over the stage dir, writing to `<parent of vector_path>/pdf/` and `<parent of vector_path>/png/`.
-5. Run cropfig's `upload_figures.py` to copy the cropped PDF into `<MANUSCRIPT_DIR>/figures/` (idempotent overwrite; the manuscript copy is the canonical artifact for `\includegraphics`). Skip the outline-embed half (3b) if no outline file is configured — phase 06 reminds the user to re-run `$sync` to embed once an outline exists.
+5. Run cropfig's `upload_figures.py` to copy the cropped PDF into `<MANUSCRIPT_DIR>/figures/` (idempotent overwrite; the manuscript copy is the canonical artifact for `\includegraphics`). Skip the outline-embed half (3b) if no outline file is configured — phase 06 reminds the user to re-run `/sync` to embed once an outline exists.
 6. Capture cropfig's stdout/stderr. On non-zero exit:
    - Do **not** fail the whole phase. The uncropped PDF at `vector_path` is still usable for the reviewer in phase 04.
    - Log a warning to the run log with cropfig's stderr.
@@ -260,7 +260,7 @@ Pass forward to phase 04:
 - Does **not** dispatch `@reviewer`. Phase 04 owns that.
 - Does **not** retry the implementer on traceback. The retry mechanism is the engine's loop (CONTINUE → fresh next iter); intra-iter retry would mask the bug from the verdict logic.
 - Does **not** open / edit `<vector_path>` after the implementer wrote it. The PDF is treated as opaque; cropfig (step 6) is the only post-processing step.
-- Does **not** invoke any skill. Cropfig is a skill, not a command — invoking it is allowed per Phase 2 decision §5.
-- Does **not** push the cropped artifact to a remote (Overleaf, S3, etc.). That belongs to `$sync` or `manuscript-scaffold`'s commit-push phase.
+- Does **not** invoke any slash command. Cropfig is a skill, not a command — invoking it is allowed per Phase 2 decision §5.
+- Does **not** push the cropped artifact to a remote (Overleaf, S3, etc.). That belongs to `/sync` or `manuscript-scaffold`'s commit-push phase.
 - Does **not** update `paper.json`. Only `figures.json` is touched.
 - Does **not** auto-install missing Python libraries. If the implementer hits `ModuleNotFoundError`, that lands in `Status: failed` with the verbatim traceback; phase 05 BLOCKED, and the user installs the library before re-running.

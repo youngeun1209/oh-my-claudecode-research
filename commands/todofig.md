@@ -3,9 +3,9 @@ description: Compare a captured-figure deck against an outline document; produce
 argument-hint: [optional figure identifier to focus on, e.g. "Fig4" or "R1"]
 ---
 
-# $todofig
+# /todofig
 
-Thin dispatcher — the full figure-vs-outline gap analysis lives in the `todofig` skill so the skill surface stays small and the workflow can also be invoked outside `$todofig`.
+Thin dispatcher — the full figure-vs-outline gap analysis lives in the `todofig` skill so the slash-command surface stays small and the workflow can also be invoked outside `/todofig`.
 
 ## Dispatch
 
@@ -16,4 +16,4 @@ Thin dispatcher — the full figure-vs-outline gap analysis lives in the `todofi
    $ARGUMENTS
    ```
 
-If the file is not directly readable from the current working directory, locate it under the active `CODEX_PLUGIN_ROOT` and continue.
+If the file is not directly readable from the current working directory, locate it under the active `CLAUDE_PLUGIN_ROOT` and continue.

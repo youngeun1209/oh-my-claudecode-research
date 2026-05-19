@@ -3,7 +3,7 @@
 > **Skeleton only.** This file shows the structure used by the original DoD-Agent
 > supervisor's memory; all concrete content (target venue, dataset, hypothesis
 > text, subject IDs, p-values, deadlines) has been stripped. Copy this file
-> into your own project's `.omx/omxr/agent-memory/supervisor/MEMORY.md` and fill
+> into your own project's `.claude/agent-memory/supervisor/MEMORY.md` and fill
 > in your project's specifics.
 
 **Last synced:** [YYYY-MM-DD]
@@ -49,4 +49,4 @@
 - `project-status.md` — running per-result status (more detail than the table above)
 
 ## Drifts flagged at last sync
-- [Auto-populated by `$sync` if running that command; otherwise leave empty.]
+- [Auto-populated by `/sync` if running that command; otherwise leave empty.]

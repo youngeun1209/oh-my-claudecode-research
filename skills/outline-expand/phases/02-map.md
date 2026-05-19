@@ -1,6 +1,6 @@
 # Phase 2 — Map (parallel dispatch)
 
-Build N per-section `task_brief` strings and dispatch `@paper-writer` once per draftable section. **All N dispatches are emitted in a single message** so Codex's Agent tool fans them out in parallel — this is the entire point of the map shape, and the demonstration this engine exists to ship.
+Build N per-section `task_brief` strings and dispatch `@paper-writer` once per draftable section. **All N dispatches are emitted in a single message** so Claude Code's Agent tool fans them out in parallel — this is the entire point of the map shape, and the demonstration this engine exists to ship.
 
 This phase composes [`../../orchestrate/phases/02-dispatch.md`](../../orchestrate/phases/02-dispatch.md) N times. The orchestrate `loop` primitive is **not** used — there is no iteration. Each dispatch is one-shot; phase 03 reduces the outputs.
 
@@ -45,7 +45,7 @@ Record `run_started_at` for the phase 04 end-record.
 
 For each entry in `section_plan`, build one `task_brief` string. The brief shape is identical across sections; only the substituted variables differ.
 
-### Section length defaults (matches `$iterate-revision` phase 02)
+### Section length defaults (matches `/iterate-revision` phase 02)
 
 | Section | Default length range | Note |
 |---|---|---|
@@ -123,7 +123,7 @@ Conventions (binding):
   write [CITE: <one-line claim>] — @literature-curator will resolve later.
 - Use \ref{fig:<label>} for figure references. Do not invent figure files.
 - Do not edit main.tex or any non-section file.
-- Do not edit references.bib or .omx/omxr/agent-memory/paper-writer/nomenclature.md
+- Do not edit references.bib or .claude/agent-memory/paper-writer/nomenclature.md
   in this dispatch — those are owned by @literature-curator and the user
   respectively. If you make a terminology decision, log it back to the
   caller in the form: TERMINOLOGY-DECISION: <term> = <chosen-form> (reason: <reason>).
@@ -167,15 +167,15 @@ For each entry in `section_plan`, assemble one dispatch spec in the shape `phase
 
 ## Step 5 — Dispatch all N in a single message (the map step)
 
-This is the parallel-dispatch demonstration. The orchestrate dispatch primitive at [`../../orchestrate/phases/02-dispatch.md`](../../orchestrate/phases/02-dispatch.md) ordinarily handles one Agent-tool invocation per call. For the map step, emit **N Agent-tool calls in a single assistant message** so Codex's runtime can run them in parallel.
+This is the parallel-dispatch demonstration. The orchestrate dispatch primitive at [`../../orchestrate/phases/02-dispatch.md`](../../orchestrate/phases/02-dispatch.md) ordinarily handles one Agent-tool invocation per call. For the map step, emit **N Agent-tool calls in a single assistant message** so Claude Code's runtime can run them in parallel.
 
 Operationally:
 
 1. Build an `Agent` tool call per dispatch spec, with:
    - `subagent_type`: `"general-purpose"` (per orchestrate phase 02 step 4 contract).
-   - `description`: `"omxr/paper-writer: outline-expand <section_name>"`.
+   - `description`: `"omcr/paper-writer: outline-expand <section_name>"`.
    - `prompt`: the assembled prompt per orchestrate phase 02 step 3 (persona body + `---` + Task + `---` + State slice + `---` + Expected output (omitted, since `expected_output_schema` is null)).
-2. Place all N tool calls in **one assistant message**. Codex's documented behavior is to dispatch parallel-tool-calls in the same message concurrently. Do not split into multiple messages — that serializes them.
+2. Place all N tool calls in **one assistant message**. Claude Code's documented behavior is to dispatch parallel-tool-calls in the same message concurrently. Do not split into multiple messages — that serializes them.
 3. Collect the N responses. Each is a dict in the shape orchestrate phase 02 returns:
    ```jsonc
    {
@@ -191,7 +191,7 @@ If a dispatch errors (Agent tool returns an error for one of the N), capture the
 
 Following orchestrate phase 02 step 1: read `<plugin_root>/agents/paper-writer.md` exactly once at the start of phase 02, strip its YAML frontmatter (step 2 of the primitive), and reuse the stripped body across all N prompts. This avoids re-reading the persona file N times. The persona body is identical for every dispatch in a single run — only the task brief and state slice vary.
 
-If `$CODEX_PLUGIN_ROOT/agents/paper-writer.md` is unreachable, abort with the message specified by orchestrate phase 02's error contract:
+If `$CLAUDE_PLUGIN_ROOT/agents/paper-writer.md` is unreachable, abort with the message specified by orchestrate phase 02's error contract:
 
 ```
 dispatch: persona file agents/paper-writer.md not found at plugin root
@@ -262,5 +262,5 @@ Pass forward to phase 03:
 - Does **not** write to disk except `_run-log.jsonl` (run-start record). Section files are written in phase 03.
 - Does **not** edit `nomenclature.md`. TERMINOLOGY-DECISION lines are surfaced as suggestions in phase 04, not auto-merged.
 - Does **not** retry failed dispatches. The user re-runs with `--sections <failed-name>`.
-- Does **not** check for `[TBD: ...]` markers. The outline excerpt may contain them; the writer decides how to handle them. (`$iterate-revision` is the engine with the TBD guard.)
+- Does **not** check for `[TBD: ...]` markers. The outline excerpt may contain them; the writer decides how to handle them. (`/iterate-revision` is the engine with the TBD guard.)
 - Does **not** read `reviews.json`. There is no prior-review lookup — this is a fresh map-reduce expansion.

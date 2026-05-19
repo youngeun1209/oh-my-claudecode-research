@@ -24,4 +24,4 @@ The skill runs four internal phases:
 
 ## On early stop from the skill
 
-If the skill stops early (existing content in the manuscript dir, user declined Overleaf clone, etc.), continue to phase 7 and surface the stop reason in the report. **Do not retry the skill from `$start-research` without user direction** — re-running `$start-research` after the user manually resolves the blocker is the right path.
+If the skill stops early (existing content in the manuscript dir, user declined Overleaf clone, etc.), continue to phase 7 and surface the stop reason in the report. **Do not retry the skill from `/start-research` without user direction** — re-running `/start-research` after the user manually resolves the blocker is the right path.

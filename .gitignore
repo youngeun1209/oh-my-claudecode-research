@@ -3,20 +3,15 @@
 __pycache__/
 *.pyc
 
-# Codex/OMX generated project state can contain unpublished research context,
-# agent memory, local hook config, and PII patterns. Keep it local.
-.codex/
-.omx/
-
-# Legacy local state from pre-Codex versions.
+# .claude/ ships per-user Claude Code state, including agent-memory/ and
+# scrub-patterns.txt — both of which can contain actual PII (advisor names,
+# subject IDs, internal URLs). Keep entirely local.
 .claude/
 .omc/
 
 .env
 
 # Local symlinks to external checkouts (per-user absolute paths)
-/oh-my-codex-upstream
-/oh-my-codex/
 /oh-my-claudecode
 /DoD-Agent
 
@@ -26,3 +21,4 @@ __pycache__/
 # tracked reference material (Phase 0 decision §7 + user ACK).
 /develop/*
 !/develop/example-state/
+

@@ -1,34 +1,34 @@
 ---
 name: figure-bake
-description: Drive one figure from design idea to manuscript-ready vector PDF + outline-ready PNG. Loops `@figure-descriptor` → `@analysis-implementer` → `@reviewer` against a single fig-id in `figures.json`, with the `cropfig` skill auto-invoked at the end of each implement phase to keep manuscript + outline artifacts in lockstep. The third Phase 2 engine — a 3-agent loop, more complex than `$iterate-revision`'s 2-agent loop, and the only Phase 2 engine that executes real code per iteration. Safe to re-run; safe to resume after BLOCKED or HALT.
+description: Drive one figure from design idea to manuscript-ready vector PDF + outline-ready PNG. Loops `@figure-descriptor` → `@analysis-implementer` → `@reviewer` against a single fig-id in `figures.json`, with the `cropfig` skill auto-invoked at the end of each implement phase to keep manuscript + outline artifacts in lockstep. The third Phase 2 engine — a 3-agent loop, more complex than `/iterate-revision`'s 2-agent loop, and the only Phase 2 engine that executes real code per iteration. Safe to re-run; safe to resume after BLOCKED or HALT.
 writes: [figures, paper]
 cost_estimate_tokens: 45000
 ---
 
-# $figure-bake
+# /figure-bake
 
 This engine bakes a single figure from a one-line concept to a manuscript-grade artifact. It is the **3-agent loop** demonstration of the orchestration pattern: each iteration runs design (`@figure-descriptor`) → implementation (`@analysis-implementer`, which actually executes Python/matplotlib code via Bash) → critique (`@reviewer`, which reads the rendered PNG/PDF multimodally), with a verdict at the end of every iter.
 
-If you are reading this because Codex's skill auto-discovery surfaced it: invoke it via `$figure-bake <fig-id>`. Do not edit `figures.json`, the rendered figure files, or the per-figure script directory by hand while a run is in flight.
+If you are reading this because Claude Code's skill auto-discovery surfaced it: invoke it via `/figure-bake <fig-id>`. Do not edit `figures.json`, the rendered figure files, or the per-figure script directory by hand while a run is in flight.
 
 **When this skill is invoked, immediately execute the workflow below. Do not only restate or summarize these instructions back to the user.**
 
 ## Signature
 
 ```
-$figure-bake <fig-id> [--max-iter N] [--data <path>] [--code-dir <path>]
+/figure-bake <fig-id> [--max-iter N] [--data <path>] [--code-dir <path>]
 ```
 
 | Flag | Default | Purpose |
 |---|---|---|
 | `--max-iter` | `3` | Hard cap. Reaching it without DONE/BLOCKED → HALT. Override via CLI or via `## Research stack` field `figure_bake.max_iter`. |
-| `--data` | (resolved) | Dataset root. Three-layer resolution: CLI `--data` > env `CODEX_RESEARCH_DATA_ROOT` > AGENTS.md `## Research stack` `data_root` > hardcoded `./data/` (Phase 2 decision §3). |
+| `--data` | (resolved) | Dataset root. Three-layer resolution: CLI `--data` > env `CLAUDE_RESEARCH_DATA_ROOT` > CLAUDE.md `## Research stack` `data_root` > hardcoded `./data/` (Phase 2 decision §3). |
 | `--code-dir` | `null` | Optional script directory the implementer writes its renderer(s) into. If unset, the implementer chooses (typically `<manuscript_root>/figures/code/` or alongside `vector_path`). |
 
 Examples:
-- `$figure-bake fig1` — defaults; data resolves from env / AGENTS.md
-- `$figure-bake fig2 --max-iter 5 --data ~/datasets/2026-cohort/`
-- `$figure-bake fig3 --code-dir code/figures/`
+- `/figure-bake fig1` — defaults; data resolves from env / CLAUDE.md
+- `/figure-bake fig2 --max-iter 5 --data ~/datasets/2026-cohort/`
+- `/figure-bake fig3 --code-dir code/figures/`
 
 ## The loop
 
@@ -76,11 +76,11 @@ This engine **does not** invent its own state-read, dispatch, or loop mechanics.
 Phase 01 resolves `data_root` in this order (first non-empty wins):
 
 1. **CLI `--data <path>`** — one-off override for this invocation.
-2. **Env `CODEX_RESEARCH_DATA_ROOT`** — useful for CI / batch runs.
-3. **AGENTS.md `## Research stack` block, field `data_root`** — the project-default. Set once during `$start-research` or hand-edited.
+2. **Env `CLAUDE_RESEARCH_DATA_ROOT`** — useful for CI / batch runs.
+3. **CLAUDE.md `## Research stack` block, field `data_root`** — the project-default. Set once during `/start-research` or hand-edited.
 4. **Hardcoded fallback `./data/`** — last-resort relative path.
 
-The resolved path is then validated: phase 01 aborts if the path does not exist on disk. `--data` is the only layer that overrides the validation order; an env or AGENTS.md value that doesn't exist still aborts (the user must fix their config). See Phase 2 decision §3 for the rationale (mirrors the env → AGENTS.md → default pattern already used elsewhere in the plugin).
+The resolved path is then validated: phase 01 aborts if the path does not exist on disk. `--data` is the only layer that overrides the validation order; an env or CLAUDE.md value that doesn't exist still aborts (the user must fix their config). See Phase 2 decision §3 for the rationale (mirrors the env → CLAUDE.md → default pattern already used elsewhere in the plugin).
 
 ## Verdict rule
 
@@ -109,7 +109,7 @@ Phase 05 owns these writes. Phase 06 only reads them.
 
 ## Cost model
 
-Each iteration is **3 Agent-tool dispatches** (descriptor + implementer + reviewer) plus one `cropfig` invocation. With `max_iter = 3`, a typical run is ≤ 9 subagent calls + 3 cropfig passes. The `cost_estimate_tokens: 45000` frontmatter field is a coarse upper-bound for `$supervisor-drive` budget gating (Phase 3 §6); actuals land in `_run-log.jsonl` post-hoc per Phase 0 decision §6.
+Each iteration is **3 Agent-tool dispatches** (descriptor + implementer + reviewer) plus one `cropfig` invocation. With `max_iter = 3`, a typical run is ≤ 9 subagent calls + 3 cropfig passes. The `cost_estimate_tokens: 45000` frontmatter field is a coarse upper-bound for `/supervisor-drive` budget gating (Phase 3 §6); actuals land in `_run-log.jsonl` post-hoc per Phase 0 decision §6.
 
 Per-iter cost is dominated by:
 - the persona bodies (descriptor ~200 lines, implementer ~170 lines, reviewer ~200 lines) inlined into each dispatch (Phase 0 decision §5),
@@ -120,13 +120,13 @@ Why the default `max_iter = 3` is deliberately small: each iter triggers real co
 
 ## What this engine does NOT do
 
-- Does **not** insert `\includegraphics{...}` into any `.tex` file. The implementer writes the rendering script + the PDF; embedding the PDF into the manuscript is the user's call. Phase 06 suggests `$sync` as the right tool for that, because `$sync` already understands the outline-side embed pattern through `cropfig` func 3.
+- Does **not** insert `\includegraphics{...}` into any `.tex` file. The implementer writes the rendering script + the PDF; embedding the PDF into the manuscript is the user's call. Phase 06 suggests `/sync` as the right tool for that, because `/sync` already understands the outline-side embed pattern through `cropfig` func 3.
 - Does **not** crop manually. The crop pass is one call to the `cropfig` skill, which owns the band-classification heuristic + the dual PDF/PNG output. This engine doesn't duplicate that logic.
 - Does **not** mutate any other figure's entry in `figures.json`. One run = one fig-id.
-- Does **not** call `$iterate-revision`, `$respond-reviewer`, `$outline-expand`, or `$literature-sweep`. Engines are leaves (Phase 2 decision §5). If a reviewer comment says "this figure proves nothing about the methods section," that's a hint to run `$iterate-revision sections/methods.tex` afterward — the user, not this engine, makes that call.
+- Does **not** call `/iterate-revision`, `/respond-reviewer`, `/outline-expand`, or `/literature-sweep`. Engines are leaves (Phase 2 decision §5). If a reviewer comment says "this figure proves nothing about the methods section," that's a hint to run `/iterate-revision sections/methods.tex` afterward — the user, not this engine, makes that call.
 - Does **not** commit to git between iterations by default. `on_iter_end` is left unset on the loop primitive.
 - Does **not** retry the implementer on a Python traceback inside the same iter. A failed render becomes a BLOCKED verdict and the user fixes the data / script before re-running.
-- Does **not** auto-resolve the dataset path against a default if the user-configured path is missing. Phase 01 aborts; the user must fix the AGENTS.md / env / `--data` value.
+- Does **not** auto-resolve the dataset path against a default if the user-configured path is missing. Phase 01 aborts; the user must fix the CLAUDE.md / env / `--data` value.
 
 ## Re-running policy
 

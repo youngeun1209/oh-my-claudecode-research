@@ -13,7 +13,7 @@ evaluate → maybe-commit, until the verdict says stop. The only place
 | `verdict_rule_spec` | yes | dict | — | Passed verbatim to `phases/03-evaluate.md`. |
 | `max_iter` | no  | int | 3 | Hard cap. Reaching it without DONE/BLOCKED emits HALT. |
 | `budget_tokens` | no | int / null | null | Cumulative cap. If `tokens_used > budget_tokens` at the end of an iteration, emit HALT. Post-hoc only (Phase 0 decision §6). |
-| `on_iter_end` | no | string / null | null | If `"git-commit"`: after each non-final iteration, `git add -A && git commit -m "omxr: iter {n} of {engine_name}/{run_id}"`. Anything else is ignored. |
+| `on_iter_end` | no | string / null | null | If `"git-commit"`: after each non-final iteration, `git add -A && git commit -m "omcr: iter {n} of {engine_name}/{run_id}"`. Anything else is ignored. |
 | `engine_args` | no | dict | `{}` | Free-form engine inputs (e.g. `{section: "results", venue: "..."}`). Recorded into `_run-log.jsonl` `args` field. |
 
 ## Dispatch plan shape
@@ -104,7 +104,7 @@ Execute in order:
       "git-commit"` AND the verdict is `CONTINUE` (i.e., we're going
       to loop again):
       - Run `git add -A` (from the project root).
-      - Run `git commit -m "omxr: iter {iter} of {engine_name}/{run_id}"`.
+      - Run `git commit -m "omcr: iter {iter} of {engine_name}/{run_id}"`.
       - If the commit fails (e.g. nothing to commit), log a warning to
         the run log and continue. Do not abort the loop.
 
@@ -175,7 +175,7 @@ estimation; this primitive's input contract already accepts
   writes use the tmp + rename pattern from `phases/01-state-read.md`.
 - **Resumability is partial.** A killed loop leaves the start record
   in `_run-log.jsonl` without an end record. Phase 3
-  (`$supervisor-drive`) defines the resume contract; this primitive
+  (`/supervisor-drive`) defines the resume contract; this primitive
   does not auto-resume.
 
 ## Errors

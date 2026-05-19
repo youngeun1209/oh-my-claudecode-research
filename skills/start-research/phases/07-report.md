@@ -3,9 +3,9 @@
 Produce a concise summary the user can read in 10 seconds. Use the template below; fill in per-phase outcomes recorded during phases 1–6.
 
 ````
-## OMXR $start-research complete — YYYY-MM-DD
+## OMCR /start-research complete — YYYY-MM-DD
 
-### AGENTS.md
+### CLAUDE.md
 - Project context:    <N fields filled, M still [TBD]>
 - Research stack:     <updated / unchanged>
 - Language preference: <updated / unchanged>
@@ -43,21 +43,21 @@ Produce a concise summary the user can read in 10 seconds. Use the template belo
 4. Preview locally: `cd <manuscript_dir> && latexmk -pdf main.tex`
 5. (If push was deferred) When satisfied with the scaffold:
      `git -C <manuscript_dir> push origin <default_branch>`
-6. Run `$todofig` once you have a captured figure deck to compare against the outline
+6. Run `/todofig` once you have a captured figure deck to compare against the outline
 ````
 
 After printing the report, end by recommending the user run `@supervisor where are we?` for the first real conversation.
 
-## If `$omxr-setup` was declined in phase 1
+## If `/omcr-setup` was declined in phase 1
 
-If phase 1 ended with the user declining to run `$omxr-setup`, skip the full report template above and just print:
+If phase 1 ended with the user declining to run `/omcr-setup`, skip the full report template above and just print:
 
 ````
-## OMXR $start-research — cancelled
+## OMCR /start-research — cancelled
 
-`$omxr-setup` has not run yet. Run it manually first:
+`/omcr-setup` has not run yet. Run it manually first:
 
-  $omxr-setup
+  /omcr-setup
 
-Then re-run `$start-research`.
+Then re-run `/start-research`.
 ````

@@ -1,6 +1,6 @@
 # Phase 3 — Parallel read
 
-Dispatch `@literature-curator` to summarize the candidate list. **This is the parallel-dispatch primitive demonstration.** When `parallel == 1` the engine issues one sequential dispatch per batch (the safe default, Phase 2 decision §1). When `parallel > 1` the engine issues `P` curator dispatches in a **single assistant message**, which Codex's Agent tool runs concurrently per the dispatch primitive's Agent-tool parallel-call pattern.
+Dispatch `@literature-curator` to summarize the candidate list. **This is the parallel-dispatch primitive demonstration.** When `parallel == 1` the engine issues one sequential dispatch per batch (the safe default, Phase 2 decision §1). When `parallel > 1` the engine issues `P` curator dispatches in a **single assistant message**, which Claude Code's Agent tool runs concurrently per the dispatch primitive's Agent-tool parallel-call pattern.
 
 Each curator returns one BibTeX entry + one summary CSV row per paper in its assigned batch. The actual writes to `references.bib` and the CSV happen in phase 06 — phase 03 keeps everything in-memory so phase 04 can dedupe across batches and phase 05 can verify before anything lands on disk.
 
@@ -141,7 +141,7 @@ Collect the dispatch result into `batch_outputs = [result]`.
 
 ### Case B — parallel (`parallel > 1`)
 
-Issue **all `parallel` dispatch calls in a single assistant message** — Codex's Agent tool runs subagents concurrently when multiple Agent-tool invocations appear in one message (this is the parallel-dispatch primitive described in phase 0 of the orchestrate skill).
+Issue **all `parallel` dispatch calls in a single assistant message** — Claude Code's Agent tool runs subagents concurrently when multiple Agent-tool invocations appear in one message (this is the parallel-dispatch primitive described in phase 0 of the orchestrate skill).
 
 Each call uses the same `persona: "literature-curator"` and `expected_output_schema` as Case A, but each one's `task_brief` is built for its specific batch and `state_slice.batch_index` is set to the batch's 0-based index.
 

@@ -2,7 +2,7 @@
 
 > **Skeleton only.** Concrete BibTeX paths, citekeys, anchor papers, and venue
 > names have been stripped. Copy this file into your own project's
-> `.omx/omxr/agent-memory/literature-curator/MEMORY.md` and fill in.
+> `.claude/agent-memory/literature-curator/MEMORY.md` and fill in.
 >
 > Domain flavor: neuro-fMRI. Preferred sources, bucket conventions, and
 > example citekey patterns reflect typical neuroimaging studies (preprocessing,
@@ -99,4 +99,4 @@ Claims for which a satisfactory citation could not be found. Re-attempt only if 
 
 ## Drifts flagged at last sync
 
-- [Auto-populated by `$sync` if running that command; otherwise leave empty.]
+- [Auto-populated by `/sync` if running that command; otherwise leave empty.]

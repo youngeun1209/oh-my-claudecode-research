@@ -2,7 +2,7 @@
 
 > **Skeleton only.** Color-system hex codes, exact panel layouts, and figure
 > redesign narratives have been stripped. Copy into your own project's
-> `.omx/omxr/agent-memory/figure-descriptor/MEMORY.md` and fill in.
+> `.claude/agent-memory/figure-descriptor/MEMORY.md` and fill in.
 
 **Last synced:** [YYYY-MM-DD]
 

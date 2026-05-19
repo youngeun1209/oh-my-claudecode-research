@@ -1,22 +1,22 @@
 ---
 name: outline-expand
-description: Map-reduce engine — given an outline file and a `paper.json`, draft N sections in parallel by dispatching `@paper-writer` once per section in a single Agent-tool batch, then assemble the prose into each section's `paper.json.sections[name].path`. Passes a shared `nomenclature.md` payload to every dispatch (Phase 2 decision §4) so parallel writers share terminology. After merge, emits a non-blocking `terminology-drift.md` lint artifact listing terms that disagree across sections. First drafts only — does **not** call `$iterate-revision`. Safe to re-run; safe to scope with `--sections`.
+description: Map-reduce engine — given an outline file and a `paper.json`, draft N sections in parallel by dispatching `@paper-writer` once per section in a single Agent-tool batch, then assemble the prose into each section's `paper.json.sections[name].path`. Passes a shared `nomenclature.md` payload to every dispatch (Phase 2 decision §4) so parallel writers share terminology. After merge, emits a non-blocking `terminology-drift.md` lint artifact listing terms that disagree across sections. First drafts only — does **not** call `/iterate-revision`. Safe to re-run; safe to scope with `--sections`.
 writes: [paper]
 cost_estimate_tokens: 40000
 ---
 
-# $outline-expand
+# /outline-expand
 
-This engine is OMXR's map-reduce shape: one outline in, N first-draft sections out, one Agent-tool dispatch per section, all dispatched in a single message so Codex's runtime fans them out in parallel. It is the second-simplest engine after `$iterate-revision` — there is no loop and no reviewer; the verdict is "we wrote the files we said we would."
+This engine is OMCR's map-reduce shape: one outline in, N first-draft sections out, one Agent-tool dispatch per section, all dispatched in a single message so Claude Code's runtime fans them out in parallel. It is the second-simplest engine after `/iterate-revision` — there is no loop and no reviewer; the verdict is "we wrote the files we said we would."
 
-If you are reading this because Codex's skill auto-discovery surfaced it: invoke it via `$outline-expand <outline-path>`. Do not hand-edit the manuscript sections or `.omx/state/omxr/paper.json` while a run is in flight.
+If you are reading this because Claude Code's skill auto-discovery surfaced it: invoke it via `/outline-expand <outline-path>`. Do not hand-edit the manuscript sections or `.claude/omcr-state/paper.json` while a run is in flight.
 
 **When this skill is invoked, immediately execute the workflow below. Do not only restate or summarize these instructions back to the user.**
 
 ## Signature
 
 ```
-$outline-expand <outline-path> [--sections <list>] [--max-iter-per-section N]
+/outline-expand <outline-path> [--sections <list>] [--max-iter-per-section N]
 ```
 
 | Flag | Default | Purpose |
@@ -25,9 +25,9 @@ $outline-expand <outline-path> [--sections <list>] [--max-iter-per-section N]
 | `--max-iter-per-section` | `1` (unused currently) | Reserved for now `--auto-iterate`. This engine produces first drafts only. |
 
 Examples:
-- `$outline-expand outline.md` — draft every not-yet-approved section listed in the outline.
-- `$outline-expand outline.md --sections introduction,methods` — draft only those two.
-- `$outline-expand manuscript/outline.tex --sections results` — single section out of a LaTeX outline.
+- `/outline-expand outline.md` — draft every not-yet-approved section listed in the outline.
+- `/outline-expand outline.md --sections introduction,methods` — draft only those two.
+- `/outline-expand manuscript/outline.tex --sections results` — single section out of a LaTeX outline.
 
 ## The shape
 
@@ -36,11 +36,11 @@ phase 01 — precheck     (parse outline, resolve manuscript_root, decide sectio
 phase 02 — map          (build N task briefs, dispatch @paper-writer × N in one message)
 phase 03 — reduce       (write each prose to its section file, update paper.json,
                          run terminology drift lint, emit terminology-drift.md)
-phase 04 — finalize     (user summary, suggest $iterate-revision per section,
+phase 04 — finalize     (user summary, suggest /iterate-revision per section,
                          append summary line to _run-log.jsonl)
 ```
 
-There is no loop. Each phase runs once. The orchestrate `loop` primitive is **not** used by this engine — `loop` is for engines that iterate dispatch → evaluate → maybe-continue, which `$outline-expand` does not. Instead, phase 02 uses `orchestrate/phases/02-dispatch.md` directly, N times, in a single message.
+There is no loop. Each phase runs once. The orchestrate `loop` primitive is **not** used by this engine — `loop` is for engines that iterate dispatch → evaluate → maybe-continue, which `/outline-expand` does not. Instead, phase 02 uses `orchestrate/phases/02-dispatch.md` directly, N times, in a single message.
 
 ## Phase execution
 
@@ -56,7 +56,7 @@ Execute phases sequentially. For each phase, read the linked file and follow its
 This engine imports the following primitives from `skills/orchestrate/`:
 
 - [`phases/01-state-read.md`](../orchestrate/phases/01-state-read.md) — read `paper.json` once in phase 01 (bootstrap if missing). The engine carries the parsed dict through phases 02–04 rather than re-reading.
-- [`phases/02-dispatch.md`](../orchestrate/phases/02-dispatch.md) — invoked N times in phase 02 (one `@paper-writer` per section). All N invocations are emitted in a single message; Codex's Agent tool fans them out in parallel.
+- [`phases/02-dispatch.md`](../orchestrate/phases/02-dispatch.md) — invoked N times in phase 02 (one `@paper-writer` per section). All N invocations are emitted in a single message; Claude Code's Agent tool fans them out in parallel.
 
 This engine **does not** use the `loop` primitive (`phases/04-loop.md`) — there is no iteration. It **does not** use the `evaluate` primitive (`phases/03-evaluate.md`) — there is no reviewer, no severity rule, no verdict. Phase 03 writes files and lints terminology; phase 04 reports stats. Both are engine-specific logic.
 
@@ -66,14 +66,14 @@ The `_run-log.jsonl` start + end records are still emitted, but written directly
 
 Phase 02 reads, in priority order:
 
-1. `.omx/omxr/agent-memory/paper-writer/nomenclature.md` in the user's project — the canonical author-curated nomenclature list. The `memory-load.sh` hook makes this file part of the session context for subagents, but we **also** embed its content into each dispatch's `task_brief` so the writer cannot miss it.
+1. `.claude/agent-memory/paper-writer/nomenclature.md` in the user's project — the canonical author-curated nomenclature list. The `memory-load.sh` hook makes this file part of the session context for subagents, but we **also** embed its content into each dispatch's `task_brief` so the writer cannot miss it.
 2. If the file does not exist, the engine substitutes this minimal stub:
 
    ```
    (No nomenclature.md yet — none has been recorded for this project.
     Use terminology consistent with the Introduction section if one is already
     drafted; if undecided, pick one form and log it in
-    .omx/omxr/agent-memory/paper-writer/nomenclature.md so future runs can
+    .claude/agent-memory/paper-writer/nomenclature.md so future runs can
     converge. Avoid switching between synonyms within a single section.)
    ```
 
@@ -94,17 +94,17 @@ For each candidate, the lint records:
 - The sections each variant appears in.
 - A one-line suggested-canonical: the most frequently-used variant across the run.
 
-The output is written to `<manuscript_root>/terminology-drift.md`. **Non-blocking** — the engine returns DONE regardless of what the lint finds. The user reads the drift file (or runs `$iterate-revision` on each section, which will surface the same issues through the reviewer) and decides.
+The output is written to `<manuscript_root>/terminology-drift.md`. **Non-blocking** — the engine returns DONE regardless of what the lint finds. The user reads the drift file (or runs `/iterate-revision` on each section, which will surface the same issues through the reviewer) and decides.
 
 Drift output is regenerated each run. The file is **not** committed to git on behalf of the user; users typically gitignore it (sample gitignore line: `terminology-drift.md`).
 
 ## First drafts only — no refinement
 
-This engine **does not** call `$iterate-revision`, ever. Phase 2 decision §5 (engines are leaves) is binding. The user's options after a successful run:
+This engine **does not** call `/iterate-revision`, ever. Phase 2 decision §5 (engines are leaves) is binding. The user's options after a successful run:
 
-- `$iterate-revision <section-path>` per section, ordered by importance.
+- `/iterate-revision <section-path>` per section, ordered by importance.
 - Hand-edit a section (e.g. the abstract is short — faster to write than to iterate).
-- `$supervisor-drive` (Phase 3) — when shipped, this will be the engine that can chain `$outline-expand` → N × `$iterate-revision` autonomously.
+- `/supervisor-drive` (Phase 3) — when shipped, this will be the engine that can chain `/outline-expand` → N × `/iterate-revision` autonomously.
 
 Phase 04's user summary surfaces this explicitly with the per-section command lines pre-filled.
 
@@ -112,21 +112,21 @@ Phase 04's user summary surfaces this explicitly with the per-section command li
 
 | File | Why |
 |---|---|
-| `paper.json.sections[name].status` → `"drafted"` for each newly-written section | The default post-draft status; matches `$iterate-revision`'s precondition for REVISE mode. |
+| `paper.json.sections[name].status` → `"drafted"` for each newly-written section | The default post-draft status; matches `/iterate-revision`'s precondition for REVISE mode. |
 | `paper.json.sections[name].iter` → `1` for each newly-written section | The map-reduce produced one iteration of prose. |
 | `paper.json.sections[name].path` content | The actual prose, written via the `Write` tool. |
 | `paper.json.last_updated` | Current UTC ISO-8601 at phase 03 end. |
 | `<manuscript_root>/terminology-drift.md` | Lint artifact. Always written, even if no drift found (file then contains a one-line "no drift detected" stub). |
-| `.omx/state/omxr/_run-log.jsonl` | One `phase: "start"` line in phase 02, one `phase: "end"` line in phase 04, one `phase: "summary"` line in phase 04. |
+| `.claude/omcr-state/_run-log.jsonl` | One `phase: "start"` line in phase 02, one `phase: "end"` line in phase 04, one `phase: "summary"` line in phase 04. |
 
 This engine does **not** write `reviews.json`, `citations.json`, or `figures.json`.
 
 ## What this engine does NOT do
 
-- Does **not** loop. One pass through the dispatch plan. Refinement is the user's call via `$iterate-revision`.
+- Does **not** loop. One pass through the dispatch plan. Refinement is the user's call via `/iterate-revision`.
 - Does **not** call another engine. Engines are leaves (Phase 2 §5).
-- Does **not** review the prose it produces. There is no reviewer dispatch in this engine. Use `$iterate-revision <section-path>` per section to invoke the reviewer.
-- Does **not** auto-resolve `[CITE:]` placeholders. Writers may emit them; `@literature-curator` resolves them in a separate flow (`$literature-sweep`).
+- Does **not** review the prose it produces. There is no reviewer dispatch in this engine. Use `/iterate-revision <section-path>` per section to invoke the reviewer.
+- Does **not** auto-resolve `[CITE:]` placeholders. Writers may emit them; `@literature-curator` resolves them in a separate flow (`/literature-sweep`).
 - Does **not** clobber `approved` sections. Phase 01 skips them unless they appear in `--sections`.
 - Does **not** retry failed dispatches. A partial-failure run is reported, not auto-recovered. The user re-runs with `--sections <failed-names>`.
 - Does **not** edit `main.tex`, `references.bib`, or `outline.md`. Writes only section files + the drift artifact.

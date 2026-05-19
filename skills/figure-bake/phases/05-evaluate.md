@@ -1,6 +1,6 @@
 ---
 name: figure-bake-evaluate
-description: Phase 5 of $figure-bake. Apply the severity-threshold verdict rule to the reviewer's issues list, update figures.json.figures[<fig-id>] critique_status / impl_status / brief_status / iter, and return the verdict to the loop primitive.
+description: Phase 5 of /figure-bake. Apply the severity-threshold verdict rule to the reviewer's issues list, update figures.json.figures[<fig-id>] critique_status / impl_status / brief_status / iter, and return the verdict to the loop primitive.
 ---
 
 # Phase 5 — Evaluate
@@ -95,7 +95,7 @@ Call [`../../orchestrate/phases/03-evaluate.md`](../../orchestrate/phases/03-eva
 }
 ```
 
-`section` is `null` — `$figure-bake` operates on a fig-id, not a paper section. The orchestrate primitive's reviews.json update path is conditional on the engine having dispatched `@reviewer` to evaluate a section; this engine *does* dispatch `@reviewer`, but the durable critique record lives in `figures.json.figures[<fig-id>].critiques`, not in `reviews.json`. To match that ownership convention:
+`section` is `null` — `/figure-bake` operates on a fig-id, not a paper section. The orchestrate primitive's reviews.json update path is conditional on the engine having dispatched `@reviewer` to evaluate a section; this engine *does* dispatch `@reviewer`, but the durable critique record lives in `figures.json.figures[<fig-id>].critiques`, not in `reviews.json`. To match that ownership convention:
 
 - The orchestrate primitive's reviews.json append in its step 3 should be **suppressed** for this engine. Two options:
   1. Have the primitive treat `section == null` as "do not write to reviews.json" (already the spirit of the primitive's "if the engine dispatched @reviewer" condition — the primitive only writes when `section` is non-null in the canonical interpretation).
@@ -110,7 +110,7 @@ The primitive returns `{verdict, reason, iter}`. Capture both. Then **immediatel
 3. Set `entry.verdict = <verdict>` and `entry.reason = <engine reason from step 2>`.
 4. Write `figures.json` back atomically.
 
-This mirrors the `$iterate-revision` phase 04 pattern of overwriting the primitive's terse reason with an engine-specific one — phase 06's summary reads better that way.
+This mirrors the `/iterate-revision` phase 04 pattern of overwriting the primitive's terse reason with an engine-specific one — phase 06's summary reads better that way.
 
 ## Step 4 — Update `figures.json.figures[<fig-id>]` status fields
 
@@ -164,9 +164,9 @@ The loop primitive also applies its post-hoc `budget_tokens` cap here (Phase 0 d
 ## What this phase does NOT do
 
 - Does **not** invoke any subagent. Pure logic + state writes.
-- Does **not** decide whether to commit (loop's `on_iter_end` owns that; OMXR currently leaves it off for `$figure-bake`).
+- Does **not** decide whether to commit (loop's `on_iter_end` owns that; OMCR currently leaves it off for `/figure-bake`).
 - Does **not** modify `_run-log.jsonl`. The loop primitive owns that file.
-- Does **not** touch `paper.json` / `citations.json` / `reviews.json`. Out of scope for `$figure-bake`. The orchestrate evaluate primitive's reviews.json append is suppressed (see step 3 note); `paper.json` is only read in phase 01.
+- Does **not** touch `paper.json` / `citations.json` / `reviews.json`. Out of scope for `/figure-bake`. The orchestrate evaluate primitive's reviews.json append is suppressed (see step 3 note); `paper.json` is only read in phase 01.
 - Does **not** invent verdict values. Only the four are allowed.
 - Does **not** retry. One verdict per iter; if `CONTINUE`, the next iter is a fresh design / implement / critique triple.
 - Does **not** delete prior critique entries. The `critiques[]` list is append-only; old iters' critiques persist for audit.

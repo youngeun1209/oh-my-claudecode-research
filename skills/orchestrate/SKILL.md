@@ -1,18 +1,18 @@
 ---
 name: orchestrate
-description: Internal primitive skill — engine skills compose these four phases. Not invoked directly by the user. Provides state-read, dispatch, evaluate, and loop primitives over `.omx/state/omxr/` so that engines (`$iterate-revision`, `$literature-sweep`, `$respond-reviewer`, `$figure-bake`, `$outline-expand`, `$supervisor-drive`) can be expressed as a small composition declaration instead of bespoke code.
+description: Internal primitive skill — engine skills compose these four phases. Not invoked directly by the user. Provides state-read, dispatch, evaluate, and loop primitives over `.claude/omcr-state/` so that engines (`/iterate-revision`, `/literature-sweep`, `/respond-reviewer`, `/figure-bake`, `/outline-expand`, `/supervisor-drive`) can be expressed as a small composition declaration instead of bespoke code.
 ---
 
 # Orchestrate (internal primitive)
 
-This skill ships the four primitives every OMXR engine depends on. It is
+This skill ships the four primitives every OMCR engine depends on. It is
 **not** something a user invokes directly — there is no `/orchestrate`
 command and there should never be one. Engines (the user-facing skills
 listed above) import its phase files and compose them.
 
-If you are reading this because Codex's skill auto-discovery
+If you are reading this because Claude Code's skill auto-discovery
 surfaced it: please pick the engine you actually wanted to run, e.g.
-`$iterate-revision` for revising a section against a reviewer.
+`/iterate-revision` for revising a section against a reviewer.
 
 **When this skill's phase files are referenced from another skill, follow them exactly as written. Do not re-derive behavior from the primitives doc — that doc is the design source; these phase files are the implementation contract.**
 
@@ -20,7 +20,7 @@ surfaced it: please pick the engine you actually wanted to run, e.g.
 
 | # | Primitive | Purpose | File |
 |---|---|---|---|
-| 1 | `state-read` | Read + validate + bootstrap a state JSON under `.omx/state/omxr/`. | [`phases/01-state-read.md`](phases/01-state-read.md) |
+| 1 | `state-read` | Read + validate + bootstrap a state JSON under `.claude/omcr-state/`. | [`phases/01-state-read.md`](phases/01-state-read.md) |
 | 2 | `dispatch`   | Invoke a persona subagent via the Agent tool with inlined prompt. | [`phases/02-dispatch.md`](phases/02-dispatch.md) |
 | 3 | `evaluate`   | Apply an engine-supplied verdict rule to the last output + state. | [`phases/03-evaluate.md`](phases/03-evaluate.md) |
 | 4 | `loop`       | Drive dispatch → evaluate → repeat with `max_iter` and budget safeties. | [`phases/04-loop.md`](phases/04-loop.md) |
@@ -30,12 +30,12 @@ primitives just keep state, dispatch, and counters honest.
 
 ## The state store
 
-Five files under `.omx/state/omxr/` in the user's project. Layout is
+Five files under `.claude/omcr-state/` in the user's project. Layout is
 flat — no `logs/` subdirectory — per Phase 0 decision §1.
 
 | File | Owner-by-convention | Append-only? |
 |---|---|---|
-| `paper.json` | engines + `$omxr-setup` + `$start-research` | no |
+| `paper.json` | engines + `/omcr-setup` + `/start-research` | no |
 | `reviews.json` | engines that dispatch `@reviewer` | yes |
 | `citations.json` | `@literature-curator` + `verify-citation` skill | no |
 | `figures.json` | engines that dispatch `@figure-descriptor` + `cropfig` | no |
@@ -79,7 +79,7 @@ An engine skill (e.g. `skills/iterate-revision/SKILL.md`) must:
 
 3. **Declare `cost_estimate_tokens:` in frontmatter** (optional but
    recommended for Phase 3 autonomous mode) — a coarse constant the
-   `$supervisor-drive` scheduler uses for budget gating. Phase 3
+   `/supervisor-drive` scheduler uses for budget gating. Phase 3
    decision §6 adds rolling-median actuals on top.
 
 4. **Provide a verdict rule.** The engine's own phase files contain
@@ -89,7 +89,7 @@ An engine skill (e.g. `skills/iterate-revision/SKILL.md`) must:
 
 5. **Never call another engine.** Engines are leaves (Phase 2 decision
    §5, Phase 3 decision §3). If composition between engines is needed,
-   `$supervisor-drive` is the only thing that may chain — and it
+   `/supervisor-drive` is the only thing that may chain — and it
    re-evaluates state between every step rather than invoking engines
    from inside engines.
 
@@ -104,21 +104,21 @@ cumulative usage exceeds the cap.
 
 ## Safety invariants
 
-- **Serial execution only** (Phase 0 decision §4). OMXR does not currently ship
+- **Serial execution only** (Phase 0 decision §4). OMCR does not currently ship
   a lock file. One engine at a time per project.
 - **`max_iter` is hard.** The loop never silently exceeds it — when
   reached without DONE/BLOCKED, the loop emits HALT and exits cleanly.
 - **Dispatch errors break the loop.** If the Agent tool errors mid-run,
   the loop emits BLOCKED and the partial state is already on disk.
 - **State persists across interruption.** A user Ctrl-C leaves
-  `.omx/state/omxr/*.json` in a consistent state because each
+  `.claude/omcr-state/*.json` in a consistent state because each
   primitive writes atomically (write-tmp + rename).
 
 ## When to extend vs. when to fork
 
 Add a phase to `orchestrate/phases/` only when **every** engine would
 benefit. Engine-specific logic (e.g. "scan for `[TBD:` markers" from
-`$iterate-revision` Phase 0 decision §1.2) goes in that engine's own
+`/iterate-revision` Phase 0 decision §1.2) goes in that engine's own
 phase files. The four primitives here should stay at four for now.
 
 If a fifth primitive looks tempting (e.g. "parallel dispatch fanout"),
