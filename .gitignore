@@ -13,7 +13,6 @@ __pycache__/
 
 # Local symlinks to external checkouts (per-user absolute paths)
 /oh-my-claudecode
-/DoD-Agent
 
 # Local design / working docs (orchestration roadmap drafts, RFCs, scratch).
 # Specs migrate to wiki/ + skills/<name>/SKILL.md when implemented.
