@@ -16,9 +16,33 @@ A 6-agent research team + 6 orchestration engines + 4 setup/workflow commands + 
 
 ## Quick start
 
+**Step 0: Install OMC (optional, highly recommended)**
+
+Not required, but highly recommended. OMCR works standalone, but pairing it with [`oh-my-claudecode`](https://github.com/Yeachan-Heo/oh-my-claudecode) unlocks generic orchestration.
+
+Marketplace flow — open Claude Code in your terminal (`claude`), then enter these slash commands one at a time inside the session:
+
+```
+/plugin marketplace add https://github.com/Yeachan-Heo/oh-my-claudecode
+```
+
+Then:
+
+```
+/plugin install oh-my-claudecode
+```
+
+Or **directly in your shell** (no Claude Code session needed) via npm:
+
+```bash
+npm i -g oh-my-claude-sisyphus@latest
+```
+
+Full mapping: [`wiki/With-OMC.md`](wiki/With-OMC.md).
+
 **Step 1: Install**
 
-**If you're installing OMCR for the first time** — marketplace flow (recommended). These are Claude Code slash commands, enter them **one at a time**:
+**If you're installing OMCR for the first time** — marketplace flow (recommended). Open Claude Code in your terminal (`claude`), then enter these slash commands one at a time inside the session:
 
 ```
 /plugin marketplace add https://github.com/youngeun1209/oh-my-claudecode-research
