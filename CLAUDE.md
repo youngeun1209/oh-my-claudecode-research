@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Repository status
 
-OMCR is at **v0.1**, work-in-progress. The only tagged releases are `v0.1.0` and `v0.1.1`; the plugin manifest (`.claude-plugin/plugin.json`) declares `0.1.2` (ahead of the last tag — unreleased work). Everything currently on `main` — including the orchestration engines and the autonomous supervisor — is unreleased v0.1 work. There is no v0.2 / v0.3 / v0.4 — those labels showed up in earlier docs by mistake and are being removed. Current tree ships:
+OMCR is at **v0.1**, work-in-progress. Tagged releases are `v0.1.0`, `v0.1.1`, `v0.1.2`; the plugin manifest (`.claude-plugin/plugin.json`) declares `0.1.3` (ahead of the last tag — unreleased work pending the `v0.1.3` tag). Everything currently on `main` — including the orchestration engines and the autonomous supervisor — is unreleased v0.1 work. There is no v0.2 / v0.3 / v0.4 — those labels showed up in earlier docs by mistake and are being removed. Current tree ships:
 - 6 research-team agents (`agents/`)
 - 13 slash commands (`commands/`) — 7 setup/workflow/utility (`/omcr-setup`, `/start-research`, `/todofig`, `/sync`, `/session-start`, `/save-session-log`, `/update-version`) + 6 orchestration engines (`/iterate-revision`, `/literature-sweep`, `/respond-reviewer`, `/figure-bake`, `/outline-expand`, `/supervisor-drive`)
 - 18 skills (`skills/`) — 11 setup/workflow/utility skills + 1 primitive (`orchestrate`) + 6 engine skills backing the orchestration commands

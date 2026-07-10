@@ -1,6 +1,6 @@
 {
   "name": "oh-my-claudecode-research",
-  "version": "0.1.2",
+  "version": "0.1.3",
   "description": "Research-team agents for Claude Code: supervisor, analysis-implementer, paper-writer, figure-descriptor, reviewer, literature-curator.",
   "author": { "name": "Young-Eun Lee" },
   "repository": "https://github.com/youngeun1209/oh-my-claudecode-research",

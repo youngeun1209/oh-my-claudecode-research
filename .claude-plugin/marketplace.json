@@ -9,7 +9,7 @@
     {
       "name": "oh-my-claudecode-research",
       "description": "Research-team agents for Claude Code: supervisor, analysis-implementer, paper-writer, figure-descriptor, reviewer, literature-curator. Ships 6 agents, 13 slash commands, 18 skills, and 4 hooks for academic paper workflows.",
-      "version": "0.1.2",
+      "version": "0.1.3",
       "author": {
         "name": "Young-Eun Lee"
       },
@@ -26,5 +26,5 @@
       ]
     }
   ],
-  "version": "0.1.2"
+  "version": "0.1.3"
 }
