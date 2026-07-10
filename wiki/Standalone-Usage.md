@@ -15,9 +15,9 @@ If you also have OMC installed (or want to install it), see [With OMC](With-OMC.
 | Surface | Behavior |
 |---|---|
 | 6 `@`-mentionable agents | Full personas, English-by-default, configurable language |
-| 4 setup/workflow commands (`/omcr-setup`, `/start-research`, `/todofig`, `/sync`) | Parameterized via `## Research stack` block in your CLAUDE.md |
+| 7 setup/workflow/utility commands (`/omcr-setup`, `/start-research`, `/todofig`, `/sync`, `/session-start`, `/save-session-log`, `/update-version`) | Parameterized via `## Research stack` block in your CLAUDE.md |
 | **6 orchestration engines** (`/iterate-revision`, `/literature-sweep`, `/respond-reviewer`, `/figure-bake`, `/outline-expand`, `/supervisor-drive`) | Multi-step workflow drivers with `.claude/omcr-state/` persistence — see [Using-Orchestration](Using-Orchestration.md) |
-| `cropfig` + `verify-citation` + `manuscript-scaffold` skills | Figure crop pipeline + citation verification + LaTeX scaffold |
+| `cropfig` + `verify-citation` + `manuscript-scaffold` + `paper-ingest` skills | Figure crop pipeline + citation verification + LaTeX scaffold + reading library ([Reading-Library](Reading-Library.md)) |
 | 4 hooks | PII guard + MEMORY auto-load + citation warning + setup nudge |
 | `templates/MEMORY.template.md` | Canonical schema for per-agent memory |
 | `examples/neuro-fmri/` | Overlay preset if you do neuroimaging (fMRI / EEG / MEG) work |

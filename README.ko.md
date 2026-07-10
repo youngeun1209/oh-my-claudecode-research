@@ -8,7 +8,7 @@ _연구 도구를 따로 배우지 마세요. 그냥 OMCR을 쓰세요._
 
 OMCR은 Claude Code를 위한 연구 워크스페이스입니다: 6명의 에이전트 — `@supervisor`, `@analysis-implementer`, `@paper-writer`, `@figure-descriptor`, `@reviewer`, `@literature-curator` — 와 함께 가설, 분석, 글쓰기, 그림, 인용, 리뷰를 진행합니다. 직접 손대고 싶지 않을 때는 6개의 오케스트레이션 엔진이 흔한 루프를 자동화해줍니다. 위에 범용 오케스트레이션(재시도, 병렬 실행, 예산 추적)이 더 필요하면 [oh-my-claudecode](https://github.com/Yeachan-Heo/oh-my-claudecode)와 조합하세요.
 
-6명의 연구팀 에이전트 + 6개의 오케스트레이션 엔진 + 4개의 셋업/워크플로 커맨드 + 14개의 스킬 + 4개의 경량 훅.
+6명의 연구팀 에이전트 + 6개의 오케스트레이션 엔진 + 7개의 셋업/워크플로/유틸리티 커맨드 + 18개의 스킬 + 4개의 경량 훅.
 
 > **상태: v0.1.** Breaking change가 자주 있을 수 있습니다. 피드백과 PR 환영합니다.
 
@@ -98,7 +98,7 @@ git clone https://github.com/youngeun1209/oh-my-claudecode-research \
 | `@reviewer` | 타깃 venue 수준의 적대적 사전 리뷰. |
 | `@literature-curator` | 프로젝트의 BibTeX과 literature summary table을 lockstep으로 owns. `[CITE: ...]` placeholder를 해결하고, `verify-citation` 스킬로 인용을 검증하며, 절대로 fabricate하지 않음. |
 
-### 4 slash commands (프로젝트의 CLAUDE.md로 파라미터화)
+### 7 slash commands (프로젝트의 CLAUDE.md로 파라미터화)
 
 | Command | What it does |
 |---|---|
@@ -106,10 +106,13 @@ git clone https://github.com/youngeun1209/oh-my-claudecode-research \
 | `/start-research [minimal\|neuro-fmri]` | 인터뷰형: `CLAUDE.md` placeholder를 채움(working title, 가설, target venue, 데이터셋, narrative spine), 선택적으로 에이전트 메모리에 프리셋 적용, LaTeX manuscript 디렉터리를 scaffold(`manuscript-scaffold` 스킬을 통해, 저널 템플릿 + 선택적 Overleaf clone 포함). `/omcr-setup`이 안 돌았으면 먼저 돌릴지 물어봄. |
 | `/todofig [Fig N]` | 캡쳐된 figure 덱과 outline을 비교 → P0/P1/P2 우선순위 TODO. |
 | `/sync` | 현재 상태(덱)와 목표(outline)를 reconcile, 에이전트 메모리 갱신, 선택적으로 cropped figure를 타깃 문서에 embed. 상태 스냅샷이지 TODO가 아님. |
+| `/session-start [light\|full]` | 읽기 전용 orientation — 프로젝트 corpus(CLAUDE.md, outline, MEMORY, wiki 랜딩 페이지)를 읽고 요약 + 있는 그대로의 상태 스냅샷을 리포트. 부작용 없음; light/full 모드. |
+| `/save-session-log [slug]` | 현재 세션의 날짜별 기록(요청, 작업 내용, 건드린 파일, 결정 사항, 다음 단계)을 session-logs 디렉터리에 충실하게 기록한 뒤, 확정된 지식을 wiki에 정밀하게 distill. |
+| `/update-version [@new files]` | outline이나 figure 덱이 버전업(v4→v5)되면, 새 파일명을 모든 live 참조에 전파; 오래된 archive는 삭제 여부를 물어봄(confirm-gated). 기존 값은 `## Research stack`에서 읽어옴. |
 
-### 14 skills
+### 18 skills
 
-4개의 셋업/워크플로 슬래시 커맨드는 thin dispatcher — 각자 `$ARGUMENTS`를 매칭되는 스킬로 forward합니다. `cropfig`, `verify-citation`, `manuscript-scaffold`는 standalone으로도 호출 가능. **추가로** 1개 primitive(`orchestrate` — 내부용, 4개 phase로 composes) + 6개의 오케스트레이션 커맨드를 backing하는 엔진 스킬; 전체 워크스루는 [`wiki/Using-Orchestration.md`](wiki/Using-Orchestration.md). 아래 표는 7개의 셋업/워크플로 스킬을 다룹니다.
+7개의 셋업/워크플로/유틸리티 슬래시 커맨드는 thin dispatcher — 각자 `$ARGUMENTS`를 매칭되는 스킬로 forward합니다. `cropfig`, `verify-citation`, `manuscript-scaffold`, `paper-ingest`는 standalone으로도 호출 가능. **추가로** 1개 primitive(`orchestrate` — 내부용, 4개 phase로 composes) + 6개의 오케스트레이션 커맨드를 backing하는 엔진 스킬; 전체 워크스루는 [`wiki/Using-Orchestration.md`](wiki/Using-Orchestration.md). 아래 표는 11개의 셋업/워크플로/유틸리티 스킬을 다룹니다.
 
 | Skill | What it does |
 |---|---|
@@ -120,6 +123,10 @@ git clone https://github.com/youngeun1209/oh-my-claudecode-research \
 | `cropfig` | `.key`/`.pptx` 덱에서 manuscript + outline artifact까지의 3단계 파이프라인: 슬라이드별 벡터 PDF(cropped, manuscript-grade) + outline 등급 PNG. 직접 호출하거나 다른 커맨드가 호출; 슬래시 없음. |
 | `verify-citation` | CrossRef/OpenAlex로 존재 + 메타데이터 확인. `@literature-curator`가 추가하는 모든 항목을 gate하고, 검증 결과를 프로젝트 summary table에 기록. |
 | `manuscript-scaffold` | 번들된 LaTeX skeleton을 사용자의 manuscript 디렉터리로 복사하고, 선택적으로 번들된 registry에서 저널별 `\documentclass`를 적용, 선택적으로 Overleaf 프로젝트를 clone(토큰은 추적 파일에 persist하지 않음), 기본 브랜치에 commit, push 전에 확인. `/start-research` phase 6에서 호출됨; standalone으로도 호출 가능. |
+| `paper-ingest` | 읽은 논문(PDF / DOI / URL)을 2개 폴더짜리 **reading library**로 ingest — 프로젝트 중립적인 요약 + cropped main figure + `index.csv` row, 이어서 relevance-gated된 project-usage 노트. `verify-citation` + `cropfig`를 재사용. manuscript BibTeX과는 별개. Standalone. [Reading-Library](wiki/Reading-Library.md) 참조. |
+| `session-start` | `/session-start`를 backing. 읽기 전용 프로젝트 orientation(corpus 읽기 + 상태 리포트; light/full 모드). |
+| `save-session-log` | `/save-session-log`를 backing. 날짜별 세션 기록 + 확정된 지식의 정밀한 wiki-distill. |
+| `update-version` | `/update-version`를 backing. outline/덱 버전업을 모든 live 포인터에 전파; 과거 기록은 그대로 고정. |
 
 ### 4 hooks
 
@@ -138,6 +145,7 @@ git clone https://github.com/youngeun1209/oh-my-claudecode-research \
 - **[Standalone Usage](wiki/Standalone-Usage.md)** — OMCR 단독 사용, 전체 워크스루
 - **[With OMC](wiki/With-OMC.md)** — 풀스택: OMCR + OMC companion 설치
 - **[Agents](wiki/Agents.md)** | **[Commands](wiki/Commands.md)** | **[Hooks](wiki/Hooks.md)** — 레퍼런스
+- **[Reading Library](wiki/Reading-Library.md)** — `paper-ingest`: 읽은 논문을 파일링(manuscript BibTeX과는 별개)
 - **[OMC Tool Reference](wiki/OMC-Tool-Reference.md)** — 47개의 OMC MCP 도구를 연구 단계별로 매핑
 - **[Specializing](wiki/Specializing.md)** — 분야별 프리셋 만들기
 

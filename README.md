@@ -8,7 +8,7 @@ _Don't learn research tooling. Just use OMCR._
 
 OMCR is a research workspace for Claude Code: six agents — `@supervisor`, `@analysis-implementer`, `@paper-writer`, `@figure-descriptor`, `@reviewer`, `@literature-curator` — you work alongside on hypothesis, analysis, writing, figures, citations, review. Six orchestration engines automate the common loops when you want it hands-off. Compose with [oh-my-claudecode](https://github.com/Yeachan-Heo/oh-my-claudecode) for generic orchestration on top (retries, parallelism, budget tracking).
 
-A 6-agent research team + 6 orchestration engines + 4 setup/workflow commands + 14 skills + 4 lightweight hooks.
+A 6-agent research team + 6 orchestration engines + 7 setup/workflow/utility commands + 18 skills + 4 lightweight hooks.
 
 > **Status: v0.1.** Breaking changes are likely. Feedback and PRs welcome.
 
@@ -123,7 +123,7 @@ Full walkthrough: [`wiki/Getting-Started.md`](wiki/Getting-Started.md)
 | `@reviewer`             | Adversarial pre-submission review at the target venue's level.                                                                                                                 |
 | `@literature-curator`   | Owns the project BibTeX + literature summary table in lockstep. Resolves `[CITE: ...]` placeholders, verifies citations via the `verify-citation` skill, never fabricates. |
 
-### 4 slash commands (parameterized via your project's CLAUDE.md)
+### 7 slash commands (parameterized via your project's CLAUDE.md)
 
 | Command                                  | What it does                                                                                                                                                                                                                                                                                                                                        |
 | ---------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -131,10 +131,13 @@ Full walkthrough: [`wiki/Getting-Started.md`](wiki/Getting-Started.md)
 | `/start-research [minimal\|neuro-fmri]` | Interview-driven: fill the `CLAUDE.md` placeholders (working title, hypothesis, target venue, datasets, narrative spine), optionally apply a preset to agent memory, scaffold the LaTeX manuscript dir (via the `manuscript-scaffold` skill, with optional journal template + Overleaf clone). Offers to run `/omcr-setup` first if not done. |
 | `/todofig [Fig N]`                     | Compare a captured figure deck against an outline → prioritized P0/P1/P2 TODO.                                                                                                                                                                                                                                                                     |
 | `/sync`                                | Reconcile current state (deck) with goal (outline), refresh agent memories, optionally embed cropped figures into a target document. Status snapshot, not a TODO.                                                                                                                                                                                   |
+| `/session-start [light\|full]`         | Read-only orientation — read the project corpus (CLAUDE.md, outline, MEMORY, wiki landing page) and report a summary + honest status snapshot. Zero side effects; light/full modes.                                                                                                                                                                 |
+| `/save-session-log [slug]`             | Write a dated, faithful record of the current session (requests, work, files touched, decisions, next steps) to the session-logs dir, then surgically distill settled knowledge into the wiki.                                                                                                                                                       |
+| `/update-version [@new files]`         | When the outline or figure deck is bumped (v4→v5), propagate the new filename into every live reference; offer to delete obsolete archives (confirm-gated). Reads the old values from `## Research stack`.                                                                                                                                            |
 
-### 14 skills
+### 18 skills
 
-The 4 setup/workflow slash commands are thin dispatchers — each forwards `$ARGUMENTS` to a matching skill. `cropfig`, `verify-citation`, `manuscript-scaffold` are standalone-invocable. **Plus** 1 primitive (`orchestrate` — internal, composes via 4 phases) + 6 engine skills backing the 6 orchestration commands; full walkthrough at [`wiki/Using-Orchestration.md`](wiki/Using-Orchestration.md). The table below covers the 7 setup/workflow skills.
+The 7 setup/workflow/utility slash commands are thin dispatchers — each forwards `$ARGUMENTS` to a matching skill. `cropfig`, `verify-citation`, `manuscript-scaffold`, `paper-ingest` are standalone-invocable. **Plus** 1 primitive (`orchestrate` — internal, composes via 4 phases) + 6 engine skills backing the 6 orchestration commands; full walkthrough at [`wiki/Using-Orchestration.md`](wiki/Using-Orchestration.md). The table below covers the 11 setup/workflow/utility skills.
 
 | Skill                   | What it does                                                                                                                                                                                                                                                                                                                                         |
 | ----------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -145,6 +148,10 @@ The 4 setup/workflow slash commands are thin dispatchers — each forwards `$ARG
 | `cropfig`             | Three-step pipeline from a `.key`/`.pptx` deck to manuscript + outline artifacts: per-slide vector PDFs (cropped, manuscript-grade) + outline-grade PNGs. Invoked directly or by other commands; no slash.                                                                                                                                       |
 | `verify-citation`     | Existence + metadata check via CrossRef/OpenAlex. Gates every entry `@literature-curator` adds, writes verification verdict into the project summary table.                                                                                                                                                                                        |
 | `manuscript-scaffold` | Copy the bundled LaTeX skeleton into the user's manuscript dir, optionally apply a journal-specific `\documentclass` from the bundled registry, optionally clone an Overleaf project (token never persisted to tracked files), commit on the default branch, ask before pushing. Called by `/start-research` phase 6; also standalone-invocable. |
+| `paper-ingest`        | Ingest a paper you read (PDF / DOI / URL) into a two-folder **reading library** — project-agnostic summary + cropped main figure + `index.csv` row, then a relevance-gated project-usage note. Reuses `verify-citation` + `cropfig`. Separate from the manuscript BibTeX. Standalone. See [Reading-Library](wiki/Reading-Library.md). |
+| `session-start`       | Backs `/session-start`. Read-only project orientation (corpus read + status report; light/full modes). |
+| `save-session-log`    | Backs `/save-session-log`. Dated session record + surgical wiki-distill of settled knowledge. |
+| `update-version`      | Backs `/update-version`. Propagate outline/deck version bumps across every live pointer; dated historical records stay frozen. |
 
 ### 4 hooks
 
@@ -163,6 +170,7 @@ The 4 setup/workflow slash commands are thin dispatchers — each forwards `$ARG
 - **[Standalone Usage](wiki/Standalone-Usage.md)** — using OMCR alone, full walkthrough
 - **[With OMC](wiki/With-OMC.md)** — full stack: OMCR + OMC companion install
 - **[Agents](wiki/Agents.md)** | **[Commands](wiki/Commands.md)** | **[Hooks](wiki/Hooks.md)** — references
+- **[Reading Library](wiki/Reading-Library.md)** — `paper-ingest`: file papers you read (separate from the manuscript BibTeX)
 - **[OMC Tool Reference](wiki/OMC-Tool-Reference.md)** — 47 OMC MCP tools mapped to research stages
 - **[Specializing](wiki/Specializing.md)** — author a field-specific preset
 

@@ -8,7 +8,7 @@ _Araştırma araçlarını öğrenmeyin. Sadece OMCR kullanın._
 
 OMCR, Claude Code için bir araştırma çalışma alanıdır: altı ajan — `@supervisor`, `@analysis-implementer`, `@paper-writer`, `@figure-descriptor`, `@reviewer`, `@literature-curator` — ile birlikte hipotez, analiz, yazım, figure, atıflar, review üzerinde çalışırsınız. Hands-off istediğinizde altı orkestrasyon motoru yaygın döngüleri otomatikleştirir. Üstte genel orkestrasyon (retry, paralellik, bütçe takibi) lazımsa [oh-my-claudecode](https://github.com/Yeachan-Heo/oh-my-claudecode) ile birleştirin.
 
-6 araştırma ajanı + 6 orkestrasyon motoru + 4 setup/workflow komutu + 14 skill + 4 hafif hook.
+6 araştırma ajanı + 6 orkestrasyon motoru + 7 setup/workflow/utility komutu + 18 skill + 4 hafif hook.
 
 > **Durum: v0.1.** Breaking change'ler muhtemel. Geri bildirim ve PR'lar memnuniyetle.
 
@@ -98,7 +98,7 @@ Tam walkthrough: [`wiki/Getting-Started.md`](wiki/Getting-Started.md)
 | `@reviewer` | Hedef venue seviyesinde gönderim öncesi adversarial review. |
 | `@literature-curator` | Projenin BibTeX'i ve literature summary table'ını lockstep tutar. `[CITE: ...]` placeholder'larını çözer, atıfları `verify-citation` skill'iyle doğrular, asla uydurmaz. |
 
-### 4 slash commands (projenizin CLAUDE.md'si üzerinden parametrelenir)
+### 7 slash commands (projenizin CLAUDE.md'si üzerinden parametrelenir)
 
 | Command | What it does |
 |---|---|
@@ -106,10 +106,13 @@ Tam walkthrough: [`wiki/Getting-Started.md`](wiki/Getting-Started.md)
 | `/start-research [minimal\|neuro-fmri]` | Mülakat tarzı: `CLAUDE.md` placeholder'larını doldurur (çalışma başlığı, hipotez, hedef venue, datasetler, anlatı omurgası), isteğe bağlı olarak ajan belleğine bir preset uygular, LaTeX manuscript dizinini scaffold eder (`manuscript-scaffold` skill'i aracılığıyla, dergi template'i + opsiyonel Overleaf clone ile). Eğer `/omcr-setup` çalıştırılmamışsa önce onu çalıştırmayı önerir. |
 | `/todofig [Fig N]` | Yakalanan bir figure deck'i bir outline ile karşılaştırır → P0/P1/P2 öncelikli TODO. |
 | `/sync` | Mevcut durumu (deck) hedefle (outline) uzlaştırır, ajan belleklerini tazeler, isteğe bağlı olarak crop'lanmış figure'ları hedef belgeye gömer. Bir snapshot, TODO değil. |
+| `/session-start [light\|full]` | Read-only orientasyon — proje corpus'unu (CLAUDE.md, outline, MEMORY, wiki landing page) okur ve bir özet + dürüst durum snapshot'ı raporlar. Yan etkisi yok; light/full modları. |
+| `/save-session-log [slug]` | Mevcut oturumun tarihli, sadık bir kaydını (istekler, yapılan iş, dokunulan dosyalar, kararlar, sonraki adımlar) session-logs dizinine yazar, ardından yerleşmiş bilgiyi wiki'ye cerrahi şekilde damıtır. |
+| `/update-version [@new files]` | Outline veya figure deck bump edildiğinde (v4→v5), yeni dosya adını her live referansa yayar; artık kullanılmayan arşivleri silmeyi önerir (confirm-gated). Eski değerleri `## Research stack`'ten okur. |
 
-### 14 skills
+### 18 skills
 
-4 setup/workflow slash komutu thin dispatcher'lardır — her biri `$ARGUMENTS`'i eşleşen bir skill'e forward eder. `cropfig`, `verify-citation`, `manuscript-scaffold` bağımsız olarak da çağrılabilir. **Ek olarak** 1 primitive (`orchestrate` — dahili, 4 fazdan compose olur) + 6 orkestrasyon komutunu destekleyen engine skill; tam walkthrough [`wiki/Using-Orchestration.md`](wiki/Using-Orchestration.md). Aşağıdaki tablo 7 setup/workflow skill'ini kapsar.
+7 setup/workflow/utility slash komutu thin dispatcher'lardır — her biri `$ARGUMENTS`'i eşleşen bir skill'e forward eder. `cropfig`, `verify-citation`, `manuscript-scaffold`, `paper-ingest` bağımsız olarak da çağrılabilir. **Ek olarak** 1 primitive (`orchestrate` — dahili, 4 fazdan compose olur) + 6 orkestrasyon komutunu destekleyen engine skill; tam walkthrough [`wiki/Using-Orchestration.md`](wiki/Using-Orchestration.md). Aşağıdaki tablo 11 setup/workflow/utility skill'ini kapsar.
 
 | Skill | What it does |
 |---|---|
@@ -120,6 +123,10 @@ Tam walkthrough: [`wiki/Getting-Started.md`](wiki/Getting-Started.md)
 | `cropfig` | `.key`/`.pptx` deck'ten manuscript + outline artifact'larına üç adımlı pipeline: slide-başına vektör PDF (cropped, manuscript-grade) + outline-grade PNG. Doğrudan veya başka komutlar tarafından çağrılır; slash yok. |
 | `verify-citation` | CrossRef/OpenAlex aracılığıyla varlık + metadata kontrolü. `@literature-curator`'ın eklediği her girdiyi gate'ler, doğrulama sonucunu projenin summary table'ına yazar. |
 | `manuscript-scaffold` | Paketlenmiş LaTeX skeleton'u kullanıcının manuscript dizinine kopyalar, isteğe bağlı olarak paketlenmiş registry'den dergiye özel `\documentclass` uygular, isteğe bağlı olarak bir Overleaf projesini clone'lar (token tracked dosyalara persist edilmez), default branch'e commit atar, push öncesi sorar. `/start-research` faz 6 tarafından çağrılır; bağımsız olarak da çağrılabilir. |
+| `paper-ingest` | Okuduğunuz bir makaleyi (PDF / DOI / URL) iki-klasörlü bir **reading library**'e ingest eder — proje-nötr özet + crop'lanmış ana figure + `index.csv` satırı, ardından relevance-gated bir proje-kullanım notu. `verify-citation` + `cropfig`'i yeniden kullanır. Manuscript BibTeX'inden ayrıdır. Standalone. Bkz. [Reading-Library](wiki/Reading-Library.md). |
+| `session-start` | `/session-start` arkasında. Read-only proje orientasyonu (corpus okuma + durum raporu; light/full modları). |
+| `save-session-log` | `/save-session-log` arkasında. Tarihli oturum kaydı + yerleşmiş bilginin wiki'ye cerrahi damıtımı. |
+| `update-version` | `/update-version` arkasında. Outline/deck versiyon bump'larını her live pointer'a yayar; tarihli geçmiş kayıtlar donmuş kalır. |
 
 ### 4 hooks
 
@@ -138,6 +145,7 @@ Tam walkthrough: [`wiki/Getting-Started.md`](wiki/Getting-Started.md)
 - **[Standalone Usage](wiki/Standalone-Usage.md)** — OMCR'ı tek başına kullanma, tam walkthrough
 - **[With OMC](wiki/With-OMC.md)** — full stack: OMCR + OMC companion kurulumu
 - **[Agents](wiki/Agents.md)** | **[Commands](wiki/Commands.md)** | **[Hooks](wiki/Hooks.md)** — referanslar
+- **[Reading Library](wiki/Reading-Library.md)** — `paper-ingest`: okuduğunuz makaleleri dosyalayın (manuscript BibTeX'inden ayrı)
 - **[OMC Tool Reference](wiki/OMC-Tool-Reference.md)** — 47 OMC MCP aracının araştırma aşamalarına mapping'i
 - **[Specializing](wiki/Specializing.md)** — alan-özel preset yazma
 

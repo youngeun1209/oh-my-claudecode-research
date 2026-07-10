@@ -8,7 +8,7 @@ _别再去学科研工具了。直接用 OMCR。_
 
 OMCR 是面向 Claude Code 的科研工作空间:6 名 agent —— `@supervisor`、`@analysis-implementer`、`@paper-writer`、`@figure-descriptor`、`@reviewer`、`@literature-curator` —— 与你一起完成假设、分析、写作、figure、引用、review。需要 hands-off 时,6 个编排引擎自动化常见循环。如果在上层还需要通用编排(重试、并行、预算追踪),就与 [oh-my-claudecode](https://github.com/Yeachan-Heo/oh-my-claudecode) 组合使用。
 
-6 名研究团队 agent + 6 个编排引擎 + 4 个 setup/workflow 命令 + 14 个技能 + 4 个轻量级 hook。
+6 名研究团队 agent + 6 个编排引擎 + 7 个 setup/workflow/utility 命令 + 18 个技能 + 4 个轻量级 hook。
 
 > **状态:v0.1。** 可能出现 breaking change。欢迎反馈与 PR。
 
@@ -98,7 +98,7 @@ git clone https://github.com/youngeun1209/oh-my-claudecode-research \
 | `@reviewer` | 按目标 venue 水准做提交前的对抗性审稿。 |
 | `@literature-curator` | 同步维护项目的 BibTeX 与 literature summary table。解析 `[CITE: ...]` 占位符,通过 `verify-citation` 技能验证引用,绝不捏造。 |
 
-### 4 slash commands (通过项目 CLAUDE.md 参数化)
+### 7 slash commands (通过项目 CLAUDE.md 参数化)
 
 | Command | What it does |
 |---|---|
@@ -106,10 +106,13 @@ git clone https://github.com/youngeun1209/oh-my-claudecode-research \
 | `/start-research [minimal\|neuro-fmri]` | 访谈式:填充 `CLAUDE.md` 占位符(工作标题、假设、目标 venue、数据集、叙述主线),可选地为代理记忆应用预设,scaffold LaTeX manuscript 目录(通过 `manuscript-scaffold` 技能,可选 journal template + Overleaf clone)。如未运行 `/omcr-setup`,会询问是否先运行。 |
 | `/todofig [Fig N]` | 对比已捕获的 figure deck 与 outline → 优先级 P0/P1/P2 的 TODO。 |
 | `/sync` | 调和当前状态(deck)与目标(outline),刷新代理记忆,可选地将 cropped figure 嵌入目标文档。是状态快照而非 TODO。 |
+| `/session-start [light\|full]` | 只读式的项目导览:读取项目语料(CLAUDE.md、outline、MEMORY、wiki 首页),汇报摘要 + 诚实的状态快照。零副作用;light/full 两种模式。 |
+| `/save-session-log [slug]` | 为当前会话写一份带日期、忠实的记录(请求、完成的工作、涉及的文件、决策、后续步骤)到 session-logs 目录,然后将已确定的知识精细提炼进 wiki。 |
+| `/update-version [@new files]` | 当 outline 或 figure deck 升级版本时(v4→v5),把新文件名传播到每一处引用;可选删除过时的归档(需确认)。从 `## Research stack` 读取旧值。 |
 
-### 14 skills
+### 18 skills
 
-4 个 setup/workflow 斜杠命令是 thin dispatcher —— 各自把 `$ARGUMENTS` 转发给同名技能。`cropfig`、`verify-citation`、`manuscript-scaffold` 也可独立调用。**额外加上** 1 个 primitive(`orchestrate` —— 内部使用,由 4 个 phase 组合而成) + 6 个支撑 6 个编排命令的引擎技能;完整教程见 [`wiki/Using-Orchestration.md`](wiki/Using-Orchestration.md)。下表覆盖 7 个 setup/workflow 技能。
+7 个 setup/workflow/utility 斜杠命令是 thin dispatcher —— 各自把 `$ARGUMENTS` 转发给同名技能。`cropfig`、`verify-citation`、`manuscript-scaffold`、`paper-ingest` 也可独立调用。**额外加上** 1 个 primitive(`orchestrate` —— 内部使用,由 4 个 phase 组合而成) + 6 个支撑 6 个编排命令的引擎技能;完整教程见 [`wiki/Using-Orchestration.md`](wiki/Using-Orchestration.md)。下表覆盖 11 个 setup/workflow/utility 技能。
 
 | Skill | What it does |
 |---|---|
@@ -120,6 +123,10 @@ git clone https://github.com/youngeun1209/oh-my-claudecode-research \
 | `cropfig` | 从 `.key`/`.pptx` deck 到 manuscript + outline artifact 的三步管道:逐 slide 矢量 PDF(cropped、manuscript-grade) + outline-grade PNG。直接调用或由其他命令调用;无斜杠。 |
 | `verify-citation` | 通过 CrossRef/OpenAlex 做存在性 + 元数据检查。把守 `@literature-curator` 添加的每一条,把验证结论写入项目 summary table。 |
 | `manuscript-scaffold` | 把内置的 LaTeX skeleton 复制到用户 manuscript 目录,可选地从内置 registry 应用 journal 专属 `\documentclass`,可选地 clone Overleaf 项目(token 不会 persist 到 tracked 文件),在默认分支 commit,push 前会询问。被 `/start-research` 的 phase 6 调用;也可独立调用。 |
+| `paper-ingest` | 把你读过的论文(PDF / DOI / URL)导入两文件夹结构的**阅读库**——项目无关的摘要 + cropped 主图 + `index.csv` 行,然后是按相关性门控的项目使用笔记。复用 `verify-citation` + `cropfig`。与 manuscript 的 BibTeX 分离。独立调用。 |
+| `session-start` | 支撑 `/session-start`。只读式项目导览(语料读取 + 状态汇报;light/full 模式)。 |
+| `save-session-log` | 支撑 `/save-session-log`。带日期的会话记录 + 对已确定知识的精细 wiki 提炼。 |
+| `update-version` | 支撑 `/update-version`。把 outline/deck 版本升级传播到每一处活跃引用;带日期的历史记录保持冻结。 |
 
 ### 4 hooks
 
@@ -138,6 +145,7 @@ git clone https://github.com/youngeun1209/oh-my-claudecode-research \
 - **[Standalone Usage](wiki/Standalone-Usage.md)** — 单独使用 OMCR 的完整教程
 - **[With OMC](wiki/With-OMC.md)** — 全栈:OMCR + OMC companion 安装
 - **[Agents](wiki/Agents.md)** | **[Commands](wiki/Commands.md)** | **[Hooks](wiki/Hooks.md)** — 参考
+- **[Reading Library](wiki/Reading-Library.md)** — `paper-ingest`:归档你读过的论文(与 manuscript 的 BibTeX 分离)
 - **[OMC Tool Reference](wiki/OMC-Tool-Reference.md)** — 将 47 个 OMC MCP 工具映射到研究阶段
 - **[Specializing](wiki/Specializing.md)** — 编写领域专属预设
 

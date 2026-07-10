@@ -22,7 +22,11 @@
     "./skills/cropfig",
     "./skills/verify-citation",
     "./skills/sync",
-    "./skills/todofig"
+    "./skills/todofig",
+    "./skills/paper-ingest",
+    "./skills/session-start",
+    "./skills/save-session-log",
+    "./skills/update-version"
   ],
   "hooks": "./hooks/hooks.json"
 }

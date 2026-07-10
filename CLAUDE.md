@@ -4,16 +4,16 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Repository status
 
-OMCR is at **v0.1**, work-in-progress. The only tagged releases are `v0.1.0` and `v0.1.1`; the plugin manifest (`.claude-plugin/plugin.json`) declares `0.1.0`. Everything currently on `main` — including the orchestration engines and the autonomous supervisor — is unreleased v0.1 work. There is no v0.2 / v0.3 / v0.4 — those labels showed up in earlier docs by mistake and are being removed. Current tree ships:
+OMCR is at **v0.1**, work-in-progress. The only tagged releases are `v0.1.0` and `v0.1.1`; the plugin manifest (`.claude-plugin/plugin.json`) declares `0.1.2` (ahead of the last tag — unreleased work). Everything currently on `main` — including the orchestration engines and the autonomous supervisor — is unreleased v0.1 work. There is no v0.2 / v0.3 / v0.4 — those labels showed up in earlier docs by mistake and are being removed. Current tree ships:
 - 6 research-team agents (`agents/`)
-- 10 slash commands (`commands/`) — 4 setup/workflow (`/omcr-setup`, `/start-research`, `/todofig`, `/sync`) + 6 orchestration engines (`/iterate-revision`, `/literature-sweep`, `/respond-reviewer`, `/figure-bake`, `/outline-expand`, `/supervisor-drive`)
-- 14 skills (`skills/`) — 7 setup/workflow skills + 1 primitive (`orchestrate`) + 6 engine skills backing the orchestration commands
+- 13 slash commands (`commands/`) — 7 setup/workflow/utility (`/omcr-setup`, `/start-research`, `/todofig`, `/sync`, `/session-start`, `/save-session-log`, `/update-version`) + 6 orchestration engines (`/iterate-revision`, `/literature-sweep`, `/respond-reviewer`, `/figure-bake`, `/outline-expand`, `/supervisor-drive`)
+- 18 skills (`skills/`) — 11 setup/workflow/utility skills + 1 primitive (`orchestrate`) + 6 engine skills backing the orchestration commands
 - 4 lightweight hooks (`hooks/`)
-- a canonical memory schema (`templates/MEMORY.template.md`)
+- a canonical memory schema (`templates/MEMORY.template.md`) + a reading-library scaffold (`templates/paper-library/`)
 - canonical orchestration-state schemas (`develop/example-state/` — tracked reference for `.claude/omcr-state/{paper,reviews,citations,figures,rebuttals}.json` + `_run-log.jsonl`)
 - the plugin manifest (`.claude-plugin/plugin.json`)
 - one worked example preset (`examples/neuro-fmri/` — neuro-flavored analysis-implementer body + redacted MEMORY.md skeletons)
-- wiki documentation (`wiki/`) — 15 markdown pages, mirrors to GitHub Wiki via `wiki/README.md` instructions
+- wiki documentation (`wiki/`) — 16 markdown pages + a `sync_github_wiki.sh` push helper, mirrors to GitHub Wiki via `wiki/README.md` instructions
 
 MIT licensed (`LICENSE`, 2026 Young-Eun Lee). No build chain, no npm — plain markdown plus shell scripts loaded directly by Claude Code.
 
@@ -31,7 +31,7 @@ Public release on GitHub as the **research companion** to the upstream `oh-my-cl
 The repo root holds symlinks to other local checkouts the maintainer wants accessible while working here:
 
 - [`oh-my-claudecode/`](oh-my-claudecode/) → maintainer's checkout of the upstream `oh-my-claudecode` project. Source material this "research" repo is built around — read it for prior art, naming, structure, and "how does upstream do X" (`oh-my-claudecode/README.md`, `CLAUDE.md`, `AGENTS.md`).
-- [`DoD-Agent/`](DoD-Agent/) → maintainer's checkout of a separate research project (`DoD-Agent`). Available as cross-reference; its own `CLAUDE.md` describes its scope. Don't assume content from `DoD-Agent` belongs in this repo unless the user says so.
+- [`movie-project/`](movie-project/) → maintainer's checkout of a separate research project (`DoD-Agent`, symlinked here as `movie-project`). Available as cross-reference; its own `CLAUDE.md` describes its scope. Don't assume content from it belongs in this repo unless the user says so.
 
 Rules that apply to **all** symlinks in this section:
 
@@ -53,18 +53,21 @@ oh-my-claudecode-research/
 │   ├── figure-descriptor.md
 │   ├── reviewer.md
 │   └── literature-curator.md         # bibliography curator + BibTeX/summary-table owner
-├── commands/                         # 10 thin dispatcher slash commands — all delegate to a matching skill
+├── commands/                         # 13 thin dispatcher slash commands — all delegate to a matching skill
 │   ├── omcr-setup.md                 # /omcr-setup → skills/omcr-setup/
 │   ├── start-research.md             # /start-research → skills/start-research/
 │   ├── todofig.md                    # /todofig → skills/todofig/
 │   ├── sync.md                       # /sync → skills/sync/
+│   ├── session-start.md              # /session-start → skills/session-start/ (read-only orientation)
+│   ├── save-session-log.md           # /save-session-log → skills/save-session-log/ (session journaling)
+│   ├── update-version.md             # /update-version → skills/update-version/ (version-pointer propagation)
 │   ├── iterate-revision.md           # /iterate-revision → skills/iterate-revision/
 │   ├── literature-sweep.md           # /literature-sweep → skills/literature-sweep/
 │   ├── respond-reviewer.md           # /respond-reviewer → skills/respond-reviewer/
 │   ├── figure-bake.md                # /figure-bake → skills/figure-bake/
 │   ├── outline-expand.md             # /outline-expand → skills/outline-expand/
 │   └── supervisor-drive.md           # /supervisor-drive → skills/supervisor-drive/
-├── skills/                           # 14 skills: 1 primitive + 6 engines + 7 setup/workflow
+├── skills/                           # 18 skills: 1 primitive + 6 engines + 11 setup/workflow/utility
 │   ├── orchestrate/                  # PRIMITIVE: state-read + dispatch + evaluate + loop. Internal — composed by engines, never invoked directly.
 │   │   ├── SKILL.md
 │   │   └── phases/{01-state-read,02-dispatch,03-evaluate,04-loop}.md
@@ -102,6 +105,15 @@ oh-my-claudecode-research/
 │   │   └── SKILL.md
 │   ├── todofig/                      # backs /todofig — deck-vs-outline gap analyzer
 │   │   └── SKILL.md
+│   ├── paper-ingest/                 # UTILITY: reading library — PDF/DOI/URL → summary + cropped fig + index.csv; reuses verify-citation + cropfig. Standalone.
+│   │   ├── SKILL.md
+│   │   └── {pdf_to_assets.sh,update_index.py}
+│   ├── session-start/                # backs /session-start — read-only orientation (corpus read + status report; light/full modes)
+│   │   └── SKILL.md
+│   ├── save-session-log/             # backs /save-session-log — dated session record + surgical wiki-distill
+│   │   └── SKILL.md
+│   ├── update-version/               # backs /update-version — propagate deck/outline version bumps across live pointers; frozen dated records stay frozen
+│   │   └── SKILL.md
 │   └── verify-citation/              # CrossRef/OpenAlex existence + metadata check; hard gate for /literature-sweep
 │       ├── SKILL.md
 │       └── verify_citation.py
@@ -120,6 +132,10 @@ oh-my-claudecode-research/
 │       └── README.md                 # how to overlay + author-your-own guide
 ├── templates/
 │   ├── MEMORY.template.md            # canonical empty MEMORY.md schema
+│   ├── paper-library/                # reading-library scaffold copied by paper-ingest / /start-research into the user's Paper library dir
+│   │   ├── README.md                 # two-folder model + conventions (buckets/status/bibkey)
+│   │   ├── _TEMPLATE.md              # Template B — project-usage note (relevant papers)
+│   │   └── bibliographic-management/{_TEMPLATE.md,index.csv,figs/.gitkeep}   # Template A — paper record + flat index
 │   ├── journal-registry.json         # venue → CTAN class lookup + aims/scope/editorial-priorities/reviewer-concerns per venue (27 entries; CTAN packages only, no bundled .cls). Schema v1.1.
 │   └── manuscript-skeleton/          # default LaTeX scaffold copied by /start-research (via manuscript-scaffold skill) into the user's Manuscript dir
 │       ├── main.tex                  # documentclass possibly rewritten by manuscript-scaffold per journal-registry
@@ -138,7 +154,7 @@ oh-my-claudecode-research/
 │   │   ├── rebuttals.json            # per-run rebuttal entries from /respond-reviewer
 │   │   └── _run-log.jsonl            # append-only run log (one JSON per line)
 │   └── (other develop/ files are gitignored — design notes, decisions, test fixtures, smoketest)
-├── wiki/                             # 15-page documentation deep dive (browse here or push to GitHub Wiki)
+├── wiki/                             # 16-page documentation deep dive + sync_github_wiki.sh (browse here or push to GitHub Wiki)
 │   ├── Home.md                       # navigation hub
 │   ├── Getting-Started.md            # install + first session
 │   ├── Standalone-Usage.md           # OMCR alone walkthrough (@-mention style)
@@ -150,7 +166,8 @@ oh-my-claudecode-research/
 │   ├── Orchestration-Comparison.md   # OMCR-alone vs OMCR+OMC matrix + decision tree
 │   ├── Autonomous-Drive.md           # /supervisor-drive deep dive (6 safety gates)
 │   ├── Agents.md                     # 6 agents reference
-│   ├── Commands.md                   # all 10 slash commands reference
+│   ├── Commands.md                   # all 13 slash commands reference + standalone skills
+│   ├── Reading-Library.md            # paper-ingest two-folder reading library
 │   ├── Hooks.md                      # 4 hooks reference
 │   ├── Specializing.md               # author a field-specific preset + engine-skill frontmatter
 │   └── README.md                     # how to sync this dir to GitHub Wiki
@@ -182,10 +199,10 @@ When editing agents, link to the template file via a relative path so users disc
 
 ## Plugin wiring — what this registers with Claude Code
 
-The plugin manifest (`.claude-plugin/plugin.json`) declares four registries:
-- `agents: ./agents/` — 6 `@`-mentionable agents
-- `commands: ./commands/` — 10 thin dispatcher slash commands: 4 setup/workflow (`/omcr-setup`, `/start-research`, `/sync`, `/todofig`) + 6 orchestration engines (`/iterate-revision`, `/literature-sweep`, `/respond-reviewer`, `/figure-bake`, `/outline-expand`, `/supervisor-drive`) — each forwards `$ARGUMENTS` to its matching skill
-- `skills: ./skills/` — 14 invocable skills: 7 setup/workflow (`omcr-setup`, `start-research`, `sync`, `todofig`, `cropfig`, `verify-citation`, `manuscript-scaffold`) + 1 primitive (`orchestrate` — internal building block, composed by engines, not invoked directly) + 6 engine skills backing the orchestration commands. `cropfig`, `verify-citation`, `manuscript-scaffold` are also standalone-invocable.
+The plugin manifest (`.claude-plugin/plugin.json`) declares four registries (plus a tracked `.claude-plugin/marketplace.json` for marketplace listing):
+- `agents: ./agents/` — 6 `@`-mentionable agents (auto-discovered from the dir; no `agents:` key in the manifest)
+- `commands: ./commands/` — 13 thin dispatcher slash commands: 7 setup/workflow/utility (`/omcr-setup`, `/start-research`, `/sync`, `/todofig`, `/session-start`, `/save-session-log`, `/update-version`) + 6 orchestration engines (`/iterate-revision`, `/literature-sweep`, `/respond-reviewer`, `/figure-bake`, `/outline-expand`, `/supervisor-drive`) — each forwards `$ARGUMENTS` to its matching skill
+- `skills: ./skills/` — 18 invocable skills: 11 setup/workflow/utility (`omcr-setup`, `start-research`, `sync`, `todofig`, `cropfig`, `verify-citation`, `manuscript-scaffold`, `paper-ingest`, `session-start`, `save-session-log`, `update-version`) + 1 primitive (`orchestrate` — internal building block, composed by engines, not invoked directly) + 6 engine skills backing the orchestration commands. `cropfig`, `verify-citation`, `manuscript-scaffold`, `paper-ingest` are also standalone-invocable.
 - `hooks: ./hooks/hooks.json` — 4 lifecycle hooks
 
 The 4 hooks wire to Claude Code events:

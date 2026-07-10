@@ -1,6 +1,6 @@
 # oh-my-claudecode-research — Wiki
 
-A Claude Code plugin that ships a **6-agent research team** + **10 slash commands** (4 setup/workflow + 6 orchestration engines) + **14 skills** (1 primitive + 13 backing surfaces) + **4 lightweight hooks**, all tailored for producing research papers (or any structured-figure-and-outline document).
+A Claude Code plugin that ships a **6-agent research team** + **13 slash commands** (7 setup/workflow/utility + 6 orchestration engines) + **18 skills** (1 primitive + 17 backing surfaces) + **4 lightweight hooks**, all tailored for producing research papers (or any structured-figure-and-outline document).
 
 This wiki is the documentation deep dive. The [README](../README.md) is the quick overview.
 
@@ -15,7 +15,8 @@ This wiki is the documentation deep dive. The [README](../README.md) is the quic
 
 ### Reference
 - **[Agents](Agents.md)** — The 6 core agents (supervisor / analysis-implementer / paper-writer / figure-descriptor / reviewer / literature-curator)
-- **[Commands](Commands.md)** — all 10 slash commands (4 setup/workflow + 6 orchestration engines) and the standalone skills
+- **[Commands](Commands.md)** — all 13 slash commands (7 setup/workflow/utility + 6 orchestration engines) and the standalone skills
+- **[Reading Library](Reading-Library.md)** — `paper-ingest`: file papers you read into a two-folder library (separate from the manuscript BibTeX)
 - **[Hooks](Hooks.md)** — `pii-scrub`, `memory-load`, `citation-warn`, `setup-nudge`
 - **[OMC Tool Reference](OMC-Tool-Reference.md)** — 47 OMC MCP tools mapped to research workflow stages
 - **[Orchestration Comparison](Orchestration-Comparison.md)** — composition matrix: OMCR alone vs OMCR + OMC, decision tree, cost & complexity table
@@ -49,8 +50,8 @@ OMCR is a **research-workflow orchestration plugin**. It coordinates a 6-special
 
 Plus the wiring:
 - 4 hooks (PII guard, MEMORY auto-load, citation warning, setup nudge)
-- 10 slash commands: 4 setup/workflow (`/omcr-setup` installs infra; `/start-research` is the interview; `/todofig` and `/sync` cover figure-deck-vs-outline) + 6 orchestration engines (`/iterate-revision`, `/literature-sweep`, `/respond-reviewer`, `/figure-bake`, `/outline-expand`, `/supervisor-drive` — see [Using-Orchestration](Using-Orchestration.md))
-- 14 skills: the 4 setup/workflow commands are backed by matching skills; `cropfig` strips caption bands; `verify-citation` gates every citation; `manuscript-scaffold` lays down the LaTeX skeleton. Plus 1 primitive (`orchestrate`) + 6 engine skills (`iterate-revision`, `literature-sweep`, `respond-reviewer`, `figure-bake`, `outline-expand`, `supervisor-drive`)
+- 13 slash commands: 7 setup/workflow/utility (`/omcr-setup` installs infra; `/start-research` is the interview; `/todofig` and `/sync` cover figure-deck-vs-outline; `/session-start` orients read-only; `/save-session-log` journals a session; `/update-version` propagates artifact version bumps) + 6 orchestration engines (`/iterate-revision`, `/literature-sweep`, `/respond-reviewer`, `/figure-bake`, `/outline-expand`, `/supervisor-drive` — see [Using-Orchestration](Using-Orchestration.md))
+- 18 skills: the setup/workflow/utility commands are backed by matching skills; `cropfig` strips caption bands; `verify-citation` gates every citation; `manuscript-scaffold` lays down the LaTeX skeleton; `paper-ingest` files papers you read into a two-folder [Reading Library](Reading-Library.md). Plus 1 primitive (`orchestrate`) + 6 engine skills (`iterate-revision`, `literature-sweep`, `respond-reviewer`, `figure-bake`, `outline-expand`, `supervisor-drive`)
 
 ## What OMCR is NOT
 

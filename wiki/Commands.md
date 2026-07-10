@@ -1,6 +1,6 @@
 # Commands — reference
 
-OMCR ships **10 slash commands** (all thin dispatchers) and **14 invocable skills**, all parameterized via the [Project context + Research stack blocks](Configuration.md) in your project's `CLAUDE.md`. The 4 setup/workflow commands (`/omcr-setup`, `/start-research`, `/todofig`, `/sync`) are documented in detail below, followed by the 2 standalone skills (`cropfig`, `verify-citation`). The 6 orchestration engines (`/iterate-revision`, `/literature-sweep`, `/respond-reviewer`, `/figure-bake`, `/outline-expand`, `/supervisor-drive`) are summarized at the bottom with links to deeper walkthroughs.
+OMCR ships **13 slash commands** (all thin dispatchers) and **18 invocable skills**, all parameterized via the [Project context + Research stack blocks](Configuration.md) in your project's `CLAUDE.md`. The 7 setup/workflow/utility commands (`/omcr-setup`, `/start-research`, `/todofig`, `/sync`, `/session-start`, `/save-session-log`, `/update-version`) are documented in detail below, followed by the 3 standalone skills (`cropfig`, `verify-citation`, `paper-ingest`). The 6 orchestration engines (`/iterate-revision`, `/literature-sweep`, `/respond-reviewer`, `/figure-bake`, `/outline-expand`, `/supervisor-drive`) are summarized at the bottom with links to deeper walkthroughs.
 
 ## `/omcr-setup`
 
@@ -209,6 +209,42 @@ Output:
 - Fig 5 figure-descriptor memory says "Raw / Own / Other" but slide shows "Baseline / Treatment / Sham" — please reconcile.
 ```
 
+## `/session-start`
+
+**Goal:** Reproduce "understand this project" at the start of a session — read the project's Markdown corpus, build a genuine understanding, and report a concise summary + honest current-status snapshot. **Read-only, zero side effects** (no exports, no memory edits, no report files, no analysis runs). For a writing status snapshot use `/sync`; for figure gaps use `/todofig`.
+
+**Inputs (from `## Research stack` block):** `Outline file` (canonical ground truth), `Wiki dir` (optional — landing page synthesis).
+
+**Argument:** `$ARGUMENTS` — `light` (Step 1→3→4, the auto-trigger default) · `full` / empty (full corpus sweep) · a focus area (e.g. `R3`, `figures`) narrows the status report.
+
+**Report:** identity → narrative spine → result structure → current status table → most-urgent P0s → drift flags. Precedence for scientific content: `Outline file` > wiki > memory; when they disagree, the outline wins and the discrepancy is flagged.
+
+[Source: `commands/session-start.md`](../commands/session-start.md), [`skills/session-start/`](../skills/session-start/)
+
+## `/save-session-log`
+
+**Goal:** Write a structured, faithful Markdown record of the current session — requests, work done, files touched (with paths), decisions, open next steps — to the session-logs dir (one dated file per invocation), then surgically mirror any *settled* knowledge into the wiki so future sessions see it. A working record for the user, **not** a scientific artifact or a sync report.
+
+**Inputs (from `## Research stack` block):** `Session logs dir` (default `session-logs/`), `Wiki dir` (optional — distill target).
+
+**Argument:** `$ARGUMENTS` — optional filename slug (auto-derived from the session theme if omitted).
+
+**Side effects (limited):** (a) writes one new log file (never overwrites — disambiguates `-2`, `-3`); (b) surgical factual updates to *existing* wiki pages only. New wiki pages / framing changes / pre-reg edits are **proposed, not written** — gated on user confirmation. Reconstructs only what actually happened; marks unfinished background jobs honestly.
+
+[Source: `commands/save-session-log.md`](../commands/save-session-log.md), [`skills/save-session-log/`](../skills/save-session-log/)
+
+## `/update-version`
+
+**Goal:** When a versioned artifact (the `Outline file` or the `Deck file`) is bumped (v4→v5, ver7→ver8), propagate the new filename into **every live reference** — CLAUDE.md, command/skill files, agent memories, manuscript anchors, export scripts — so no downstream tool points at a stale file. Then offer to delete obsolete archives (confirm-gated, per file, never automatic).
+
+**Inputs (from `## Research stack` block):** `Deck file`, `Outline file` — hold the *previously-current* values; the delta vs the new files gives the rename pairs. The block's values are updated **last** to reflect the new state.
+
+**Argument:** `$ARGUMENTS` — `@`-mention the new file(s) (e.g. `@outline_v5.md @figures_v8.key`), or run bare to be prompted. A partial bump (only one artifact) is accepted.
+
+**Frozen — never rewritten:** dated snapshot reports (`sync_reports/`, `todofig_reports/`), `Last synced:` markers, past-dated changelog bullets, and the internal version header inside an archive file (that file *is* that version). The live sweep is the source of truth (line numbers drift); a wrong deck name in an export script silently breaks `/todofig`, `/sync`, and `cropfig`, so config/scripts are verified after editing.
+
+[Source: `commands/update-version.md`](../commands/update-version.md), [`skills/update-version/`](../skills/update-version/)
+
 ## Orchestration engines
 
 Six engine commands automate multi-step research workflows. Each engine reads/writes state in `.claude/omcr-state/`, dispatches one or more agent personas via the [`orchestrate`](../skills/orchestrate/SKILL.md) primitive skill, and reports a DONE / CONTINUE / BLOCKED / HALT verdict. Engines are **leaves** — they never call other slash-command engines; cross-engine coordination is the autonomous `/supervisor-drive`'s job.
@@ -317,8 +353,25 @@ python3 .../verify_citation.py --doi 10.1038/nature14236 \
 
 [Source: `skills/verify-citation/SKILL.md`](../skills/verify-citation/SKILL.md) and [`verify_citation.py`](../skills/verify-citation/verify_citation.py)
 
+## `paper-ingest` (skill, not a slash command)
+
+**Goal:** Turn a paper you hand it — a PDF path, a DOI, or a URL — into a clean record in the project's two-folder **reading library**: a project-agnostic summary (with a cropped main figure) under `bibliographic-management/`, an upserted row in `index.csv`, and — only after judging relevance and getting your go-ahead — a project-usage note. This is the **reading/notes layer**, separate from the manuscript `references.bib` that `@literature-curator` owns; a paper can be recorded here without ever being cited.
+
+**Invocation:** Standalone-invocable via the `Skill` tool (`skill="paper-ingest"`), or triggered by "ingest this paper" / "summarize and file this PDF".
+
+**Inputs (env → `## Research stack` → default):** `Paper library dir` (`PAPER_LIBRARY_DIR`, default `docs/papers/`), `Paper buckets` (`PAPER_BUCKETS`, comma-separated tag vocabulary — free-form if unset).
+
+**Reuses existing OMCR skills:** `verify-citation` (DOI/URL → canonical metadata + abstract, no fabrication) and `cropfig`'s band heuristic (main-figure crop). PDFs go through the bundled poppler wrapper `pdf_to_assets.sh` (extract text + page renders, then `--crop` a figure region). `update_index.py` does an idempotent `bibkey`-keyed upsert.
+
+**Scaffold:** on first run, if the `Paper library dir` is absent, it is copied from [`templates/paper-library/`](../templates/paper-library/) (two `_TEMPLATE.md` files + `index.csv` header + `figs/`).
+
+**Deep dive:** [Reading-Library](Reading-Library.md).
+
+[Source: `skills/paper-ingest/SKILL.md`](../skills/paper-ingest/SKILL.md)
+
 ## See also
 
 - [Configuration](Configuration.md) — `## Research stack` block schema
+- [Reading-Library](Reading-Library.md) — the `paper-ingest` two-folder reading library
 - [Agents](Agents.md) — agents that may invoke these commands
 - [Hooks](Hooks.md) — `pii-scrub` runs before any write the commands produce

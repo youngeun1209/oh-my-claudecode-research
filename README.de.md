@@ -8,7 +8,7 @@ _Lernen Sie keine Research-Tools. Nutzen Sie einfach OMCR._
 
 OMCR ist ein Forschungs-Workspace für Claude Code: sechs Agents — `@supervisor`, `@analysis-implementer`, `@paper-writer`, `@figure-descriptor`, `@reviewer`, `@literature-curator` — mit denen Sie an Hypothese, Analyse, Schreiben, Figures, Citations, Review zusammenarbeiten. Sechs Orchestrierungs-Engines automatisieren die häufigen Loops, wenn Sie hands-off wollen. Kombinieren Sie es mit [oh-my-claudecode](https://github.com/Yeachan-Heo/oh-my-claudecode), wenn Sie darüber generische Orchestrierung brauchen (Retries, Parallelität, Budget-Tracking).
 
-Ein 6-Agenten-Forschungsteam + 6 Orchestrierungs-Engines + 4 Setup/Workflow-Commands + 14 Skills + 4 leichtgewichtige Hooks.
+Ein 6-Agenten-Forschungsteam + 6 Orchestrierungs-Engines + 7 Setup/Workflow/Utility-Commands + 18 Skills + 4 leichtgewichtige Hooks.
 
 > **Status: v0.1.** Breaking Changes sind wahrscheinlich. Feedback und PRs willkommen.
 
@@ -98,7 +98,7 @@ Vollständiger Walkthrough: [`wiki/Getting-Started.md`](wiki/Getting-Started.md)
 | `@reviewer` | Adversariale Vor-Einreichungs-Review auf Niveau des Ziel-Venues. |
 | `@literature-curator` | Pflegt BibTeX und Literatur-Summary-Tabelle des Projekts im Lockstep. Löst `[CITE: ...]`-Platzhalter auf, verifiziert Zitate per `verify-citation`-Skill, fabriziert niemals. |
 
-### 4 slash commands (parametrisiert über die CLAUDE.md Ihres Projekts)
+### 7 slash commands (parametrisiert über die CLAUDE.md Ihres Projekts)
 
 | Command | What it does |
 |---|---|
@@ -106,10 +106,13 @@ Vollständiger Walkthrough: [`wiki/Getting-Started.md`](wiki/Getting-Started.md)
 | `/start-research [minimal\|neuro-fmri]` | Interview-Stil: Füllt die `CLAUDE.md`-Platzhalter (Working Title, Hypothese, Ziel-Venue, Datasets, Narrative), wendet optional ein Preset auf Agent-Memory an, scaffoldet das LaTeX-Manuscript-Verzeichnis (via `manuscript-scaffold`-Skill, mit Journal-Template + optionalem Overleaf-Clone). Bietet `/omcr-setup` zuerst auszuführen, falls nicht geschehen. |
 | `/todofig [Fig N]` | Vergleicht ein erfasstes Figure-Deck mit einem Outline → priorisierter P0/P1/P2-TODO. |
 | `/sync` | Versöhnt den aktuellen Zustand (Deck) mit dem Ziel (Outline), aktualisiert Agent-Memories, bettet optional gecroppte Figures in ein Zieldokument ein. Status-Snapshot, kein TODO. |
+| `/session-start [light\|full]` | Read-only Orientierung: liest den Projekt-Korpus (CLAUDE.md, Outline, MEMORY, Wiki-Landingpage), berichtet Zusammenfassung + ehrlichen Status. Keine Nebenwirkungen; light-/full-Modi. |
+| `/save-session-log [slug]` | Schreibt einen datierten, getreuen Bericht der Session (Anfragen, Arbeit, berührte Dateien, Entscheidungen, nächste Schritte) in das Session-Logs-Verzeichnis und destilliert anschließend chirurgisch abgesichertes Wissen ins Wiki. |
+| `/update-version [@new files]` | Wenn Outline oder Figure-Deck angehoben wird (v4→v5), propagiert den neuen Dateinamen in jede lebende Referenz; bietet an, obsolete Archive zu löschen (bestätigungspflichtig). Liest die alten Werte aus `## Research stack`. |
 
-### 14 skills
+### 18 skills
 
-Die 4 Setup/Workflow-Slash-Commands sind Thin Dispatcher — jeder leitet `$ARGUMENTS` an einen entsprechenden Skill weiter. `cropfig`, `verify-citation`, `manuscript-scaffold` sind eigenständig aufrufbar. **Zusätzlich** 1 Primitive (`orchestrate` — intern, setzt sich aus 4 Phasen zusammen) + 6 Engine-Skills, die die 6 Orchestrierungs-Commands stützen; vollständiger Walkthrough in [`wiki/Using-Orchestration.md`](wiki/Using-Orchestration.md). Die Tabelle unten deckt die 7 Setup/Workflow-Skills ab.
+Die 7 Setup/Workflow/Utility-Slash-Commands sind Thin Dispatcher — jeder leitet `$ARGUMENTS` an einen entsprechenden Skill weiter. `cropfig`, `verify-citation`, `manuscript-scaffold`, `paper-ingest` sind eigenständig aufrufbar. **Zusätzlich** 1 Primitive (`orchestrate` — intern, setzt sich aus 4 Phasen zusammen) + 6 Engine-Skills, die die 6 Orchestrierungs-Commands stützen; vollständiger Walkthrough in [`wiki/Using-Orchestration.md`](wiki/Using-Orchestration.md). Die Tabelle unten deckt die 11 Setup/Workflow/Utility-Skills ab.
 
 | Skill | What it does |
 |---|---|
@@ -120,6 +123,10 @@ Die 4 Setup/Workflow-Slash-Commands sind Thin Dispatcher — jeder leitet `$ARGU
 | `cropfig` | Drei-Schritt-Pipeline von einem `.key`/`.pptx`-Deck zu Manuscript- + Outline-Artefakten: pro-Slide-Vektor-PDFs (gecroppt, manuscript-grade) + outline-grade-PNGs. Direkt oder durch andere Commands aufgerufen; kein Slash. |
 | `verify-citation` | Existenz- + Metadaten-Check via CrossRef/OpenAlex. Gatet jeden Eintrag, den `@literature-curator` hinzufügt, schreibt das Verifikations-Urteil in die Summary-Table des Projekts. |
 | `manuscript-scaffold` | Kopiert das gebündelte LaTeX-Skeleton in das Manuscript-Verzeichnis des Nutzers, wendet optional ein journal-spezifisches `\documentclass` aus dem gebündelten Registry an, klont optional ein Overleaf-Projekt (Token wird nie in tracked Dateien persistiert), commitet auf den Default-Branch, fragt vor dem Push. Wird von `/start-research` Phase 6 aufgerufen; auch eigenständig aufrufbar. |
+| `paper-ingest` | Nimmt ein gelesenes Paper (PDF / DOI / URL) in eine zweigeteilte **Reading Library** auf — projektunabhängige Zusammenfassung + gecroppte Hauptfigure + `index.csv`-Zeile, danach eine relevanzgegatete Projekt-Nutzungsnotiz. Nutzt `verify-citation` + `cropfig` wieder. Getrennt von der Manuscript-BibTeX. Eigenständig. |
+| `session-start` | Stützt `/session-start`. Read-only Projekt-Orientierung (Korpus-Lektüre + Statusbericht; light-/full-Modi). |
+| `save-session-log` | Stützt `/save-session-log`. Datierter Session-Bericht + chirurgische Wiki-Destillation abgesicherten Wissens. |
+| `update-version` | Stützt `/update-version`. Propagiert Outline-/Deck-Versionssprünge über jeden lebenden Pointer; datierte historische Records bleiben eingefroren. |
 
 ### 4 hooks
 
@@ -138,6 +145,7 @@ Die 4 Setup/Workflow-Slash-Commands sind Thin Dispatcher — jeder leitet `$ARGU
 - **[Standalone Usage](wiki/Standalone-Usage.md)** — OMCR allein nutzen, vollständiger Walkthrough
 - **[With OMC](wiki/With-OMC.md)** — Full Stack: OMCR + OMC-Companion-Installation
 - **[Agents](wiki/Agents.md)** | **[Commands](wiki/Commands.md)** | **[Hooks](wiki/Hooks.md)** — Referenzen
+- **[Reading Library](wiki/Reading-Library.md)** — `paper-ingest`: gelesene Papers ablegen (getrennt von der Manuscript-BibTeX)
 - **[OMC Tool Reference](wiki/OMC-Tool-Reference.md)** — 47 OMC-MCP-Tools auf Forschungsphasen gemappt
 - **[Specializing](wiki/Specializing.md)** — fachspezifisches Preset autoren
 

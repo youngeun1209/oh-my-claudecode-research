@@ -24,6 +24,10 @@ Add a `## Research stack` section to your project's `CLAUDE.md`. The slash comma
 - **Report language:** English
 - **Report output dir:** ./todofig_reports/
 - **Sync report dir:** ./sync_reports/
+- **Paper library dir:** docs/papers/   (reading library — used by `paper-ingest`)
+- **Paper buckets:** core-method, baselines, datasets   (optional tag vocabulary for `paper-ingest`)
+- **Session logs dir:** session-logs/   (used by `/save-session-log`)
+- **Wiki dir:** docs/wiki/   (optional — read by `/session-start`, distilled into by `/save-session-log`)
 ```
 
 ### Field reference
@@ -45,6 +49,10 @@ Add a `## Research stack` section to your project's `CLAUDE.md`. The slash comma
 | `CrossRef email` | `verify-citation` | email | (optional) | Polite-pool identifier for CrossRef. Recommended — higher rate limit and priority on the public API. Not used to send any mail. |
 | `Overleaf git URL` | `/start-research` | URL | (optional) | If set, `/start-research` (via the `manuscript-scaffold` skill) clones the Overleaf project into `Manuscript dir` and scaffolds the skeleton there. Requires Overleaf paid plan with Git Integration. Authentication token is cached only in git's credential helper or `~/.netrc` — never written to CLAUDE.md or any tracked file. |
 | `Data root` | `/figure-bake` | path | `./data/` | Root directory for experimental data. `/figure-bake` resolves figure data references relative to this. Per-figure paths inside a figure brief reference paths under this root. |
+| `Paper library dir` | `paper-ingest` | path | `docs/papers/` | Root of the two-folder reading library (`bibliographic-management/` records + project-usage notes + `index.csv`). Scaffolded from [`templates/paper-library/`](../templates/paper-library/) on first ingest. Separate from the manuscript `BibTeX file`. |
+| `Paper buckets` | `paper-ingest` | comma-list | (free-form) | Optional tag vocabulary that groups reading by theme (e.g. `core-method, baselines, datasets`). If unset, `paper-ingest` picks a free-form one-word tag. No default vocabulary ships — buckets are a project choice. |
+| `Session logs dir` | `/save-session-log` | path | `session-logs/` | Where `/save-session-log` writes one dated `session_<ts>_<slug>.md` per invocation. |
+| `Wiki dir` | `/session-start`, `/save-session-log` | path | `docs/wiki/` (if present) | Project knowledge vault. `/session-start` reads its landing page for orientation; `/save-session-log` surgically distills settled knowledge into it. Optional — both skills degrade gracefully if absent. |
 
 ### First-run wizard
 
@@ -70,6 +78,10 @@ Use environment variables to override layer 2 for a single invocation or to pass
 | `CROPFIG_PROBE_DPI` | `cropfig` func 2 | (no layer-2 field; tunable knob) |
 | `CROPFIG_PNG_DPI` | `cropfig` func 2 | (no layer-2 field; tunable knob) |
 | `CLAUDE_RESEARCH_DATA_ROOT` | `/figure-bake` | `Data root` |
+| `PAPER_LIBRARY_DIR` | `paper-ingest` | `Paper library dir` |
+| `PAPER_BUCKETS` | `paper-ingest` | `Paper buckets` |
+| `SESSION_LOGS_DIR` | `/save-session-log` | `Session logs dir` |
+| `WIKI_DIR` | `/session-start`, `/save-session-log` | `Wiki dir` |
 | `CLAUDE_RESEARCH_DISABLE_PII_SCRUB` | `pii-scrub` hook | (n/a — disables) |
 | `CLAUDE_RESEARCH_DISABLE_MEMORY_LOAD` | `memory-load` hook | (n/a — disables) |
 | `CLAUDE_RESEARCH_DISABLE_CITATION_WARN` | `citation-warn` hook | (n/a — disables) |

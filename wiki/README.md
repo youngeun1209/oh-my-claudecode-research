@@ -18,6 +18,22 @@ git add . && git commit -m "Sync wiki from main repo" && git push origin master
 
 GitHub Wiki uses Markdown but has [its own page-naming conventions](https://docs.github.com/en/communities/documenting-your-project-with-wikis/adding-or-editing-wiki-pages) — page names become filenames with `-` for spaces and `.md` extension, so the existing filenames (`Home.md`, `Getting-Started.md`, etc.) work directly.
 
+### Automated sync (`sync_github_wiki.sh`)
+
+For a folder-structured wiki (nested `.md` under subdirs, Obsidian-style), the bundled
+[`sync_github_wiki.sh`](sync_github_wiki.sh) flattens the tree into GitHub Wiki's flat namespace,
+strips YAML frontmatter, and generates a folder-grouped `_Sidebar.md`. Enable Wikis + create the
+first page in the repo's Wiki tab once, then:
+
+```bash
+bash wiki/sync_github_wiki.sh <src-wiki-dir> https://github.com/<owner>/<repo>.wiki.git
+# e.g. for a project's own docs/wiki/ vault:
+bash wiki/sync_github_wiki.sh docs/wiki https://github.com/<owner>/<repo>.wiki.git
+```
+
+OMCR's own `wiki/` is already flat (`Home.md`, `Getting-Started.md`, …), so the manual `cp` above
+is enough for it; the script is the reusable utility for a project's nested knowledge vault.
+
 ## Entry point
 
 Start at [`Home.md`](Home.md) for navigation.
@@ -31,6 +47,8 @@ Start at [`Home.md`](Home.md) for navigation.
 - `Configuration.md` — `## Research stack` block + env vars
 - `OMC-Tool-Reference.md` — 47 OMC MCP tools mapped to research workflow
 - `Agents.md` — 6 agents reference
-- `Commands.md` — `/todofig`, `/sync`, `cropfig`, `verify-citation`
+- `Commands.md` — all 13 slash commands + standalone skills (`cropfig`, `verify-citation`, `paper-ingest`)
+- `Reading-Library.md` — `paper-ingest` two-folder reading library
 - `Hooks.md` — 4 hooks
 - `Specializing.md` — Author a field-specific preset
+- `sync_github_wiki.sh` — flatten-and-push a folder-structured wiki to GitHub Wiki

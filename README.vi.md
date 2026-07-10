@@ -8,7 +8,7 @@ _Đừng học công cụ nghiên cứu. Cứ dùng OMCR._
 
 OMCR là một không gian làm việc nghiên cứu cho Claude Code: sáu agent — `@supervisor`, `@analysis-implementer`, `@paper-writer`, `@figure-descriptor`, `@reviewer`, `@literature-curator` — bạn cùng làm việc trên giả thuyết, phân tích, viết, figure, citation, review. Sáu engine điều phối tự động hóa các vòng lặp phổ biến khi bạn muốn hands-off. Kết hợp với [oh-my-claudecode](https://github.com/Yeachan-Heo/oh-my-claudecode) khi cần điều phối tổng quát ở tầng trên (retry, parallel, budget tracking).
 
-Đội nghiên cứu 6 agent + 6 engine điều phối + 4 lệnh setup/workflow + 14 skill + 4 hook nhẹ.
+Đội nghiên cứu 6 agent + 6 engine điều phối + 7 lệnh setup/workflow/utility + 18 skill + 4 hook nhẹ.
 
 > **Trạng thái: v0.1.** Có thể có thay đổi phá vỡ tương thích. Hoan nghênh feedback và PR.
 
@@ -98,7 +98,7 @@ Hướng dẫn đầy đủ: [`wiki/Getting-Started.md`](wiki/Getting-Started.md
 | `@reviewer` | Review đối kháng trước khi submit ở mức của venue mục tiêu. |
 | `@literature-curator` | Sở hữu đồng bộ BibTeX và bảng tóm tắt literature của dự án. Giải quyết placeholder `[CITE: ...]`, xác minh trích dẫn qua skill `verify-citation`, không bao giờ bịa. |
 
-### 4 slash commands (tham số hóa qua CLAUDE.md của dự án)
+### 7 slash commands (tham số hóa qua CLAUDE.md của dự án)
 
 | Command | What it does |
 |---|---|
@@ -106,10 +106,13 @@ Hướng dẫn đầy đủ: [`wiki/Getting-Started.md`](wiki/Getting-Started.md
 | `/start-research [minimal\|neuro-fmri]` | Kiểu phỏng vấn: điền các placeholder trong `CLAUDE.md` (working title, giả thuyết, venue mục tiêu, dataset, mạch truyện), tùy chọn áp preset vào agent memory, scaffold thư mục LaTeX manuscript (qua skill `manuscript-scaffold`, kèm template tạp chí + clone Overleaf tùy chọn). Đề nghị chạy `/omcr-setup` trước nếu chưa chạy. |
 | `/todofig [Fig N]` | So sánh deck figure đã chụp với outline → TODO ưu tiên P0/P1/P2. |
 | `/sync` | Đồng bộ trạng thái hiện tại (deck) với mục tiêu (outline), refresh agent memory, tùy chọn nhúng figure đã crop vào tài liệu mục tiêu. Snapshot trạng thái, không phải TODO. |
+| `/session-start [light\|full]` | Định hướng chỉ đọc — đọc corpus dự án (CLAUDE.md, outline, MEMORY, trang chủ wiki) và báo cáo tóm tắt + trạng thái trung thực. Không side effect; chế độ light/full. |
+| `/save-session-log [slug]` | Ghi một bản ghi phiên có ngày tháng, trung thực (yêu cầu, công việc, file đã chạm, quyết định, bước tiếp theo) vào thư mục session-logs, sau đó chắt lọc phẫu thuật kiến thức đã chốt vào wiki. |
+| `/update-version [@new files]` | Khi outline hoặc figure deck được nâng version (v4→v5), lan truyền tên file mới vào mọi tham chiếu đang sống; đề nghị xóa archive lỗi thời (có xác nhận). Đọc giá trị cũ từ `## Research stack`. |
 
-### 14 skills
+### 18 skills
 
-4 lệnh slash setup/workflow là thin dispatcher — mỗi cái forward `$ARGUMENTS` đến skill cùng tên. `cropfig`, `verify-citation`, `manuscript-scaffold` cũng có thể gọi độc lập. **Cộng thêm** 1 primitive (`orchestrate` — nội bộ, ghép từ 4 phase) + 6 engine skill backing 6 lệnh điều phối; hướng dẫn đầy đủ ở [`wiki/Using-Orchestration.md`](wiki/Using-Orchestration.md). Bảng dưới phủ 7 skill setup/workflow.
+7 lệnh slash setup/workflow/utility là thin dispatcher — mỗi cái forward `$ARGUMENTS` đến skill cùng tên. `cropfig`, `verify-citation`, `manuscript-scaffold`, `paper-ingest` cũng có thể gọi độc lập. **Cộng thêm** 1 primitive (`orchestrate` — nội bộ, ghép từ 4 phase) + 6 engine skill backing 6 lệnh điều phối; hướng dẫn đầy đủ ở [`wiki/Using-Orchestration.md`](wiki/Using-Orchestration.md). Bảng dưới phủ 11 skill setup/workflow/utility.
 
 | Skill | What it does |
 |---|---|
@@ -120,6 +123,10 @@ Hướng dẫn đầy đủ: [`wiki/Getting-Started.md`](wiki/Getting-Started.md
 | `cropfig` | Pipeline ba bước từ deck `.key`/`.pptx` đến artifact manuscript + outline: PDF vector từng slide (đã crop, chất lượng manuscript) + PNG chất lượng outline. Gọi trực tiếp hoặc bởi lệnh khác; không có slash. |
 | `verify-citation` | Kiểm tra tồn tại + metadata qua CrossRef/OpenAlex. Gate mọi entry mà `@literature-curator` thêm vào, ghi phán quyết xác minh vào summary table của dự án. |
 | `manuscript-scaffold` | Sao chép LaTeX skeleton đi kèm vào thư mục manuscript của người dùng, tùy chọn áp `\documentclass` đặc thù tạp chí từ registry đi kèm, tùy chọn clone dự án Overleaf (token không persist vào file được track), commit trên nhánh mặc định, hỏi trước khi push. Được `/start-research` phase 6 gọi; cũng có thể gọi độc lập. |
+| `paper-ingest` | Nạp một bài báo bạn đã đọc (PDF/DOI/URL) vào thư viện đọc hai thư mục: tóm tắt trung tính theo dự án + figure chính đã crop + dòng `index.csv`, sau đó một ghi chú project-usage có gate theo mức liên quan. Tái sử dụng `verify-citation` + `cropfig`. Tách biệt với BibTeX của manuscript. Độc lập. |
+| `session-start` | Backing `/session-start`. Định hướng dự án chỉ đọc (đọc corpus + báo cáo trạng thái; chế độ light/full). |
+| `save-session-log` | Backing `/save-session-log`. Bản ghi phiên có ngày tháng + chắt lọc phẫu thuật kiến thức đã chốt vào wiki. |
+| `update-version` | Backing `/update-version`. Lan truyền việc nâng version outline/deck qua mọi con trỏ đang sống; bản ghi lịch sử có ngày tháng giữ nguyên đóng băng. |
 
 ### 4 hooks
 
@@ -138,6 +145,7 @@ Hướng dẫn đầy đủ: [`wiki/Getting-Started.md`](wiki/Getting-Started.md
 - **[Standalone Usage](wiki/Standalone-Usage.md)** — dùng OMCR một mình, hướng dẫn đầy đủ
 - **[With OMC](wiki/With-OMC.md)** — full stack: cài OMCR + OMC companion
 - **[Agents](wiki/Agents.md)** | **[Commands](wiki/Commands.md)** | **[Hooks](wiki/Hooks.md)** — tham chiếu
+- **[Reading Library](wiki/Reading-Library.md)** — `paper-ingest`: lưu trữ các bài báo bạn đã đọc (tách biệt với BibTeX của manuscript)
 - **[OMC Tool Reference](wiki/OMC-Tool-Reference.md)** — 47 công cụ OMC MCP được map vào các giai đoạn nghiên cứu
 - **[Specializing](wiki/Specializing.md)** — viết preset đặc thù ngành
 
