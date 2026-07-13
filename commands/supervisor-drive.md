@@ -1,6 +1,6 @@
 ---
 description: Autonomous orchestrator — survey state, pick the right OMCR engine, run it, re-evaluate, loop. Interactive by default. Safety-gated. Supports --auto, --plan-only, --resume, and budget caps.
-argument-hint: [--auto | --interactive | --plan-only] [--max-iter N] [--budget-tokens N] [--budget-time MIN] [--resume <run-id>] [--fresh] [--no-commit]
+argument-hint: "[--auto | --interactive | --plan-only] [--max-iter N] [--budget-tokens N] [--budget-time MIN] [--resume <run-id>] [--fresh] [--no-commit]"
 ---
 
 # /supervisor-drive
