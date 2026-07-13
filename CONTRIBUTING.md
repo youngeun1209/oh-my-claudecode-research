@@ -67,7 +67,7 @@ argument-hint: "[--flag <value>]"
 ```yaml
 ---
 description: One-line command purpose.
-argument-hint: [optional positional or scope hint]
+argument-hint: "[optional positional or scope hint]"
 ---
 ```
 
